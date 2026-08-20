@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+
+{% block title %}Model Performance{% endblock %}
+{% block meta_description %}KeTox model performance metrics: Accuracy, Sensitivity, Specificity, and MCC for Random Forest and GCN models across Sibling, Stranger, and Safe test sets.{% endblock %}
+
+{% block content %}
+
+<!-- ═══════════════════════════ PAGE HEADER ══════════════════════════════ -->
+<section class="bg-white border-b border-slate-200">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <span class="inline-block w-2 h-2 rounded-full bg-teal-ketox"></span>
+          <span class="section-label">Validation Results · Placeholder Data</span>
+        </div>
+        <h1 class="text-2xl sm:text-3xl font-black text-navy-900 tracking-tight">Model Performance</h1>
+        <p class="text-slate-500 text-sm mt-1 max-w-xl">
+          Evaluation across three held-out test sets (Sibling, Stranger, Safe).
+          Toggle between
+          <span class="tooltip-wrapper">
+            <span class="tooltip-anchor font-medium text-slate-700">Random Forest</span>
+            <span class="tooltip-box">An ensemble of decision trees trained on RDKit molecular descriptors. Provides global feature importance via SHAP.</span>
+          </span>
+          and
+          <span class="tooltip-wrapper">
+            <span class="tooltip-anchor font-medium text-slate-700">GCN</span>
+            <span class="tooltip-box">Graph Convolutional Network — processes the molecular graph directly (atoms as nodes, bonds as edges). Provides atom-level explanations via GraphGrad-CAM.</span>
+          </span>
+          metrics.
+        </p>
+      </div>
+      <!-- Model toggle -->
+      <div class="flex-shrink-0">
+        <div class="model-toggle" role="group" aria-label="Select model">
+          <button class="model-toggle-btn active" id="toggle-rf" onclick="setModel('rf')">Random Forest</button>
+          <button class="model-toggle-btn" id="toggle-gcn" onclick="setModel('gcn')">GCN</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-8">
+
+  <!-- ═══════════════════════════ OVERALL STAT CARDS ═══════════════════════ -->
+  <section>
+    <h2 class="text-sm font-bold text-navy-900 mb-4 flex items-center gap-2">
+      <span id="overall-model-name">Random Forest</span>
+      <span class="text-slate-400 font-normal">— Overall performance (all test sets combined)</span>
+    </h2>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4" id="stat-cards">
+
+      <div class="card p-5 text-center">
+        <div class="section-label mb-1">Accuracy</div>
+        <div class="text-4xl font-black text-navy-900 mt-1" id="stat-accuracy">—</div>
+        <p class="text-xs text-slate-400 mt-1">Overall correct predictions</p>
+      </div>
+
+      <div class="card p-5 text-center">
+        <div class="section-label mb-1">Sensitivity</div>
+        <div class="text-4xl font-black text-teal-ketox mt-1" id="stat-sensitivity">—</div>
+        <p class="text-xs text-slate-400 mt-1">
+          <span class="tooltip-wrapper">
+            <span class="tooltip-anchor">True positive rate</span>
+            <span class="tooltip-box">Sensitivity (Recall) = TP / (TP + FN). The proportion of actual toxic compounds correctly identified.</span>
+          </span>
+        </p>
+      </div>
+
+      <div class="card p-5 text-center">
+        <div class="section-label mb-1">Specificity</div>
+        <div class="text-4xl font-black text-blue-600 mt-1" id="stat-specificity">—</div>
+        <p class="text-xs text-slate-400 mt-1">
+          <span class="tooltip-wrapper">
+            <span class="tooltip-anchor">True negative rate</span>
+            <span class="tooltip-box">Specificity = TN / (TN + FP). The proportion of safe compounds correctly identified as safe (avoids false alarms).</span>
+          </span>
+        </p>
+      </div>
+
+      <div class="card p-5 text-center">
+        <div class="section-label mb-1">
+          <span class="tooltip-wrapper">
+            <span class="tooltip-anchor">MCC</span>
+            <span class="tooltip-box">Matthews Correlation Coefficient — a balanced metric for binary classifiers, even with class imbalance. Ranges from −1 (worst) to +1 (perfect).</span>
+          </span>
+        </div>
+        <div class="text-4xl font-black text-amber-600 mt-1" id="stat-mcc">—</div>
+        <p class="text-xs text-slate-400 mt-1">Matthews Correlation Coeff.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════ GROUPED BAR CHART ════════════════════════ -->
+  <section class="card p-6">
+    <div class="flex items-center justify-between mb-1">
+      <h2 class="text-base font-bold text-navy-900" id="chart-title">Random Forest — Performance by Test Set</h2>
+    </div>
+    <p class="text-xs text-slate-500 mb-5">
+      Metrics broken down by test set type. The
+      <span class="font-medium text-orange-600">Sibling set</span> (structurally similar to Ketoconazole) presents the greatest challenge;
+      the <span class="font-medium text-green-600">Safe set</span> tests specificity.
+    </p>
+    <div class="chart-container" style="height: 320px;">
+      <canvas id="performance-chart" aria-label="Grouped bar chart of model performance metrics"></canvas>
+    </div>
+    <div class="flex justify-center gap-6 mt-4 text-[11px] text-slate-500 flex-wrap">
+      <span class="flex items-center gap-1.5"><span class="inline-block w-3 h-3 rounded" style="background:rgba(30,58,95,0.8)"></span>Accuracy</span>
+      <span class="flex items-center gap-1.5"><span class="inline-block w-3 h-3 rounded" style="background:rgba(13,148,136,0.8)"></span>Sensitivity</span>
+      <span class="flex items-center gap-1.5"><span class="inline-block w-3 h-3 rounded" style="background:rgba(37,99,235,0.8)"></span>Specificity</span>
+      <span class="flex items-center gap-1.5"><span class="inline-block w-3 h-3 rounded" style="background:rgba(217,119,6,0.8)"></span>MCC</span>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════ CONFUSION MATRICES ═══════════════════════ -->
+  <section>
+    <h2 class="text-base font-bold text-navy-900 mb-1">Confusion Matrices</h2>
+    <p class="text-xs text-slate-500 mb-5">Per-set breakdown of prediction outcomes across all three test sets. TP/TN in green, FP/FN in red.</p>
+
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      {% for set_name, set_key in [('Sibling','sibling'), ('Stranger','stranger'), ('Safe','safe')] %}
+      <div class="card p-5">
+        <h3 class="text-sm font-bold text-navy-900 mb-3">{{ set_name }} Set</h3>
+        <div class="grid grid-cols-2 gap-1 text-center text-xs">
+          <!-- Header row -->
+          <div class="col-span-2 grid grid-cols-2 gap-1 mb-0.5">
+            <div class="text-[10px] text-slate-400 font-semibold">Pred: Toxic</div>
+            <div class="text-[10px] text-slate-400 font-semibold">Pred: Safe</div>
+          </div>
+          <!-- TP / FN -->
+          <div class="cm-tp rounded-lg p-3 relative">
+            <div class="text-lg font-black" id="cm-{{ set_key }}-tp">—</div>
+            <div class="text-[9px] text-green-600 font-semibold mt-0.5">TP</div>
+            <div class="absolute top-1 left-1.5 text-[8px] text-green-500 opacity-60">Actual Toxic</div>
+          </div>
+          <div class="cm-fn rounded-lg p-3">
+            <div class="text-lg font-black" id="cm-{{ set_key }}-fn">—</div>
+            <div class="text-[9px] text-red-600 font-semibold mt-0.5">FN</div>
+          </div>
+          <!-- FP / TN -->
+          <div class="cm-fp rounded-lg p-3 relative">
+            <div class="text-lg font-black" id="cm-{{ set_key }}-fp">—</div>
+            <div class="text-[9px] text-red-600 font-semibold mt-0.5">FP</div>
+            <div class="absolute top-1 left-1.5 text-[8px] text-red-500 opacity-60">Actual Safe</div>
+          </div>
+          <div class="cm-tn rounded-lg p-3">
+            <div class="text-lg font-black" id="cm-{{ set_key }}-tn">—</div>
+            <div class="text-[9px] text-green-600 font-semibold mt-0.5">TN</div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════ NOTES ════════════════════════════════════ -->
+  <div class="flex items-start gap-3 bg-slate-50 border border-slate-200 rounded-xl px-5 py-4">
+    <i data-lucide="info" class="w-4 h-4 text-slate-400 flex-shrink-0 mt-0.5"></i>
+    <p class="text-xs text-slate-500 leading-relaxed">
+      <strong class="text-slate-700">All metrics shown are placeholder values</strong> for UI development.
+      Replace <code class="bg-slate-100 px-1 rounded text-[10px]">window.PERF_DATA</code> in performance.html's script block
+      with real evaluation results from your model validation pipeline once training is complete.
+    </p>
+  </div>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// ─── Placeholder performance data ────────────────────────────────────────────
+// TODO: Replace with real model evaluation results from your training pipeline.
+// Each set has: accuracy, sensitivity, specificity, mcc (all 0–1)
+window.PERF_DATA = {
+  rf: {
+    overall:  { accuracy: 0.926, sensitivity: 0.907, specificity: 0.947, mcc: 0.852 },
+    sibling:  { accuracy: 0.891, sensitivity: 0.872, specificity: 0.921, mcc: 0.795 },
+    stranger: { accuracy: 0.934, sensitivity: 0.908, specificity: 0.956, mcc: 0.863 },
+    safe:     { accuracy: 0.952, sensitivity: 0.941, specificity: 0.963, mcc: 0.902 },
+    // Confusion matrix values (placeholder — adjust to match your actual n per set)
+    cm: {
+      sibling:  { tp: 156, fn: 23, fp: 18, tn: 192 },
+      stranger: { tp: 201, fn: 19, fp: 14, tn: 228 },
+      safe:     { tp:  12, fn:  8, fp:  5, tn: 350 },
+    }
+  },
+  gcn: {
+    overall:  { accuracy: 0.911, sensitivity: 0.892, specificity: 0.930, mcc: 0.824 },
+    sibling:  { accuracy: 0.873, sensitivity: 0.855, specificity: 0.895, mcc: 0.750 },
+    stranger: { accuracy: 0.918, sensitivity: 0.894, specificity: 0.938, mcc: 0.831 },
+    safe:     { accuracy: 0.941, sensitivity: 0.928, specificity: 0.957, mcc: 0.885 },
+    cm: {
+      sibling:  { tp: 148, fn: 31, fp: 22, tn: 188 },
+      stranger: { tp: 196, fn: 23, fp: 17, tn: 225 },
+      safe:     { tp:  11, fn:  9, fp:  6, tn: 349 },
+    }
+  }
+};
+
+// ─── Current model state ──────────────────────────────────────────────────────
+let currentModel = 'rf';
+
+function setModel(model) {
+  currentModel = model;
+  // Toggle button styles
+  document.getElementById('toggle-rf').classList.toggle('active', model === 'rf');
+  document.getElementById('toggle-gcn').classList.toggle('active', model === 'gcn');
+  // Update all display
+  updateDisplay(model);
+}
+
+function updateDisplay(model) {
+  const data = window.PERF_DATA[model];
+  const name = model === 'rf' ? 'Random Forest' : 'Graph Conv. Network';
+
+  // Update heading
+  setText('overall-model-name', name);
+  setText('chart-title', `${name} — Performance by Test Set`);
+
+  // Stat cards (overall)
+  setText('stat-accuracy',    fmtPct(data.overall.accuracy));
+  setText('stat-sensitivity', fmtPct(data.overall.sensitivity));
+  setText('stat-specificity', fmtPct(data.overall.specificity));
+  setText('stat-mcc',         data.overall.mcc.toFixed(3));
+
+  // Chart
+  KeToxCharts.renderPerformanceChart(model, data);
+
+  // Confusion matrices
+  ['sibling', 'stranger', 'safe'].forEach(set => {
+    const cm = data.cm[set];
+    setText(`cm-${set}-tp`, cm.tp);
+    setText(`cm-${set}-fn`, cm.fn);
+    setText(`cm-${set}-fp`, cm.fp);
+    setText(`cm-${set}-tn`, cm.tn);
+  });
+}
+
+function fmtPct(val) { return (val * 100).toFixed(1) + '%'; }
+function setText(id, val) { const el = document.getElementById(id); if (el) el.textContent = val; }
+
+// ─── Init on page load ────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  updateDisplay('rf');
+});
+</script>
+{% endblock %}

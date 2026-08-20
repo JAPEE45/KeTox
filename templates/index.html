@@ -1,0 +1,520 @@
+{% extends "base.html" %} {% block title %}Predict{% endblock %} {% block
+meta_description %}Enter a molecule or drug name to predict CYP3A4
+hepatotoxicity. KeTox uses Random Forest and GCN models with SHAP, LIME, and
+GraphGrad-CAM explainability.{% endblock %} {% block content %}
+
+<!-- ═══════════════════════════ MAIN WRAPPER ═══════════════════════════════ -->
+<div
+  class="max-w-7xl mx-auto w-full px-6 sm:px-8 lg:px-12 flex-1 flex flex-col"
+>
+  <!-- ═════════════════════════ ERROR BANNER ═══════════════════════════════ -->
+  <div id="error-banner" class="hidden w-full my-4" style="display: none">
+    <div
+      class="flex items-start gap-3 bg-red-50 border border-red-200 rounded-lg px-5 py-4"
+    >
+      <i
+        data-lucide="circle-x"
+        class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5"
+      ></i>
+      <div>
+        <p class="text-sm font-semibold text-red-800">Prediction Error</p>
+        <p id="error-message" class="text-sm text-red-700 mt-0.5"></p>
+      </div>
+      <button
+        onclick="document.getElementById('error-banner').style.display = 'none'"
+        class="ml-auto text-red-400 hover:text-red-600 transition-colors flex-shrink-0"
+      >
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- ═════════════════════════ LOADING STATE ══════════════════════════════ -->
+  <div id="loading-state" style="display: none" class="w-full pb-12">
+    <div class="flex flex-col items-center justify-center gap-4 py-14">
+      <div class="spinner"></div>
+      <p class="text-sm font-medium text-slate-500">Running ML inference...</p>
+      <p class="text-xs text-slate-400">
+        Evaluating RF model &middot; GCN model &middot; PBPK &middot; XAI
+      </p>
+    </div>
+  </div>
+
+  <!-- ═════════════════════════ MAIN CONTENT GRID ══════════════════════════ -->
+  <div
+    id="main-content-grid"
+    class="flex-1 flex flex-col justify-center transition-all duration-300"
+  >
+    <div class="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-10 items-start">
+      <!-- ── LEFT COLUMN ─────────────────────────────────────────────────── -->
+      <div id="left-column" class="flex flex-col relative min-w-0">
+        <!-- ── RESULTS SECTION (Hidden initially, revealed on prediction) ── -->
+        <div
+          id="results-section"
+          style="display: none"
+          class="flex flex-col gap-12 pb-4"
+        >
+          <!-- 1. Ensemble Verdict ────────────────────────────────────────── -->
+          <div id="verdict-card">
+            <p
+              class="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3"
+            >
+              Ensemble Prediction
+            </p>
+
+            <!-- Big headline: "87%  TOXIC" -->
+            <div class="flex flex-wrap items-baseline gap-4 mb-4">
+              <span
+                id="verdict-confidence"
+                class="text-7xl font-black leading-none text-red-700"
+                >--</span
+              >
+              <span
+                id="verdict-badge"
+                class="text-5xl font-black leading-none text-red-700"
+                >--</span
+              >
+            </div>
+
+            <!-- Model sub-scores pill -->
+            <div
+              class="inline-flex items-center bg-slate-100 rounded-full px-4 py-1.5 mb-4"
+            >
+              <span class="text-sm text-slate-600" id="verdict-ensemble"
+                >--</span
+              >
+            </div>
+
+            <!-- Summary paragraph -->
+            <p
+              id="verdict-summary"
+              class="text-slate-700 text-base leading-relaxed max-w-2xl"
+            ></p>
+          </div>
+
+          <!-- 2. Model 1 / Model 2 — side-by-side with vertical divider ───── -->
+          <div class="grid grid-cols-2 divide-x divide-slate-200">
+            <!-- Random Forest -->
+            <div class="pr-8">
+              <p
+                class="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-1"
+              >
+                Model 1
+              </p>
+              <p class="text-sm font-bold text-slate-900 mb-4">Random Forest</p>
+              <div class="flex items-center justify-between mb-2">
+                <span id="rf-verdict" class="text-base font-black text-red-600"
+                  >--</span
+                >
+                <span
+                  id="rf-probability"
+                  class="text-3xl font-black text-red-700"
+                  >--</span
+                >
+              </div>
+              <div
+                class="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden mb-1"
+              >
+                <div
+                  id="rf-bar"
+                  class="h-full rounded-full transition-all duration-700 bg-red-700"
+                  style="width: 0%"
+                ></div>
+              </div>
+              <p class="text-[10px] text-slate-400 mt-1">
+                Inhibition Probability
+              </p>
+            </div>
+
+            <!-- GCN -->
+            <div class="pl-8">
+              <p
+                class="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-1"
+              >
+                Model 2
+              </p>
+              <p class="text-sm font-bold text-slate-900 mb-4">GCN</p>
+              <div class="flex items-center justify-between mb-2">
+                <span id="gcn-verdict" class="text-base font-black text-red-600"
+                  >--</span
+                >
+                <span
+                  id="gcn-probability"
+                  class="text-3xl font-black text-red-700"
+                  >--</span
+                >
+              </div>
+              <div
+                class="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden mb-1"
+              >
+                <div
+                  id="gcn-bar"
+                  class="h-full rounded-full transition-all duration-700 bg-red-700"
+                  style="width: 0%"
+                ></div>
+              </div>
+              <p class="text-[10px] text-slate-400 mt-1">
+                Inhibition Probability
+              </p>
+            </div>
+          </div>
+
+          <!-- 3. Ketoconazole Similarity ─────────────────────────────────── -->
+          <div id="similarity-card">
+            <p
+              class="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3"
+            >
+              Ketoconazole Similarity
+            </p>
+
+            <!-- Big score: "0.95 / 1.0" -->
+            <div class="flex items-baseline gap-2 mb-2">
+              <span
+                class="text-5xl font-black text-slate-900"
+                id="tanimoto-value"
+                >--</span
+              >
+              <span class="text-3xl font-black text-slate-300">/ 1.0</span>
+            </div>
+
+            <!-- Right-aligned label -->
+            <div class="flex justify-end mb-1">
+              <span class="text-[11px] text-slate-400">Tanimoto coeff.</span>
+            </div>
+
+            <!-- Rainbow gradient bar: red → amber → green -->
+            <div
+              class="w-full h-2.5 rounded-full mb-2"
+              style="
+                background: linear-gradient(
+                  90deg,
+                  #dc2626 0%,
+                  #b45309 35%,
+                  #ca8a04 55%,
+                  #16a34a 100%
+                );
+              "
+            ></div>
+            <div class="flex justify-between text-[10px] text-slate-400 mb-5">
+              <span>0.0 - Unrelated</span>
+              <span>0.4 - Structural Overlap</span>
+              <span>1.0 - Identical</span>
+            </div>
+
+            <p
+              id="similarity-description"
+              class="text-sm text-slate-600 leading-relaxed"
+            ></p>
+          </div>
+
+          <!-- 4. Explainability Tabs ─────────────────────────────────────── -->
+          <div class="border border-slate-200 rounded-xl overflow-hidden">
+            <!-- Tab bar -->
+            <div
+              class="flex items-center gap-1 px-5 pt-4 pb-3 border-b border-slate-100 bg-white"
+            >
+              <div
+                class="text-xs font-semibold uppercase tracking-widest text-slate-400 mr-3 hidden sm:block"
+              >
+                Explainability
+              </div>
+              <button
+                class="btn-tab btn-tab-active"
+                data-tab="shap"
+                id="tab-btn-shap"
+              >
+                SHAP
+              </button>
+              <button class="btn-tab" data-tab="lime" id="tab-btn-lime">
+                LIME
+              </button>
+              <button class="btn-tab" data-tab="heatmap" id="tab-btn-heatmap">
+                Structure Heatmap
+              </button>
+            </div>
+
+            <div class="p-5 bg-white">
+              <!-- SHAP panel -->
+              <div id="tab-shap" class="tab-panel active">
+                <div class="flex items-start justify-between mb-3">
+                  <div>
+                    <h3 class="text-sm font-bold text-navy-900">
+                      SHAP Feature Importances
+                    </h3>
+                    <p class="text-xs text-slate-500 mt-0.5">
+                      <span class="tooltip-wrapper">
+                        <span class="tooltip-anchor">SHAP values</span>
+                        <span class="tooltip-box"
+                          >SHapley Additive exPlanations — assigns each
+                          molecular feature a contribution score toward the
+                          model's prediction.</span
+                        >
+                      </span>
+                      for the Random Forest model &middot; Red bars push toward
+                      Toxic, teal bars toward Safe
+                    </p>
+                  </div>
+                  <span
+                    class="text-[10px] text-slate-400 bg-slate-50 rounded px-2 py-1 border border-slate-100 flex-shrink-0"
+                    >RF model</span
+                  >
+                </div>
+                <div class="chart-container" style="height: 240px">
+                  <canvas
+                    id="shap-chart"
+                    aria-label="SHAP feature importance bar chart"
+                  ></canvas>
+                </div>
+              </div>
+
+              <!-- LIME panel -->
+              <div id="tab-lime" class="tab-panel">
+                <div class="flex items-start justify-between mb-3">
+                  <div>
+                    <h3 class="text-sm font-bold text-navy-900">
+                      LIME Local Explanation
+                    </h3>
+                    <p class="text-xs text-slate-500 mt-0.5">
+                      <span class="tooltip-wrapper">
+                        <span class="tooltip-anchor">LIME</span>
+                        <span class="tooltip-box"
+                          >Local Interpretable Model-Agnostic Explanations —
+                          approximates the model locally to explain which
+                          structural rules drove the prediction.</span
+                        >
+                      </span>
+                      &mdash; Green bars push toward Safe, red bars push toward
+                      Toxic
+                    </p>
+                  </div>
+                  <div
+                    class="flex items-center gap-3 text-[10px] text-slate-500 flex-shrink-0"
+                  >
+                    <span class="flex items-center gap-1"
+                      ><span
+                        class="inline-block w-2.5 h-2.5 rounded bg-red-400"
+                      ></span
+                      >Toxic</span
+                    >
+                    <span class="flex items-center gap-1"
+                      ><span
+                        class="inline-block w-2.5 h-2.5 rounded bg-green-500"
+                      ></span
+                      >Safe</span
+                    >
+                  </div>
+                </div>
+                <div class="chart-container" style="height: 220px">
+                  <canvas
+                    id="lime-chart"
+                    aria-label="LIME feature weight bar chart"
+                  ></canvas>
+                </div>
+              </div>
+
+              <!-- Heatmap panel -->
+              <div id="tab-heatmap" class="tab-panel">
+                <div class="mb-3">
+                  <h3 class="text-sm font-bold text-navy-900">
+                    GraphGrad-CAM Structure Heatmap
+                  </h3>
+                  <p class="text-xs text-slate-500 mt-0.5">
+                    Atom-level contributions from the Graph Convolutional
+                    Network. Red/orange atoms contribute most strongly to the
+                    toxicity prediction; blue/cyan atoms reduce it.
+                  </p>
+                </div>
+                <div
+                  class="bg-slate-50 rounded-xl border border-slate-100 overflow-hidden flex flex-col items-center justify-center p-4"
+                >
+                  <img
+                    src="{{ url_for('static', filename='img/heatmap_placeholder.jpg') }}"
+                    alt="GraphGrad-CAM structural heatmap showing atom-level toxicity contributions"
+                    class="max-h-72 object-contain rounded-lg"
+                  />
+                  <p
+                    class="text-[10px] text-slate-400 mt-3 text-center max-w-sm"
+                  >
+                    <strong>Placeholder</strong> &mdash; actual heatmap will be
+                    generated by the GCN&rsquo;s GraphGrad-CAM layer and
+                    returned by the backend. Highlighted atoms = contribution
+                    strength.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <!-- /tab content -->
+          </div>
+          <!-- /explainability card -->
+        </div>
+        <!-- /#results-section -->
+
+        <!-- ── PREDICT FORM (Centered initially, Sticky Bottom in Results mode) ── -->
+        <div id="predict-section" class="w-full transition-all duration-300">
+          <form
+            id="predict-form"
+            class="flex flex-col items-start gap-3 w-full"
+            novalidate
+          >
+            <label
+              for="compound-input"
+              id="compound-label"
+              class="block text-base font-semibold text-slate-700"
+            >
+              Enter Molecule Name
+            </label>
+
+            <!-- Input box -->
+            <input
+              type="text"
+              id="compound-input"
+              name="compound_name"
+              class="w-full text-sm bg-white border border-slate-300 rounded-md px-4 py-2.5 shadow-sm focus:outline-none transition-all duration-200 placeholder:text-slate-400"
+              placeholder="e.g. Ketoconazole, Aspirin, Fluconazole..."
+              aria-label="Molecule name input"
+              autocomplete="off"
+              spellcheck="false"
+            />
+
+            <!-- Run Prediction button placed always below input -->
+            <button
+              type="submit"
+              id="submit-btn"
+              class="btn-primary flex-shrink-0"
+            >
+              <span id="submit-btn-text">Run Prediction</span>
+            </button>
+          </form>
+        </div>
+      </div>
+      <!-- /left column -->
+
+      <!-- ── RIGHT SIDEBAR (Hidden initially, revealed on prediction) ───── -->
+      <div
+        id="right-sidebar"
+        style="display: none"
+        class="sticky top-20 border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-sm"
+      >
+        <!-- Structure Preview -->
+        <div class="p-5">
+          <p
+            class="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3 flex items-center gap-1.5"
+          >
+            <i data-lucide="atom" class="w-3.5 h-3.5"></i>
+            Structure Preview
+          </p>
+          <div
+            class="bg-slate-100 rounded-lg overflow-hidden flex items-center justify-center"
+            style="min-height: 200px"
+          >
+            <img
+              id="structure-preview-img"
+              src="{{ url_for('static', filename='img/mol_input_placeholder.jpg') }}"
+              alt="2D molecular structure preview"
+              class="max-h-52 w-full object-contain"
+            />
+          </div>
+        </div>
+
+        <!-- Divider -->
+        <div class="border-t border-slate-200"></div>
+
+        <!-- PBPK Modeling -->
+        <div class="p-5">
+          <p
+            class="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-4 flex items-center gap-1.5"
+          >
+            <i data-lucide="activity" class="w-3.5 h-3.5"></i>
+            PBPK Modeling
+          </p>
+
+          <p class="text-xs text-slate-500 mb-1">
+            Predicted steady-state liver concentration
+          </p>
+
+          <!-- Css value -->
+          <div class="flex items-baseline gap-2 mb-3">
+            <span class="text-5xl font-black text-slate-900" id="css-value"
+              >--</span
+            >
+            <span class="text-base text-slate-500 font-medium">mg/L</span>
+            <span class="tooltip-wrapper ml-0.5">
+              <span class="tooltip-anchor text-sm text-slate-400">Css</span>
+              <span class="tooltip-box"
+                >Steady-state concentration (Css) — the liver drug concentration
+                reached after repeated dosing. Higher values indicate greater
+                accumulation and toxicity risk.</span
+              >
+            </span>
+          </div>
+
+          <!-- Threshold gauge bar -->
+          <div class="relative mb-1">
+            <div class="gauge-track">
+              <div
+                class="gauge-fill"
+                id="pbpk-gauge-fill"
+                style="width: 0%"
+              ></div>
+            </div>
+            <!-- IC50 threshold marker at ~46.7% -->
+            <div
+              class="absolute top-0 h-full flex items-center"
+              style="left: 46.7%"
+            >
+              <div class="w-0.5 h-4 bg-slate-400 rounded relative -top-1">
+                <span
+                  class="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[9px] text-slate-400 whitespace-nowrap"
+                  >IC&#8325;&#8320;</span
+                >
+              </div>
+            </div>
+          </div>
+
+          <!-- Interpretation note -->
+          <p
+            id="pbpk-note"
+            class="text-[11px] text-slate-500 mt-6 leading-relaxed"
+          ></p>
+        </div>
+      </div>
+      <!-- /sidebar -->
+    </div>
+    <!-- /2-col grid -->
+  </div>
+  <!-- /main-content-grid -->
+</div>
+
+{% endblock %} {% block scripts %}
+<style>
+  /* Sticky bottom styling for prediction form inside the left column */
+  #predict-section.predict-sticky-bottom {
+    position: sticky;
+    bottom: 0;
+    z-index: 30;
+    padding-top: 2.5rem;
+    padding-bottom: 0.75rem;
+    /* Allow clicks to pass through the gradient overlay area above the form */
+    pointer-events: none;
+    background: linear-gradient(
+      to top,
+      rgba(248, 250, 252, 1) 70%,
+      rgba(248, 250, 252, 0.85) 88%,
+      rgba(248, 250, 252, 0) 100%
+    );
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    mask-image: linear-gradient(to top, black 70%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to top, black 70%, transparent 100%);
+  }
+
+  /* Re-enable pointer events on the actual form and its children */
+  #predict-section.predict-sticky-bottom #predict-form {
+    pointer-events: auto;
+  }
+
+  #predict-section.predict-sticky-bottom #compound-label {
+    display: none;
+  }
+</style>
+{% endblock %}

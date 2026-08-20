@@ -1,0 +1,9 @@
+flask>=3.0.0
+flask-cors>=4.0.0
+# --- Add backend dependencies here when wiring in real inference ---
+# rdkit-pypi
+# scikit-learn
+# torch
+# torch-geometric
+# shap
+# lime

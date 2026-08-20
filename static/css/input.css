@@ -1,0 +1,164 @@
+/*
+ * KeTox — Tailwind CSS v4 Input File
+ *
+ * Build with the Tailwind CLI v4 standalone binary:
+ *   ./tailwindcss.exe -i static/css/input.css -o static/css/output.css --watch
+ *
+ * Download binary from:
+ *   https://github.com/tailwindlabs/tailwindcss/releases/latest
+ *   File: tailwindcss-windows-x64.exe  →  rename to tailwindcss.exe
+ */
+
+@import "tailwindcss";
+
+/* -------------------------------------------------------------------------
+   Custom theme tokens — available as Tailwind utilities when CLI-compiled.
+   e.g., bg-navy-800, text-teal-ketox, bg-toxic-light
+   ------------------------------------------------------------------------- */
+@theme {
+  --font-family-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-family-mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+
+  /* Navy palette */
+  --color-navy-50:  #f0f4f9;
+  --color-navy-100: #dde6f0;
+  --color-navy-200: #b9cde2;
+  --color-navy-300: #8aaed0;
+  --color-navy-500: #3a70a3;
+  --color-navy-600: #2d5a89;
+  --color-navy-700: #25476e;
+  --color-navy-800: #1e3a5f;
+  --color-navy-900: #152a47;
+
+  /* Teal accent */
+  --color-teal-ketox: #0d9488;
+  --color-teal-light:  #ccfbf1;
+
+  /* Verdict colours */
+  --color-toxic:        #dc2626;
+  --color-toxic-mid:    #ef4444;
+  --color-toxic-light:  #fef2f2;
+  --color-toxic-border: #fca5a5;
+  --color-safe:         #16a34a;
+  --color-safe-mid:     #22c55e;
+  --color-safe-light:   #f0fdf4;
+  --color-safe-border:  #86efac;
+  --color-elevated:     #d97706;
+  --color-elevated-light: #fffbeb;
+}
+
+/* -------------------------------------------------------------------------
+   Reusable component classes
+   ------------------------------------------------------------------------- */
+@layer components {
+
+  /* Card */
+  .card {
+    @apply bg-white rounded-xl border border-slate-200 shadow-sm;
+  }
+  .card-elevated {
+    @apply bg-white rounded-xl border border-slate-200 shadow-md;
+  }
+
+  /* Buttons */
+  .btn-primary {
+    @apply bg-navy-800 text-white px-6 py-3 rounded-lg font-semibold text-sm
+           hover:bg-navy-700 active:bg-navy-900
+           transition-all duration-200 flex items-center justify-center gap-2
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500 focus-visible:ring-offset-2
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-secondary {
+    @apply bg-white text-navy-800 px-4 py-2 rounded-lg font-medium text-sm
+           border border-slate-200 hover:border-navy-300 hover:bg-navy-50
+           transition-all duration-200;
+  }
+  .btn-tab {
+    @apply px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200
+           text-slate-500 hover:text-slate-700 hover:bg-slate-100;
+  }
+  .btn-tab-active {
+    @apply bg-navy-800 text-white shadow-sm;
+  }
+
+  /* Badges */
+  .badge-toxic {
+    @apply bg-red-100 text-red-700 border border-red-200 px-3 py-1 rounded-full text-sm font-bold tracking-wide;
+  }
+  .badge-safe {
+    @apply bg-green-100 text-green-700 border border-green-200 px-3 py-1 rounded-full text-sm font-bold tracking-wide;
+  }
+  .badge-elevated {
+    @apply bg-amber-100 text-amber-700 border border-amber-200 px-2.5 py-0.5 rounded-full text-xs font-semibold;
+  }
+  .badge-normal {
+    @apply bg-green-100 text-green-700 border border-green-200 px-2.5 py-0.5 rounded-full text-xs font-semibold;
+  }
+  .badge-sibling {
+    @apply bg-orange-100 text-orange-700 border border-orange-200 px-2.5 py-0.5 rounded-full text-xs font-semibold;
+  }
+  .badge-stranger {
+    @apply bg-slate-100 text-slate-600 border border-slate-200 px-2.5 py-0.5 rounded-full text-xs font-semibold;
+  }
+
+  /* SMILES input */
+  .input-smiles {
+    @apply w-full font-mono text-sm bg-slate-50 border border-slate-300 rounded-lg px-4 py-3
+           focus:outline-none focus:ring-2 focus:ring-navy-500 focus:border-navy-500
+           transition-all duration-200 placeholder:text-slate-400;
+  }
+
+  /* Example chip */
+  .chip {
+    @apply inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium
+           border border-slate-200 bg-white text-slate-600
+           hover:border-navy-300 hover:text-navy-700 hover:bg-navy-50
+           cursor-pointer transition-all duration-150 select-none;
+  }
+  .chip-toxic {
+    @apply border-red-200 bg-red-50 text-red-700 hover:border-red-300 hover:bg-red-100;
+  }
+  .chip-safe {
+    @apply border-green-200 bg-green-50 text-green-700 hover:border-green-300 hover:bg-green-100;
+  }
+
+  /* Tooltip */
+  .tooltip-wrapper {
+    @apply relative inline-block;
+  }
+  .tooltip-anchor {
+    @apply cursor-help underline decoration-dotted decoration-slate-400 underline-offset-2;
+  }
+  .tooltip-box {
+    @apply absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64
+           bg-navy-900 text-white text-xs rounded-lg px-3 py-2.5
+           z-50 opacity-0 pointer-events-none
+           transition-opacity duration-150
+           shadow-lg leading-relaxed text-center;
+  }
+  .tooltip-box::after {
+    content: '';
+    @apply absolute top-full left-1/2 -translate-x-1/2
+           border-4 border-transparent;
+    border-top-color: #152a47;
+  }
+  .tooltip-wrapper:hover .tooltip-box,
+  .tooltip-wrapper.active .tooltip-box {
+    @apply opacity-100;
+  }
+
+  /* Section label */
+  .section-label {
+    @apply text-xs font-semibold uppercase tracking-widest text-slate-400;
+  }
+
+  /* Stat card number */
+  .stat-number {
+    @apply text-4xl font-black tracking-tight;
+  }
+
+  /* Skeleton shimmer */
+  .skeleton {
+    @apply bg-slate-200 rounded animate-pulse;
+  }
+}

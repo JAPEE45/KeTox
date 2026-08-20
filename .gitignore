@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.env
+venv/
+.venv/
+
+# Tailwind CLI binary (download separately, don't commit)
+tailwindcss.exe
+tailwindcss
+
+# Flask session/instance data
+instance/
+*.db
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Node (if npm approach is ever used)
+node_modules/
