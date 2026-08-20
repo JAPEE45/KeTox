@@ -7,419 +7,432 @@
  *  - Example chip population
  *  - Tab switching (SHAP / LIME / Heatmap)
  *  - All result section DOM population
+ *
+ * Scoped in an IIFE to avoid polluting global scope.
+ * hideError and switchTab are exposed on window for any external callers.
  */
+(() => {
+  "use strict";
 
-// ─── Example Molecule chips ────────────────────────────────────────────────
-// Clicking an example populates the molecule name into the search input.
-const EXAMPLES = [
-  {
-    id: "ex-ketoconazole",
-    label: "Ketoconazole",
-    type: "toxic",
-    value: "Ketoconazole",
-  },
-  {
-    id: "ex-safe",
-    label: "Safe compound example",
-    type: "safe",
-    value: "Aspirin",
-  },
-  {
-    id: "ex-toxic",
-    label: "Toxic compound example",
-    type: "toxic",
-    value: "Fluconazole",
-  },
-];
+  // ─── PBPK gauge scale constant ─────────────────────────────────────────────
+  // All PBPK gauge fills are computed relative to this maximum (mg/L).
+  // Change this one value to rescale the gauge across the entire app.
+  const PBPK_GAUGE_MAX = 3.0;
 
-// ─── DOM references ────────────────────────────────────────────────────────
-const form = document.getElementById("predict-form");
-const compoundInput =
-  document.getElementById("compound-input") ||
-  document.getElementById("smiles-input");
-const loadingState = document.getElementById("loading-state");
-const errorBanner = document.getElementById("error-banner");
-const errorMsg = document.getElementById("error-message");
-const resultsSection = document.getElementById("results-section");
-const submitBtn = document.getElementById("submit-btn");
-const submitBtnText = document.getElementById("submit-btn-text");
+  // ─── Example Molecule chips ────────────────────────────────────────────────
+  // Clicking an example populates the molecule name into the search input.
+  // IDs must match <button id="ex-…"> elements in index.html.
 
-// ─── State helpers ─────────────────────────────────────────────────────────
-function showLoading() {
-  loadingState && (loadingState.style.display = "block");
-  resultsSection && resultsSection.classList.remove("revealed");
-  resultsSection && (resultsSection.style.display = "none");
-  const rightSidebar = document.getElementById("right-sidebar");
-  if (rightSidebar) rightSidebar.style.display = "none";
-  if (submitBtn) {
-    submitBtn.disabled = true;
-    submitBtnText && (submitBtnText.textContent = "Analyzing…");
-  }
-}
+  // ─── DOM references ────────────────────────────────────────────────────────
+  const form = document.getElementById("predict-form");
+  const compoundInput =
+    document.getElementById("compound-input") ||
+    document.getElementById("smiles-input");
+  const loadingState = document.getElementById("loading-state");
+  const errorBanner = document.getElementById("error-banner");
+  const errorMsg = document.getElementById("error-message");
+  const resultsSection = document.getElementById("results-section");
+  const submitBtn = document.getElementById("submit-btn");
+  const submitBtnText = document.getElementById("submit-btn-text");
 
-function hideLoading() {
-  loadingState && (loadingState.style.display = "none");
-  if (submitBtn) {
-    submitBtn.disabled = false;
-    submitBtnText && (submitBtnText.textContent = "Run Prediction");
-  }
-}
-
-let errorTimeout = null;
-
-function showError(msg) {
-  if (errorBanner) {
-    if (errorMsg) errorMsg.textContent = msg;
-    errorBanner.style.display = "flex";
-    if (window.lucide) lucide.createIcons();
-    
-    // Auto-dismiss after 5 seconds
-    if (errorTimeout) clearTimeout(errorTimeout);
-    errorTimeout = setTimeout(() => {
-      hideError();
-    }, 5000);
-  }
-}
-
-function hideError() {
-  if (errorBanner) {
-    errorBanner.style.display = "none";
-    if (errorTimeout) clearTimeout(errorTimeout);
-  }
-}
-
-function hideResults() {
-  if (resultsSection) {
-    resultsSection.style.display = "none";
-    resultsSection.classList.remove("revealed");
-  }
-  const rightSidebar = document.getElementById("right-sidebar");
-  if (rightSidebar) rightSidebar.style.display = "none";
-
-  const mainGrid = document.getElementById("main-content-grid");
-  if (mainGrid) {
-    mainGrid.classList.add("flex-1", "justify-center", "-mt-16");
-    mainGrid.classList.remove("pt-8", "pb-16");
+  // ─── State helpers ─────────────────────────────────────────────────────────
+  function showLoading() {
+    loadingState && (loadingState.style.display = "block");
+    resultsSection && resultsSection.classList.remove("revealed");
+    resultsSection && (resultsSection.style.display = "none");
+    const rightSidebar = document.getElementById("right-sidebar");
+    if (rightSidebar) rightSidebar.style.display = "none";
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtnText && (submitBtnText.textContent = "Analyzing…");
+    }
   }
 
-  // Collapse grid to single column so no 340px right-track is reserved,
-  // allowing left-column to fill full width for proper horizontal centering
-  const gridWrapper = document.getElementById("results-grid-wrapper");
-  if (gridWrapper) gridWrapper.style.gridTemplateColumns = "1fr";
-
-  const predictSec = document.getElementById("predict-section");
-  if (predictSec) {
-    predictSec.classList.remove("predict-sticky-bottom");
-    predictSec.classList.add("max-w-xl");
+  function hideLoading() {
+    loadingState && (loadingState.style.display = "none");
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtnText && (submitBtnText.textContent = "Run Prediction");
+    }
   }
 
-  const leftCol = document.getElementById("left-column");
-  if (leftCol) leftCol.classList.add("items-center");
-}
+  let errorTimeout = null;
 
-function showResults() {
-  // Destroy particle background — it only belongs on the initial landing page
-  window.destroyParticles?.();
+  function showError(msg) {
+    if (errorBanner) {
+      if (errorMsg) errorMsg.textContent = msg;
+      errorBanner.style.display = "flex";
+      if (window.lucide) lucide.createIcons();
 
-  const mainGrid = document.getElementById("main-content-grid");
-  if (mainGrid) {
-    mainGrid.classList.remove("flex-1", "justify-center", "-mt-16");
-    mainGrid.classList.add("pt-8", "pb-16");
+      // Auto-dismiss after 5 seconds
+      if (errorTimeout) clearTimeout(errorTimeout);
+      errorTimeout = setTimeout(() => {
+        hideError();
+      }, 5000);
+    }
   }
 
-  // Restore two-column grid (clears the single-column inline style override)
-  const gridWrapper = document.getElementById("results-grid-wrapper");
-  if (gridWrapper) gridWrapper.style.gridTemplateColumns = "";
-
-  // Expand left column back to full-width flow (no centering override)
-  const leftCol = document.getElementById("left-column");
-  if (leftCol) leftCol.classList.remove("items-center");
-
-  const predictSec = document.getElementById("predict-section");
-  if (predictSec) {
-    predictSec.classList.remove("max-w-xl");
-    predictSec.classList.add("predict-sticky-bottom");
+  function hideError() {
+    if (errorBanner) {
+      errorBanner.style.display = "none";
+      if (errorTimeout) clearTimeout(errorTimeout);
+    }
   }
 
-  if (resultsSection) {
-    resultsSection.style.display = "flex";
-    requestAnimationFrame(() => resultsSection.classList.add("revealed"));
-  }
+  function hideResults() {
+    if (resultsSection) {
+      resultsSection.style.display = "none";
+      resultsSection.classList.remove("revealed");
+    }
+    const rightSidebar = document.getElementById("right-sidebar");
+    if (rightSidebar) rightSidebar.style.display = "none";
 
-  const rightSidebar = document.getElementById("right-sidebar");
-  if (rightSidebar) {
-    rightSidebar.style.display = "block";
-  }
-}
-
-// ─── Form submission ───────────────────────────────────────────────────────
-form &&
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const inputEl =
-      document.getElementById("compound-input") ||
-      document.getElementById("smiles-input");
-    const compoundName = inputEl ? inputEl.value.trim() : "";
-
-    if (!compoundName) {
-      showError(
-        "Please enter a molecule or compound name before running the prediction.",
-      );
-      return;
+    const mainGrid = document.getElementById("main-content-grid");
+    if (mainGrid) {
+      mainGrid.classList.add("flex-1", "justify-center", "-mt-16");
+      mainGrid.classList.remove("pt-8", "pb-16");
     }
 
-    hideError();
-    showLoading();
+    // Collapse grid to single column so no 340px right-track is reserved,
+    // allowing left-column to fill full width for proper horizontal centering
+    const gridWrapper = document.getElementById("results-grid-wrapper");
+    if (gridWrapper) gridWrapper.style.gridTemplateColumns = "1fr";
 
-    try {
-      const res = await fetch("/predict", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          compound_name: compoundName,
-          name: compoundName,
-          smiles: compoundName,
-        }),
-      });
+    const predictSec = document.getElementById("predict-section");
+    if (predictSec) {
+      predictSec.classList.remove("predict-sticky-bottom");
+      predictSec.classList.add("max-w-xl");
+    }
 
-      const data = await res.json();
+    const leftCol = document.getElementById("left-column");
+    if (leftCol) leftCol.classList.add("items-center");
+  }
 
-      if (!res.ok || data.status === "error") {
+  function showResults() {
+    // Destroy particle background — it only belongs on the initial landing page
+    window.destroyParticles?.();
+
+    const mainGrid = document.getElementById("main-content-grid");
+    if (mainGrid) {
+      mainGrid.classList.remove("flex-1", "justify-center", "-mt-16");
+      mainGrid.classList.add("pt-8", "pb-16");
+    }
+
+    // Restore two-column grid (clears the single-column inline style override)
+    const gridWrapper = document.getElementById("results-grid-wrapper");
+    if (gridWrapper) gridWrapper.style.gridTemplateColumns = "";
+
+    // Expand left column back to full-width flow (no centering override)
+    const leftCol = document.getElementById("left-column");
+    if (leftCol) leftCol.classList.remove("items-center");
+
+    const predictSec = document.getElementById("predict-section");
+    if (predictSec) {
+      predictSec.classList.remove("max-w-xl");
+      predictSec.classList.add("predict-sticky-bottom");
+    }
+
+    if (resultsSection) {
+      resultsSection.style.display = "flex";
+      requestAnimationFrame(() => resultsSection.classList.add("revealed"));
+    }
+
+    const rightSidebar = document.getElementById("right-sidebar");
+    if (rightSidebar) {
+      rightSidebar.style.display = "block";
+    }
+  }
+
+  // ─── Form submission ───────────────────────────────────────────────────────
+  form &&
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const inputEl =
+        document.getElementById("compound-input") ||
+        document.getElementById("smiles-input");
+      const compoundName = inputEl ? inputEl.value.trim() : "";
+
+      if (!compoundName) {
         showError(
-          data.message ||
-            "Prediction failed. Please check your input and try again.",
+          "Please enter a molecule or compound name before running the prediction.",
         );
         return;
       }
 
-      renderResults(data);
-      showResults();
-      setTimeout(scrollToResults, 100);
-    } catch (err) {
-      showError(
-        "Network error — could not reach the prediction server. Is Flask running?",
-      );
-    } finally {
-      hideLoading();
+      hideError();
+      showLoading();
+
+      try {
+        // Run the fetch call in parallel with a minimum 5-second delay timer
+        const minLoadingTime = new Promise((resolve) =>
+          setTimeout(resolve, 5000),
+        );
+
+        const fetchPromise = fetch("/predict", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            compound_name: compoundName,
+            name: compoundName,
+            smiles: compoundName,
+          }),
+        }).then(async (res) => {
+          const data = await res.json();
+          return { ok: res.ok, data };
+        });
+
+        const [fetchResult] = await Promise.all([fetchPromise, minLoadingTime]);
+        const { ok, data } = fetchResult;
+
+        if (!ok || data.status === "error") {
+          showError(
+            data.message ||
+              "Prediction failed. Please check your input and try again.",
+          );
+          return;
+        }
+
+        renderResults(data);
+        showResults();
+        setTimeout(scrollToResults, 100);
+      } catch (err) {
+        showError(
+          "Network error — could not reach the prediction server. Is Flask running?",
+        );
+      } finally {
+        hideLoading();
+      }
+    });
+
+  // ─── Results rendering ─────────────────────────────────────────────────────
+  function renderResults(data) {
+    renderVerdictCard(data);
+    renderModelComparison(data.models);
+    renderSimilarityCard(data.similarity, data.compound_name);
+    renderPBPKCard(data.pbpk);
+    renderExplainability(data.shap, data.lime);
+
+    // Update the Structure Preview sidebar image
+    const previewImg = document.getElementById("structure-preview-img");
+    if (previewImg && data.structure_image_url) {
+      previewImg.src = data.structure_image_url;
+      previewImg.alt = `2D molecular structure of ${data.compound_name || "compound"}`;
     }
-  });
-
-// ─── Results rendering ─────────────────────────────────────────────────────
-function renderResults(data) {
-  renderVerdictCard(data);
-  renderModelComparison(data.models);
-  renderSimilarityCard(data.similarity, data.compound_name);
-  renderPBPKCard(data.pbpk);
-  renderExplainability(data.shap, data.lime);
-}
-
-// VerdictCard
-function renderVerdictCard(data) {
-  const isToxic = data.verdict === "toxic";
-  const pct = Math.round(data.confidence * 100);
-  const card = document.getElementById("verdict-card");
-  if (!card) return;
-
-  // No card border styling in new layout — plain text verdict
-
-  // Badge — large text matching prototype
-  setText("verdict-badge", isToxic ? "TOXIC" : "SAFE");
-  const badge = document.getElementById("verdict-badge");
-  if (badge) {
-    badge.className =
-      "text-5xl font-black leading-none " +
-      (isToxic ? "text-red-700" : "text-green-700");
   }
 
-  // Compound Name Tag if present
-  if (data.compound_name) {
-    setText("verdict-compound-name", data.compound_name);
-  }
+  // VerdictCard
+  function renderVerdictCard(data) {
+    const isToxic = data.verdict === "toxic";
+    const pct = Math.round(data.confidence * 100);
+    const card = document.getElementById("verdict-card");
+    if (!card) return;
 
-  // Confidence number — match prototype large sizing
-  const confEl = document.getElementById("verdict-confidence");
-  if (confEl) {
-    confEl.textContent = "0%";
-    confEl.className =
-      "text-7xl font-black leading-none " +
-      (isToxic ? "text-red-700" : "text-green-700");
-    animateCounter(confEl, pct, 700, "%", 0);
-  }
+    // No card border styling in new layout — plain text verdict
 
-  // Icon (element removed in prototype layout — null-safe)
-  const iconEl = document.getElementById("verdict-icon");
-  if (iconEl) {
-    iconEl.className =
-      "w-16 h-16 rounded-full flex items-center justify-center flex-shrink-0 " +
-      (isToxic ? "bg-red-100" : "bg-green-100");
-    iconEl.innerHTML = isToxic
-      ? `<svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>`
-      : `<svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>`;
-  }
+    // Badge — large text matching prototype
+    setText("verdict-badge", isToxic ? "TOXIC" : "SAFE");
+    const badge = document.getElementById("verdict-badge");
+    if (badge) {
+      badge.className =
+        "text-5xl font-black leading-none " +
+        (isToxic ? "text-red-700" : "text-green-700");
+    }
 
-  // Summary text
-  setText("verdict-summary", data.summary);
+    // Compound Name Tag — shown below confidence/badge headline
+    const compoundNameEl = document.getElementById("verdict-compound-name");
+    if (compoundNameEl) {
+      compoundNameEl.textContent = data.compound_name || "";
+    }
 
-  // Ensemble label — matches pill in new layout
-  setText(
-    "verdict-ensemble",
-    `Models: Random Forest: ${Math.round(data.models.random_forest.probability * 100)}% · GCN: ${Math.round(data.models.gcn.probability * 100)}%`,
-  );
-}
+    // Confidence number — match prototype large sizing
+    const confEl = document.getElementById("verdict-confidence");
+    if (confEl) {
+      confEl.textContent = "0%";
+      confEl.className =
+        "text-7xl font-black leading-none " +
+        (isToxic ? "text-red-700" : "text-green-700");
+      animateCounter(confEl, pct, 700, "%", 0);
+    }
 
-// ModelComparisonRow
-function renderModelComparison(models) {
-  renderModelCard("rf", "Random Forest", models.random_forest);
-  renderModelCard("gcn", "Graph Conv. Network", models.gcn);
-}
+    // Summary text
+    setText("verdict-summary", data.summary);
 
-function renderModelCard(id, name, model) {
-  const isToxic = model.label === "toxic";
-  const pct = Math.round(model.probability * 100);
-
-  // label element removed in new layout — null-safe
-  setText(`${id}-label`, name);
-
-  // Verdict: plain bold coloured text (not a badge pill)
-  const verdictEl = document.getElementById(`${id}-verdict`);
-  if (verdictEl) {
-    verdictEl.textContent = isToxic ? "TOXIC" : "SAFE";
-    verdictEl.className =
-      "text-base font-black " + (isToxic ? "text-red-600" : "text-green-600");
-  }
-
-  const probEl = document.getElementById(`${id}-probability`);
-  if (probEl) {
-    probEl.className =
-      "text-3xl font-black " + (isToxic ? "text-red-700" : "text-green-700");
-    animateCounter(probEl, pct, 600, "%", 0);
-  }
-
-  // Progress bar
-  const bar = document.getElementById(`${id}-bar`);
-  if (bar) {
-    bar.style.width = "0%";
-    bar.className =
-      "h-full rounded-full transition-all duration-700 " +
-      (isToxic ? "bg-red-700" : "bg-green-600");
-    requestAnimationFrame(() =>
-      requestAnimationFrame(() => {
-        bar.style.width = pct + "%";
-      }),
+    // Ensemble label — matches pill in new layout
+    setText(
+      "verdict-ensemble",
+      `Models: Random Forest: ${Math.round(data.models.random_forest.probability * 100)}% · GCN: ${Math.round(data.models.gcn.probability * 100)}%`,
     );
   }
-}
 
-// SimilarityCard
-function renderSimilarityCard(sim, compoundName) {
-  const pct = Math.round(sim.tanimoto * 100);
-  animateCounter(
-    document.getElementById("tanimoto-value"),
-    sim.tanimoto,
-    700,
-    "",
-    2,
-  );
-
-  const gaugeFill = document.getElementById("tanimoto-gauge-fill");
-  if (gaugeFill) animateGauge(gaugeFill, sim.tanimoto);
-
-  const catEl = document.getElementById("similarity-category");
-  if (catEl) {
-    catEl.textContent = sim.category;
-    const cls =
-      {
-        "Sibling-like": "badge-sibling",
-        "Stranger-like": "badge-stranger",
-        "Safe-like": "badge-safe",
-      }[sim.category] || "badge-stranger";
-    catEl.className = cls;
+  // ModelComparisonRow
+  function renderModelComparison(models) {
+    renderModelCard("rf", "Random Forest", models.random_forest);
+    renderModelCard("gcn", "Graph Conv. Network", models.gcn);
   }
 
-  if (compoundName) {
-    setText("similarity-input-label", `Input: ${compoundName}`);
+  function renderModelCard(id, name, model) {
+    const isToxic = model.label === "toxic";
+    const pct = Math.round(model.probability * 100);
+
+    // label element removed in new layout — null-safe
+    setText(`${id}-label`, name);
+
+    // Verdict: plain bold coloured text (not a badge pill)
+    const verdictEl = document.getElementById(`${id}-verdict`);
+    if (verdictEl) {
+      verdictEl.textContent = isToxic ? "TOXIC" : "SAFE";
+      verdictEl.className =
+        "text-base font-black " + (isToxic ? "text-red-600" : "text-green-600");
+    }
+
+    const probEl = document.getElementById(`${id}-probability`);
+    if (probEl) {
+      probEl.className =
+        "text-3xl font-black " + (isToxic ? "text-red-700" : "text-green-700");
+      animateCounter(probEl, pct, 600, "%", 0);
+    }
+
+    // Progress bar — delegate to ui.js animateProgressBar
+    const colorClass = isToxic ? "bg-red-700" : "bg-green-600";
+    animateProgressBar(`${id}-bar`, pct, colorClass);
   }
 
-  setText("similarity-description", sim.category_description);
-}
+  // SimilarityCard
+  function renderSimilarityCard(sim, compoundName) {
+    animateCounter(
+      document.getElementById("tanimoto-value"),
+      sim.tanimoto,
+      700,
+      "",
+      2,
+    );
 
-// PBPKCard
-function renderPBPKCard(pbpk) {
-  const cssEl = document.getElementById("css-value");
-  if (cssEl) animateCounter(cssEl, pbpk.css_mg_per_L, 700, "", 2);
+    // Animate the Tanimoto similarity gauge bar (id="tanimoto-gauge-fill" in HTML)
+    const tanimotoFill = document.getElementById("tanimoto-gauge-fill");
+    if (tanimotoFill) animateGauge(tanimotoFill, sim.tanimoto);
 
-  const labelEl = document.getElementById("css-label");
-  if (labelEl) {
-    labelEl.textContent = pbpk.css_label;
-    labelEl.className =
-      pbpk.css_label === "Elevated" ? "badge-elevated" : "badge-normal";
+    const catEl = document.getElementById("similarity-category");
+    if (catEl) {
+      catEl.textContent = sim.category;
+      const cls =
+        {
+          "Sibling-like": "badge-sibling",
+          "Stranger-like": "badge-stranger",
+          "Safe-like": "badge-safe",
+        }[sim.category] || "badge-stranger";
+      catEl.className = cls;
+    }
+
+    // similarity-input-label is optional — shows "Input: <compound>" if present
+    if (compoundName) {
+      setText("similarity-input-label", `Input: ${compoundName}`);
+    }
+
+    setText("similarity-description", sim.category_description);
   }
 
-  const threshEl = document.getElementById("css-threshold");
-  if (threshEl) threshEl.textContent = pbpk.css_threshold.toFixed(1);
+  // PBPKCard
+  function renderPBPKCard(pbpk) {
+    const cssEl = document.getElementById("css-value");
+    if (cssEl) animateCounter(cssEl, pbpk.css_mg_per_L, 700, "", 2);
 
-  const noteEl = document.getElementById("pbpk-note");
-  if (noteEl) noteEl.textContent = pbpk.css_note;
-}
+    const labelEl = document.getElementById("css-label");
+    if (labelEl) {
+      labelEl.textContent = pbpk.css_label;
+      labelEl.className =
+        pbpk.css_label === "Elevated" ? "badge-elevated" : "badge-normal";
+    }
 
-// ExplainabilityTabs — charts
-function renderExplainability(shap, lime) {
-  // Small delay so the tab panels are visible in DOM before Chart.js measures them
-  setTimeout(() => {
-    KeToxCharts.renderSHAPChart(shap);
-    KeToxCharts.renderLIMEChart(lime);
-  }, 80);
-  // Switch to SHAP tab by default
-  switchTab("shap");
-}
+    // Animate PBPK gauge — fills proportionally up to PBPK_GAUGE_MAX (mg/L)
+    const pbpkFill = document.getElementById("pbpk-gauge-fill");
+    if (pbpkFill) animateGauge(pbpkFill, pbpk.css_mg_per_L / PBPK_GAUGE_MAX);
 
-// ─── Tab switching ─────────────────────────────────────────────────────────
-function switchTab(tabName) {
-  // Hide all panels
-  document
-    .querySelectorAll(".tab-panel")
-    .forEach((p) => p.classList.remove("active"));
-  // Deactivate all tab buttons
-  document
-    .querySelectorAll("[data-tab]")
-    .forEach((b) => b.classList.remove("btn-tab-active"));
+    // Populate threshold label (id="css-threshold" in the sidebar HTML)
+    const threshEl = document.getElementById("css-threshold");
+    if (threshEl)
+      threshEl.textContent = pbpk.css_threshold.toFixed(1) + " mg/L";
 
-  // Show target panel
-  const panel = document.getElementById(`tab-${tabName}`);
-  if (panel) panel.classList.add("active");
+    // Reposition the IC50 threshold marker to the correct proportion
+    const markerEl = document.getElementById("pbpk-threshold-marker");
+    if (markerEl) {
+      const markerPct = (pbpk.css_threshold / PBPK_GAUGE_MAX) * 100;
+      markerEl.style.left = markerPct.toFixed(1) + "%";
+    }
 
-  // Activate button
-  const btn = document.querySelector(`[data-tab="${tabName}"]`);
-  if (btn) btn.classList.add("btn-tab-active");
+    const noteEl = document.getElementById("pbpk-note");
+    if (noteEl) noteEl.textContent = pbpk.css_note;
+  }
 
-  // Re-render chart if switching to SHAP or LIME (canvas needs visible container)
-  if (tabName === "shap" && instances_exist("shap"))
-    KeToxCharts.renderSHAPChart(window._lastSHAP);
-  if (tabName === "lime" && instances_exist("lime"))
-    KeToxCharts.renderLIMEChart(window._lastLIME);
-}
+  // ExplainabilityTabs — charts
+  function renderExplainability(shap, lime) {
+    // Small delay so the tab panels are visible in DOM before Chart.js measures them
+    setTimeout(() => {
+      KeToxCharts.renderSHAPChart(shap);
+      KeToxCharts.renderLIMEChart(lime);
+    }, 80);
+    // Switch to SHAP tab by default
+    switchTab("shap");
+  }
 
-// Check if chart data has been stored
-function instances_exist(name) {
-  return window[`_last${name.toUpperCase()}`] !== undefined;
-}
+  // ─── Tab switching ─────────────────────────────────────────────────────────
+  function switchTab(tabName) {
+    // Hide all panels
+    document
+      .querySelectorAll(".tab-panel")
+      .forEach((p) => p.classList.remove("active"));
+    // Deactivate all tab buttons
+    document
+      .querySelectorAll("[data-tab]")
+      .forEach((b) => b.classList.remove("btn-tab-active"));
 
-// ─── Helpers ───────────────────────────────────────────────────────────────
-function setText(id, text) {
-  const el = document.getElementById(id);
-  if (el) el.textContent = text;
-}
+    // Show target panel
+    const panel = document.getElementById(`tab-${tabName}`);
+    if (panel) panel.classList.add("active");
 
-// ─── Wire up tab button clicks + initial page state ────────────────────────
-document.addEventListener("DOMContentLoaded", () => {
-  // Collapse grid to single column on load so the form centers in full width
-  const gridWrapper = document.getElementById("results-grid-wrapper");
-  if (gridWrapper) gridWrapper.style.gridTemplateColumns = "1fr";
+    // Activate button
+    const btn = document.querySelector(`[data-tab="${tabName}"]`);
+    if (btn) btn.classList.add("btn-tab-active");
 
-  // Tab button click listeners
-  document.querySelectorAll("[data-tab]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      switchTab(btn.getAttribute("data-tab"));
+    // Re-render chart if switching to SHAP or LIME (canvas needs visible container)
+    if (tabName === "shap" && instances_exist("shap"))
+      KeToxCharts.renderSHAPChart(window._lastSHAP);
+    if (tabName === "lime" && instances_exist("lime"))
+      KeToxCharts.renderLIMEChart(window._lastLIME);
+  }
+
+  // Check if chart data has been stored
+  function instances_exist(name) {
+    return window[`_last${name.toUpperCase()}`] !== undefined;
+  }
+
+  // ─── Helpers ───────────────────────────────────────────────────────────────
+  // All helpers are provided by ui.js and exported to window.*
+  // Alias them locally so they work inside this IIFE without window. prefix.
+  const setText = window.setText;
+  const animateCounter = window.animateCounter;
+  const animateGauge = window.animateGauge;
+  const animateProgressBar = window.animateProgressBar;
+
+  // ─── Wire up tab button clicks + example chips + initial page state ─────────
+  document.addEventListener("DOMContentLoaded", () => {
+    // Collapse grid to single column on load so the form centers in full width
+    const gridWrapper = document.getElementById("results-grid-wrapper");
+    if (gridWrapper) gridWrapper.style.gridTemplateColumns = "1fr";
+
+    // Tab button click listeners
+    document.querySelectorAll("[data-tab]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        switchTab(btn.getAttribute("data-tab"));
+      });
     });
+
+    // Error close button — replaces inline onclick="hideError()" in HTML
+    const errorCloseBtn = document.getElementById("error-close-btn");
+    if (errorCloseBtn) errorCloseBtn.addEventListener("click", hideError);
   });
-});
+
+  // ─── Public API ────────────────────────────────────────────────────────────
+  // Expose only what external scripts need.
+  window.hideError = hideError;
+  window.switchTab = switchTab;
+})(); // end IIFE

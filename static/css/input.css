@@ -16,7 +16,9 @@
    e.g., bg-navy-800, text-teal-ketox, bg-toxic-light
    ------------------------------------------------------------------------- */
 @theme {
-  --font-family-sans: "Plus Jakarta Sans", "Outfit", "Google Sans", system-ui, -apple-system, sans-serif;
+  --font-family-sans:
+    "Plus Jakarta Sans", "Outfit", "Google Sans", system-ui, -apple-system,
+    sans-serif;
   --font-family-mono: "JetBrains Mono", "Fira Code", "Courier New", monospace;
 
   /* Black & White monochrome palette */
@@ -61,7 +63,7 @@
 
   /* Buttons */
   .btn-primary {
-    @apply bg-black text-white px-6 py-3 rounded-lg font-semibold text-sm
+    @apply bg-black text-white px-6 py-2 font-semibold text-sm
            hover:bg-neutral-800 active:bg-black
            transition-all duration-200 flex items-center justify-center gap-2
            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2
@@ -91,7 +93,7 @@
     @apply bg-amber-100 text-amber-700 border border-amber-200 px-2.5 py-0.5 rounded-full text-xs font-semibold;
   }
   .badge-normal {
-    @apply bg-green-100 text-green-700 border border-green-200 px-2.5 py-0.5 rounded-full text-xs font-semibold;
+    @apply text-green-700 text-xs font-semibold;
   }
   .badge-sibling {
     @apply bg-orange-100 text-orange-700 border border-orange-200 px-2.5 py-0.5 rounded-full text-xs font-semibold;

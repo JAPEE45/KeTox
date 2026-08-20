@@ -26,11 +26,13 @@
     <!-- Tailwind CSS v4 Browser CDN -->
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
 
-    <!-- Custom styles -->
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='css/output.css') }}"
-    />
+    <!-- Tailwind CLI build output (utility classes when CDN is removed) -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/output.css') }}" />
+
+    <!-- Hand-authored styles: tokens, components, animations, gauges, etc.
+         All colours reference CSS custom properties defined in custom.css :root.
+         Source of truth for design tokens — edit here, not in output.css. -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}" />
 
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -38,110 +40,12 @@
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 
-    <!-- Custom Tailwind theme + component classes -->
-    <style type="text/tailwindcss">
-      @theme {
-        --font-family-sans: "Plus Jakarta Sans", "Outfit", "Google Sans", system-ui, -apple-system, sans-serif;
-        --font-family-mono: "JetBrains Mono", "Fira Code", monospace;
-
-        --color-navy-50: #f4f4f5;
-        --color-navy-100: #e4e4e7;
-        --color-navy-200: #d4d4d8;
-        --color-navy-300: #a1a1aa;
-        --color-navy-700: #27272a;
-        --color-navy-800: #09090b;
-        --color-navy-900: #000000;
-
-        --color-teal-ketox: #18181b;
-
-        --color-toxic: #dc2626;
-        --color-toxic-light: #fef2f2;
-        --color-toxic-border: #fca5a5;
-        --color-safe: #16a34a;
-        --color-safe-light: #f0fdf4;
-        --color-safe-border: #86efac;
-        --color-elevated: #d97706;
-      }
-
-      @layer components {
-        .card {
-          @apply bg-white rounded-xl border border-neutral-200 shadow-sm;
-        }
-
-        .card-elevated {
-          @apply bg-white rounded-xl border border-neutral-200 shadow-md;
-        }
-
-        .btn-primary {
-          @apply bg-black text-white px-6 py-3 rounded-lg font-semibold text-sm
-                 hover:bg-neutral-800 active:scale-[0.98]
-                 transition-all duration-200 flex items-center justify-center gap-2
-                 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm;
-        }
-
-        .btn-tab {
-          @apply px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200
-                 text-neutral-500 hover:text-black hover:bg-neutral-100;
-        }
-
-        .btn-tab-active {
-          @apply bg-black text-white shadow-sm;
-        }
-
-        .badge-toxic {
-          @apply bg-red-100 text-red-700 border border-red-200 px-3 py-1 rounded-full text-sm font-bold tracking-wide;
-        }
-
-        .badge-safe {
-          @apply bg-green-100 text-green-700 border border-green-200 px-3 py-1 rounded-full text-sm font-bold tracking-wide;
-        }
-
-        .badge-elevated {
-          @apply bg-amber-100 text-amber-700 border border-amber-200 px-2.5 py-0.5 rounded-full text-xs font-semibold;
-        }
-
-        .badge-normal {
-          @apply bg-green-100 text-green-700 border border-green-200 px-2.5 py-0.5 rounded-full text-xs font-semibold;
-        }
-
-        .badge-sibling {
-          @apply bg-neutral-100 text-neutral-800 border border-neutral-300 px-2.5 py-0.5 rounded-full text-xs font-semibold;
-        }
-
-        .badge-stranger {
-          @apply bg-neutral-100 text-neutral-600 border border-neutral-200 px-2.5 py-0.5 rounded-full text-xs font-semibold;
-        }
-
-        .input-smiles {
-          @apply w-full font-mono text-sm bg-neutral-50 border border-neutral-300 rounded-lg px-4 py-3
-                 focus:outline-none focus:ring-2 focus:ring-black focus:border-black
-                 transition-all duration-200 placeholder:text-neutral-400;
-        }
-
-        .chip {
-          @apply inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium
-                 border border-neutral-200 bg-white text-neutral-600
-                 hover:border-black hover:text-black hover:bg-neutral-50
-                 cursor-pointer transition-all duration-150 select-none;
-        }
-
-        .chip-toxic {
-          @apply border-red-200 bg-red-50 text-red-700 hover:border-red-300 hover:bg-red-100;
-        }
-
-        .chip-safe {
-          @apply border-green-200 bg-green-50 text-green-700 hover:border-green-300 hover:bg-green-100;
-        }
-
-        .section-label {
-          @apply text-xs font-semibold uppercase tracking-widest text-neutral-400;
-        }
-
-        .skeleton {
-          @apply bg-neutral-200 rounded animate-pulse;
-        }
-      }
-    </style>
+    <!--
+      Component classes (.badge-*, .btn-*, .chip-*, .card, etc.) live in
+      static/css/output.css as plain CSS — no inline @apply block needed.
+      Tailwind utility classes (bg-*, text-*, flex, grid, etc.) are handled
+      by the browser CDN above during development.
+    -->
 
     {% block head %}{% endblock %}
   </head>
@@ -167,7 +71,14 @@
 
     <!-- ═══════════════════════════ NAVIGATION ═══════════════════════════ -->
 
-    <nav class="sticky top-0 z-40 bg-white/10 backdrop-blur-md" style="backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);">
+    <nav
+      class="sticky top-0 z-40 bg-neutral-50/85 backdrop-blur-md"
+      style="
+        background-color: rgba(250, 250, 250, 0.85);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+      "
+    >
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
           <!-- Wordmark -->
@@ -267,17 +178,14 @@
                 KeTox
               </div>
 
-              <div
-                class="text-xs text-neutral-500 font-medium hidden sm:block"
-              >
+              <div class="text-xs text-neutral-500 font-medium hidden sm:block">
                 CYP3A4 Hepatotoxicity Predictor
               </div>
             </div>
           </a>
 
-          <!-- Nav links -->
-
-          <div class="flex items-center gap-1">
+          <!-- Desktop Nav links (hidden on mobile) -->
+          <div class="hidden md:flex items-center gap-1">
             <a
               href="/"
               data-nav-path="/"
@@ -297,9 +205,130 @@
               >Model Performance</a
             >
           </div>
+
+          <!-- Mobile Accordion Toggle Button (visible on mobile only) -->
+          <div class="flex items-center md:hidden">
+            <button
+              id="mobile-nav-toggle"
+              type="button"
+              class="p-2 rounded-xl text-neutral-700 hover:text-black hover:bg-neutral-200/60 focus:outline-none transition-colors duration-200"
+              aria-controls="mobile-nav-menu"
+              aria-expanded="false"
+              aria-label="Toggle navigation menu"
+            >
+              <!-- Hamburger / Accordion Icon -->
+              <svg
+                id="mobile-nav-icon-open"
+                class="w-6 h-6 stroke-current transition-transform duration-200"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <line x1="4" y1="6" x2="20" y2="6" />
+                <line x1="4" y1="12" x2="20" y2="12" />
+                <line x1="4" y1="18" x2="20" y2="18" />
+              </svg>
+              <!-- Close Icon (hidden initially) -->
+              <svg
+                id="mobile-nav-icon-close"
+                class="w-6 h-6 stroke-current hidden transition-transform duration-200"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═════════════════════════ MOBILE ACCORDION DRAWER ════════════════ -->
+      <div
+        id="mobile-nav-menu"
+        class="md:hidden overflow-hidden transition-all duration-300 ease-in-out max-h-0 opacity-0"
+        style="
+          background-color: rgba(250, 250, 250, 0.96);
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+          border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        "
+      >
+        <div class="px-5 pt-3 pb-6 flex flex-col gap-2">
+          <a
+            href="/"
+            data-nav-path="/"
+            class="px-4 py-3 rounded-xl text-base font-semibold text-neutral-800 hover:text-black hover:bg-neutral-200/50 transition-colors flex items-center justify-between"
+          >
+            <span>Home</span>
+            <svg class="w-4 h-4 opacity-40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </a>
+          <a
+            href="/about"
+            data-nav-path="/about"
+            class="px-4 py-3 rounded-xl text-base font-semibold text-neutral-800 hover:text-black hover:bg-neutral-200/50 transition-colors flex items-center justify-between"
+          >
+            <span>About</span>
+            <svg class="w-4 h-4 opacity-40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </a>
+          <a
+            href="/performance"
+            data-nav-path="/performance"
+            class="px-4 py-3 rounded-xl text-base font-semibold text-neutral-800 hover:text-black hover:bg-neutral-200/50 transition-colors flex items-center justify-between"
+          >
+            <span>Model Performance</span>
+            <svg class="w-4 h-4 opacity-40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </a>
         </div>
       </div>
     </nav>
+
+    <!-- ═════════════════════════ MOBILE NAV SCRIPT ════════════════════════ -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const toggleBtn = document.getElementById("mobile-nav-toggle");
+        const menu = document.getElementById("mobile-nav-menu");
+        const iconOpen = document.getElementById("mobile-nav-icon-open");
+        const iconClose = document.getElementById("mobile-nav-icon-close");
+
+        if (!toggleBtn || !menu) return;
+
+        let isOpen = false;
+
+        function toggleMenu() {
+          isOpen = !isOpen;
+          toggleBtn.setAttribute("aria-expanded", isOpen);
+
+          if (isOpen) {
+            menu.style.maxHeight = menu.scrollHeight + "px";
+            menu.classList.remove("max-h-0", "opacity-0");
+            menu.classList.add("opacity-100");
+            iconOpen.classList.add("hidden");
+            iconClose.classList.remove("hidden");
+          } else {
+            menu.style.maxHeight = "0px";
+            menu.classList.add("max-h-0", "opacity-0");
+            menu.classList.remove("opacity-100");
+            iconOpen.classList.remove("hidden");
+            iconClose.classList.add("hidden");
+          }
+        }
+
+        toggleBtn.addEventListener("click", toggleMenu);
+
+        // Close on window resize to desktop
+        window.addEventListener("resize", () => {
+          if (window.innerWidth >= 768 && isOpen) {
+            toggleMenu();
+          }
+        });
+      });
+    </script>
 
     <!-- ═══════════════════════════ MAIN CONTENT ═════════════════════════ -->
 
@@ -319,9 +348,7 @@
       document.addEventListener("DOMContentLoaded", () => lucide.createIcons());
     </script>
 
-    {% block scripts %}{% endblock %}
-
-    {% if request.path == '/' %}
+    {% block scripts %}{% endblock %} {% if request.path == '/' %}
     <!-- =============== PARTICLE ANIMATION (Home only) =============== -->
     <script>
       (() => {
@@ -598,9 +625,12 @@
           }
         }
 
+        function isMobile() {
+          return window.innerWidth < 768;
+        }
+
         function resize() {
           W = canvas.width = window.innerWidth;
-
           H = canvas.height = window.innerHeight;
 
           if (!clusterX) {
@@ -610,45 +640,50 @@
         }
 
         function init() {
+          if (isMobile()) {
+            window.destroyParticles();
+            return;
+          }
+
           resize();
-
           clusterX = W / 2;
-
           clusterY = H / 2;
-
           particles = Array.from({ length: COUNT }, () => new Particle());
         }
 
+        let animationFrameId = null;
+
         function loop(ts) {
+          if (window._particleDestroyed || isMobile()) {
+            window.destroyParticles();
+            return;
+          }
+
           const dt = Math.min(ts - lastTime, 50);
-
           lastTime = ts;
-
           clock += dt * 0.001; // advance clock in seconds
 
           const targetX = mouse.x > 0 ? mouse.x : W / 2;
-
           const targetY = mouse.x > 0 ? mouse.y : H / 2;
 
           clusterX += (targetX - clusterX) * FOLLOW;
-
           clusterY += (targetY - clusterY) * FOLLOW;
 
           ctx.clearRect(0, 0, W, H);
-
-          // Pass ts (milliseconds) to update for color cycling;
-
-          // clock (seconds) is used via closure for size/breathing
 
           for (const p of particles) {
             p.update(ts);
             p.draw();
           }
 
-          requestAnimationFrame(loop);
+          animationFrameId = requestAnimationFrame(loop);
         }
 
         window.addEventListener("resize", () => {
+          if (isMobile()) {
+            window.destroyParticles();
+            return;
+          }
           resize();
           particles.forEach((p) => p.init());
         });
@@ -667,7 +702,6 @@
           "touchmove",
           (e) => {
             mouse.x = e.touches[0].clientX;
-
             mouse.y = e.touches[0].clientY;
           },
           { passive: true },
@@ -683,26 +717,37 @@
           if (window._particleDestroyed) return;
           window._particleDestroyed = true;
 
-          // Fade out the canvas over 600ms then hide it
-          canvas.style.transition = "opacity 0.6s ease";
-          canvas.style.opacity = "0";
-          setTimeout(() => {
-            canvas.style.display = "none";
-            // Stop the rAF loop by never calling requestAnimationFrame again;
-            // we achieve this by replacing loop with a no-op
-            loop = function () {};
-          }, 620);
+          if (animationFrameId) {
+            cancelAnimationFrame(animationFrameId);
+            animationFrameId = null;
+          }
+          loop = function () {};
+          particles = [];
+
+          if (ctx) {
+            ctx.clearRect(0, 0, canvas.width || 0, canvas.height || 0);
+          }
+
+          // Hide canvas immediately
+          canvas.style.display = "none";
+          canvas.remove();
         };
 
         // Immediately destroy if user clicks About or Model Performance from Home
-        document.querySelectorAll('a[href="/about"], a[href="/performance"]').forEach((link) => {
-          link.addEventListener("click", () => {
-            window.destroyParticles?.();
+        document
+          .querySelectorAll('a[href="/about"], a[href="/performance"]')
+          .forEach((link) => {
+            link.addEventListener("click", () => {
+              window.destroyParticles?.();
+            });
           });
-        });
 
-        init();
-        requestAnimationFrame(loop);
+        if (isMobile()) {
+          window.destroyParticles();
+        } else {
+          init();
+          animationFrameId = requestAnimationFrame(loop);
+        }
       })();
     </script>
     {% endif %}

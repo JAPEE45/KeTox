@@ -26,23 +26,12 @@ GraphGrad-CAM explainability.{% endblock %} {% block content %}
     </div>
     <button
       type="button"
-      onclick="hideError()"
+      id="error-close-btn"
       class="text-slate-400 hover:text-slate-600 p-1 rounded-md transition-colors"
       aria-label="Close error"
     >
       <i data-lucide="x" class="w-4 h-4"></i>
     </button>
-  </div>
-
-  <!-- ═════════════════════════ LOADING STATE ══════════════════════════════ -->
-  <div id="loading-state" style="display: none" class="w-full pb-4">
-    <div class="flex flex-col items-center justify-center gap-4 py-14">
-      <div class="spinner"></div>
-      <p class="text-sm font-medium text-slate-500">Running ML inference...</p>
-      <p class="text-xs text-slate-400">
-        Evaluating RF model &middot; GCN model &middot; PBPK &middot; XAI
-      </p>
-    </div>
   </div>
 
   <!-- ═════════════════════════ MAIN CONTENT GRID ══════════════════════════ -->
@@ -71,7 +60,7 @@ GraphGrad-CAM explainability.{% endblock %} {% block content %}
             </p>
 
             <!-- Big headline: "87%  TOXIC" -->
-            <div class="flex flex-wrap items-baseline gap-4 mb-4">
+            <div class="flex flex-wrap items-baseline gap-4 mb-2">
               <span
                 id="verdict-confidence"
                 class="text-7xl font-black leading-none text-red-700"
@@ -83,6 +72,12 @@ GraphGrad-CAM explainability.{% endblock %} {% block content %}
                 >--</span
               >
             </div>
+
+            <!-- Compound name tag -->
+            <p
+              id="verdict-compound-name"
+              class="text-sm text-slate-400 mb-3"
+            ></p>
 
             <!-- Model sub-scores pill -->
             <div
@@ -176,7 +171,7 @@ GraphGrad-CAM explainability.{% endblock %} {% block content %}
             </p>
 
             <!-- Big score: "0.95 / 1.0" -->
-            <div class="flex items-baseline gap-2 mb-2">
+            <div class="flex items-baseline gap-2 mb-1">
               <span
                 class="text-5xl font-black text-slate-900"
                 id="tanimoto-value"
@@ -185,29 +180,46 @@ GraphGrad-CAM explainability.{% endblock %} {% block content %}
               <span class="text-3xl font-black text-slate-300">/ 1.0</span>
             </div>
 
+            <!-- Input label (populated by JS) -->
+            <p
+              id="similarity-input-label"
+              class="text-xs text-slate-400 mb-2"
+            ></p>
+
             <!-- Right-aligned label -->
             <div class="flex justify-end mb-1">
               <span class="text-[11px] text-slate-400">Tanimoto coeff.</span>
             </div>
 
-            <!-- Rainbow gradient bar: red → amber → green -->
-            <div
-              class="w-full h-2.5 rounded-full mb-2"
-              style="
-                background: linear-gradient(
-                  90deg,
-                  #dc2626 0%,
-                  #b45309 35%,
-                  #ca8a04 55%,
-                  #16a34a 100%
-                );
-              "
-            ></div>
-            <div class="flex justify-between text-[10px] text-slate-400 mb-5">
+            <!-- Tanimoto gauge bar: fills left-to-right (red=low similarity → green=high) -->
+            <div class="gauge-track mb-2">
+              <div
+                id="tanimoto-gauge-fill"
+                class="gauge-fill"
+                style="
+                  width: 0%;
+                  background: linear-gradient(
+                    90deg,
+                    #dc2626 0%,
+                    #b45309 35%,
+                    #ca8a04 55%,
+                    #16a34a 100%
+                  );
+                "
+              ></div>
+            </div>
+            <div class="flex justify-between text-[10px] text-slate-400 mb-3">
               <span>0.0 - Unrelated</span>
               <span>0.4 - Structural Overlap</span>
               <span>1.0 - Identical</span>
             </div>
+
+            <!-- Category badge -->
+            <span
+              id="similarity-category"
+              class="badge-stranger mb-3 inline-block"
+              >--</span
+            >
 
             <p
               id="similarity-description"
@@ -375,6 +387,20 @@ GraphGrad-CAM explainability.{% endblock %} {% block content %}
               Enter Molecule Name
             </label>
 
+            <!-- ═════════════════════════ LOADING STATE ══════════════════════════════ -->
+            <div id="loading-state" style="display: none" class="w-full py-4">
+              <div class="flex flex-col items-center justify-center gap-3">
+                <div class="spinner"></div>
+                <p class="text-sm font-medium text-black">
+                  Running ML inference...
+                </p>
+                <p class="text-xs text-slate-600">
+                  Evaluating RF model &middot; GCN model &middot; PBPK &middot;
+                  XAI
+                </p>
+              </div>
+            </div>
+
             <!-- Input box -->
             <input
               type="text"
@@ -466,6 +492,9 @@ GraphGrad-CAM explainability.{% endblock %} {% block content %}
             </span>
           </div>
 
+          <!-- Status badge -->
+          <span id="css-label" class="badge-normal mb-3 inline-block">--</span>
+
           <!-- Threshold gauge bar -->
           <div class="relative mb-1">
             <div class="gauge-track">
@@ -475,10 +504,11 @@ GraphGrad-CAM explainability.{% endblock %} {% block content %}
                 style="width: 0%"
               ></div>
             </div>
-            <!-- IC50 threshold marker at ~46.7% -->
+            <!-- IC50 threshold marker — position updated dynamically by JS -->
             <div
+              id="pbpk-threshold-marker"
               class="absolute top-0 h-full flex items-center"
-              style="left: 46.7%"
+              style="left: 33.3%"
             >
               <div class="w-0.5 h-4 bg-slate-400 rounded relative -top-1">
                 <span
@@ -489,10 +519,16 @@ GraphGrad-CAM explainability.{% endblock %} {% block content %}
             </div>
           </div>
 
+          <!-- Threshold label (populated by JS with css_threshold value) -->
+          <p class="text-[10px] text-slate-400 mt-5 mb-1">
+            Safety threshold:
+            <span id="css-threshold" class="font-semibold">--</span>
+          </p>
+
           <!-- Interpretation note -->
           <p
             id="pbpk-note"
-            class="text-[11px] text-slate-500 mt-6 leading-relaxed"
+            class="text-[11px] text-slate-500 mt-1 leading-relaxed"
           ></p>
         </div>
       </div>

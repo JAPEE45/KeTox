@@ -1,30 +1,27 @@
 /*
- * KeTox — output.css  (Tailwind CLI build target)
+ * KeTox — custom.css
  *
- * THIS FILE IS INTENTIONALLY NEAR-EMPTY.
- * It is the output target for the Tailwind CLI v4 standalone binary:
- *   ./tailwindcss.exe -i static/css/input.css -o static/css/output.css --watch
+ * All hand-authored CSS: design tokens, component classes, animations,
+ * scrollbar styling, tooltips, gauges, and page-specific styles.
  *
- * During development the browser CDN in base.html handles utility classes
- * until tailwindcss.exe is run to produce a proper compiled bundle.
+ * Load order in base.html:
+ *   1. output.css  ← Tailwind CLI compiled utilities (or browser CDN fallback)
+ *   2. custom.css  ← this file (overrides and additions)
  *
- * All hand-authored component CSS (badges, buttons, gauges, animations, etc.)
- * lives in custom.css — NOT here.  See base.html for load order.
- *
- * To drop the CDN and go CLI-only:
- *   1. Download tailwindcss-windows-x64.exe → rename to tailwindcss.exe
- *      https://github.com/tailwindlabs/tailwindcss/releases/latest
- *   2. Run: ./tailwindcss.exe -i static/css/input.css -o static/css/output.css
- *   3. Remove the @tailwindcss/browser script tag from base.html
+ * Tokens here mirror the @theme block in input.css so they are available
+ * as CSS custom properties even when the Tailwind CLI has not been run.
  */
 
 /* =========================================================================
-   CSS Custom Properties (design tokens mirror of @theme in input.css)
+   Design tokens — CSS custom properties
+   Mirror of @theme in input.css. Using var(--token) throughout this file
+   keeps colour changes to a single source.
    ========================================================================= */
 :root {
   --navy-50: #f4f4f5;
   --navy-100: #e4e4e7;
   --navy-200: #d4d4d8;
+  --navy-300: #a1a1aa;
   --navy-700: #27272a;
   --navy-800: #09090b;
   --navy-900: #000000;
@@ -59,7 +56,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Monospace elements */
 code,
 kbd,
 samp,
@@ -75,30 +71,25 @@ samp,
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #f4f4f5;
+  background: var(--navy-50);
 }
 ::-webkit-scrollbar-thumb {
-  background: #d4d4d8;
+  background: var(--navy-200);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #a1a1aa;
+  background: var(--navy-300);
 }
 
 /* =========================================================================
-   Component classes (Button, Badge, Chip, Input, etc.)
-   These were previously defined via @apply in base.html's inline style block.
-   They live here so the browser CDN <style type="text/tailwindcss"> block
-   can be safely removed once the Tailwind CLI output is up to date.
+   Buttons
    ========================================================================= */
-
-/* Buttons */
 .btn-primary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: #000;
+  background: var(--navy-900);
   color: #fff;
   padding: 12px 24px;
   font-weight: 600;
@@ -125,7 +116,7 @@ samp,
   display: inline-flex;
   align-items: center;
   background: #fff;
-  color: #000;
+  color: var(--navy-900);
   padding: 8px 16px;
   border-radius: 8px;
   font-weight: 500;
@@ -135,7 +126,7 @@ samp,
   transition: all 0.2s;
 }
 .btn-secondary:hover {
-  border-color: #000;
+  border-color: var(--navy-900);
   background: #fafafa;
 }
 
@@ -153,16 +144,18 @@ samp,
   transition: all 0.2s;
 }
 .btn-tab:hover {
-  color: #000;
+  color: var(--navy-900);
   background: #f5f5f5;
 }
 .btn-tab-active {
-  background: #000 !important;
+  background: var(--navy-900) !important;
   color: #fff !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 }
 
-/* Badges */
+/* =========================================================================
+   Badges
+   ========================================================================= */
 .badge-toxic {
   display: inline-flex;
   align-items: center;
@@ -190,7 +183,7 @@ samp,
 .badge-elevated {
   display: inline-flex;
   align-items: center;
-  color: #b45309;
+  color: var(--elevated);
   font-size: 0.75rem;
   font-weight: 600;
   margin-bottom: 8px;
@@ -198,7 +191,7 @@ samp,
 .badge-normal {
   display: inline-flex;
   align-items: center;
-  color: #15803d;
+  color: var(--safe);
   font-size: 0.75rem;
   font-weight: 600;
   margin-bottom: 8px;
@@ -206,9 +199,9 @@ samp,
 .badge-sibling {
   display: inline-flex;
   align-items: center;
-  background: #f5f5f5;
-  color: #171717;
-  border: 1px solid #d4d4d4;
+  background: var(--navy-50);
+  color: var(--navy-700);
+  border: 1px solid var(--navy-200);
   padding: 2px 10px;
   border-radius: 9999px;
   font-size: 0.75rem;
@@ -217,7 +210,7 @@ samp,
 .badge-stranger {
   display: inline-flex;
   align-items: center;
-  background: #f5f5f5;
+  background: var(--navy-50);
   color: #525252;
   border: 1px solid #e5e5e5;
   padding: 2px 10px;
@@ -226,47 +219,9 @@ samp,
   font-weight: 600;
 }
 
-/* Chips */
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  border: 1px solid #e5e5e5;
-  background: #fff;
-  color: #525252;
-  cursor: pointer;
-  transition: all 0.15s;
-  user-select: none;
-}
-.chip:hover {
-  border-color: #000;
-  color: #000;
-  background: #fafafa;
-}
-.chip-toxic {
-  border-color: #fca5a5;
-  background: #fef2f2;
-  color: #b91c1c;
-}
-.chip-toxic:hover {
-  border-color: #f87171;
-  background: #fee2e2;
-}
-.chip-safe {
-  border-color: #86efac;
-  background: #f0fdf4;
-  color: #15803d;
-}
-.chip-safe:hover {
-  border-color: #4ade80;
-  background: #dcfce7;
-}
-
-/* Card */
+/* =========================================================================
+   Cards
+   ========================================================================= */
 .card {
   background: #fff;
   border-radius: 12px;
@@ -280,13 +235,15 @@ samp,
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-/* SMILES input */
+/* =========================================================================
+   SMILES / monospace input
+   ========================================================================= */
 .input-smiles {
   width: 100%;
   font-family: var(--font-mono);
   font-size: 0.875rem;
   background: #fafafa;
-  border: 1px solid #d4d4d8;
+  border: 1px solid var(--navy-200);
   border-radius: 8px;
   padding: 12px 16px;
   transition: all 0.2s;
@@ -294,23 +251,32 @@ samp,
   outline: none;
 }
 .input-smiles::placeholder {
-  color: #a1a1aa;
+  color: var(--navy-300);
 }
 .input-smiles:focus {
-  border-color: #000;
+  border-color: var(--navy-900);
   box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.08);
 }
 
-/* Section label */
+#smiles-input {
+  font-family: var(--font-mono);
+  letter-spacing: 0.02em;
+}
+
+/* =========================================================================
+   Section label
+   ========================================================================= */
 .section-label {
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: #a1a1aa;
+  color: var(--navy-300);
 }
 
-/* Skeleton shimmer */
+/* =========================================================================
+   Skeleton shimmer
+   ========================================================================= */
 .skeleton {
   background: #e5e5e5;
   border-radius: 4px;
@@ -368,7 +334,7 @@ samp,
 }
 
 .animate-fade-in-up {
-  animation: fadeInUp 0.35s ease-out forwards;
+  animation: fadeInUp 0.35s ease-out both;
 }
 .animate-fade-in-up-delay-1 {
   animation: fadeInUp 0.35s 0.05s ease-out both;
@@ -387,11 +353,15 @@ samp,
 }
 
 .skeleton-shimmer {
-  background: linear-gradient(90deg, #e4e4e7 25%, #f4f4f5 50%, #e4e4e7 75%);
+  background: linear-gradient(
+    90deg,
+    var(--navy-100) 25%,
+    var(--navy-50) 50%,
+    var(--navy-100) 75%
+  );
   background-size: 200% 100%;
   animation: shimmer 1.4s infinite;
 }
-
 .verdict-pulse-toxic {
   animation: pulse-ring 2s infinite;
 }
@@ -400,19 +370,18 @@ samp,
    Navigation active indicator
    ========================================================================= */
 .nav-link-active {
-  color: #000000 !important;
-  background-color: #f4f4f5 !important;
+  color: var(--navy-900) !important;
+  background-color: var(--navy-50) !important;
   font-weight: 600;
 }
 
 /* =========================================================================
-   Tooltip (pure CSS enhancement — JS adds .active for tap support)
+   Tooltip
    ========================================================================= */
 .tooltip-wrapper {
   position: relative;
   display: inline-block;
 }
-
 .tooltip-anchor {
   cursor: help;
   text-decoration: underline;
@@ -420,7 +389,6 @@ samp,
   text-underline-offset: 3px;
   text-decoration-color: #94a3b8;
 }
-
 .tooltip-box {
   position: absolute;
   bottom: calc(100% + 8px);
@@ -456,14 +424,6 @@ samp,
 }
 
 /* =========================================================================
-   SMILES input — monospace
-   ========================================================================= */
-#smiles-input {
-  font-family: var(--font-mono);
-  letter-spacing: 0.02em;
-}
-
-/* =========================================================================
    Tanimoto gauge bar
    ========================================================================= */
 .gauge-track {
@@ -477,7 +437,13 @@ samp,
   height: 100%;
   border-radius: 99px;
   transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-  background: linear-gradient(90deg, #16a34a, #22c55e, #d97706, #ef4444);
+  background: linear-gradient(
+    90deg,
+    var(--safe),
+    #22c55e,
+    var(--elevated),
+    var(--toxic)
+  );
 }
 
 /* =========================================================================
@@ -518,7 +484,7 @@ samp,
    ========================================================================= */
 .model-toggle {
   display: inline-flex;
-  background: #f4f4f5;
+  background: var(--navy-50);
   border-radius: 10px;
   padding: 3px;
   gap: 2px;
@@ -535,7 +501,7 @@ samp,
   background: transparent;
 }
 .model-toggle-btn.active {
-  background: #000000;
+  background: var(--navy-900);
   color: white;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
@@ -575,9 +541,8 @@ samp,
 }
 
 /* =========================================================================
-   Result cards — entrance animation stagger
+   Results section entrance
    ========================================================================= */
-/* Result section — single fade-in for the 2-col grid layout */
 #results-section {
   opacity: 0;
 }
@@ -615,7 +580,7 @@ details.bibliography[open] .bib-chevron {
 }
 
 /* =========================================================================
-   Hero gradient strip (About page)
+   Hero gradient (About page)
    ========================================================================= */
 .hero-about {
   background: linear-gradient(
@@ -631,11 +596,11 @@ details.bibliography[open] .bib-chevron {
    ========================================================================= */
 .verdict-card-toxic {
   border-left: 5px solid var(--toxic);
-  background: linear-gradient(to right, #fef2f2, white 40%);
+  background: linear-gradient(to right, var(--toxic-light), white 40%);
 }
 .verdict-card-safe {
   border-left: 5px solid var(--safe);
-  background: linear-gradient(to right, #f0fdf4, white 40%);
+  background: linear-gradient(to right, var(--safe-light), white 40%);
 }
 
 /* =========================================================================
