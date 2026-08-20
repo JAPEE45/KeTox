@@ -5,13 +5,13 @@ explainability, and the Sibling-Stranger-Safe validation framework.{% endblock
 %} {% block content %}
 
 <!-- ═══════════════════════════ HERO ═════════════════════════════════════ -->
-<section class="hero-about text-white">
+<section class="bg-black text-white border-b border-neutral-800">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
     <div class="max-w-3xl">
       <h1 class="text-3xl sm:text-4xl font-black tracking-tight mb-4">
         About KeTox &amp; Methodology
       </h1>
-      <p class="text-slate-300 text-sm sm:text-base leading-relaxed max-w-2xl">
+      <p class="text-neutral-300 text-sm sm:text-base leading-relaxed max-w-2xl">
         KeTox is a research prototype that predicts whether a small-molecule
         compound is likely to inhibit
         <span class="text-white font-semibold">CYP3A4</span> — the primary
@@ -47,21 +47,22 @@ explainability, and the Sibling-Stranger-Safe validation framework.{% endblock
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col gap-10">
   <!-- ═══════════════════════════ PIPELINE ════════════════════════════════ -->
   <section>
-    <h2 class="text-xl font-black text-navy-900 mb-1">Prediction Pipeline</h2>
-    <p class="text-sm text-slate-500 mb-6">
+    <h2 class="text-xl font-black text-black mb-1">Prediction Pipeline</h2>
+    <p class="text-sm text-neutral-500 mb-6">
       End-to-end flow from input molecule name to an explained toxicity verdict.
     </p>
 
     <!-- Pipeline diagram — flexbox with connector arrows -->
     <div class="card p-6 overflow-x-auto">
       <div class="flex items-start min-w-max gap-0 mx-auto justify-center">
-        {% set steps = [ ('database', 'Data', 'PubChem AID 884\nAID 1851',
-        '#1e3a5f'), ('atom', 'Features', 'RDKit descriptors\nMorgan
-        fingerprints','#0d9488'), ('activity', 'PBPK', 'Css liver conc.\nIC₅₀
-        threshold', '#2563eb'), ('cpu', 'Models', 'Random Forest\nGraph Conv.
-        Net', '#7c3aed'), ('sparkles', 'XAI', 'SHAP · LIME\nGraphGrad-CAM',
-        '#d97706'), ('shield-check','Prediction', 'Toxic / Safe\n+ confidence
-        %', '#16a34a'), ] %} {% for icon, title, desc, color in steps %}
+        {% set steps = [
+          ('database', 'Data', 'PubChem AID 884\nAID 1851', '#000000'),
+          ('atom', 'Features', 'RDKit descriptors\nMorgan fingerprints', '#18181b'),
+          ('activity', 'PBPK', 'Css liver conc.\nIC₅₀ threshold', '#27272a'),
+          ('cpu', 'Models', 'Random Forest\nGraph Conv. Net', '#3f3f46'),
+          ('sparkles', 'XAI', 'SHAP · LIME\nGraphGrad-CAM', '#18181b'),
+          ('shield-check', 'Prediction', 'Toxic / Safe\n+ confidence %', '#000000'),
+        ] %} {% for icon, title, desc, color in steps %}
         <div class="pipeline-step" style="min-width: 90px; max-width: 110px">
           <div class="step-icon" style="background:{{ color }};">
             <i data-lucide="{{ icon }}" class="w-5 h-5 text-white"></i>

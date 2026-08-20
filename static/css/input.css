@@ -16,23 +16,23 @@
    e.g., bg-navy-800, text-teal-ketox, bg-toxic-light
    ------------------------------------------------------------------------- */
 @theme {
-  --font-family-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-family-sans: "Plus Jakarta Sans", "Outfit", "Google Sans", system-ui, -apple-system, sans-serif;
   --font-family-mono: "JetBrains Mono", "Fira Code", "Courier New", monospace;
 
-  /* Navy palette */
-  --color-navy-50: #f0f4f9;
-  --color-navy-100: #dde6f0;
-  --color-navy-200: #b9cde2;
-  --color-navy-300: #8aaed0;
-  --color-navy-500: #3a70a3;
-  --color-navy-600: #2d5a89;
-  --color-navy-700: #25476e;
-  --color-navy-800: #1e3a5f;
-  --color-navy-900: #152a47;
+  /* Black & White monochrome palette */
+  --color-navy-50: #f4f4f5;
+  --color-navy-100: #e4e4e7;
+  --color-navy-200: #d4d4d8;
+  --color-navy-300: #a1a1aa;
+  --color-navy-500: #52525b;
+  --color-navy-600: #3f3f46;
+  --color-navy-700: #27272a;
+  --color-navy-800: #09090b;
+  --color-navy-900: #000000;
 
-  /* Teal accent */
-  --color-teal-ketox: #0d9488;
-  --color-teal-light: #ccfbf1;
+  /* Accent */
+  --color-teal-ketox: #18181b;
+  --color-teal-light: #f4f4f5;
 
   /* Verdict colours */
   --color-toxic: #dc2626;
@@ -53,31 +53,31 @@
 @layer components {
   /* Card */
   .card {
-    @apply bg-white rounded-xl border border-slate-200 shadow-sm;
+    @apply bg-white rounded-xl border border-neutral-200 shadow-sm;
   }
   .card-elevated {
-    @apply bg-white rounded-xl border border-slate-200 shadow-md;
+    @apply bg-white rounded-xl border border-neutral-200 shadow-md;
   }
 
   /* Buttons */
   .btn-primary {
-    @apply bg-navy-800 text-white px-6 py-3 rounded-lg font-semibold text-sm
-           hover:bg-navy-700 active:bg-navy-900
+    @apply bg-black text-white px-6 py-3 rounded-lg font-semibold text-sm
+           hover:bg-neutral-800 active:bg-black
            transition-all duration-200 flex items-center justify-center gap-2
-           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500 focus-visible:ring-offset-2
-           disabled:opacity-50 disabled:cursor-not-allowed;
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2
+           disabled:opacity-50 disabled:cursor-not-allowed shadow-sm;
   }
   .btn-secondary {
-    @apply bg-white text-navy-800 px-4 py-2 rounded-lg font-medium text-sm
-           border border-slate-200 hover:border-navy-300 hover:bg-navy-50
+    @apply bg-white text-black px-4 py-2 rounded-lg font-medium text-sm
+           border border-neutral-200 hover:border-black hover:bg-neutral-50
            transition-all duration-200;
   }
   .btn-tab {
     @apply px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200
-           text-slate-500 hover:text-slate-700 hover:bg-slate-100;
+           text-neutral-500 hover:text-black hover:bg-neutral-100;
   }
   .btn-tab-active {
-    @apply bg-navy-800 text-white shadow-sm;
+    @apply bg-black text-white shadow-sm;
   }
 
   /* Badges */

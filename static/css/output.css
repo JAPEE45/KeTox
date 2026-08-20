@@ -15,19 +15,19 @@
    CSS Custom Properties (design tokens mirror of @theme in input.css)
    ========================================================================= */
 :root {
-  --navy-50:  #f0f4f9;
-  --navy-100: #dde6f0;
-  --navy-200: #b9cde2;
-  --navy-700: #25476e;
-  --navy-800: #1e3a5f;
-  --navy-900: #152a47;
-  --teal:     #0d9488;
+  --navy-50:  #f4f4f5;
+  --navy-100: #e4e4e7;
+  --navy-200: #d4d4d8;
+  --navy-700: #27272a;
+  --navy-800: #09090b;
+  --navy-900: #000000;
+  --teal:     #18181b;
   --toxic:    #dc2626;
   --toxic-light: #fef2f2;
   --safe:     #16a34a;
   --safe-light: #f0fdf4;
   --elevated: #d97706;
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-sans: 'Plus Jakarta Sans', 'Outfit', 'Google Sans', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 }
 
@@ -51,9 +51,9 @@ code, kbd, samp, .font-mono { font-family: var(--font-mono); }
    Scrollbar styling (Webkit)
    ========================================================================= */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: #f1f5f9; }
-::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+::-webkit-scrollbar-track { background: #f4f4f5; }
+::-webkit-scrollbar-thumb { background: #d4d4d8; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #a1a1aa; }
 
 /* =========================================================================
    Animations / keyframes
@@ -70,9 +70,9 @@ code, kbd, samp, .font-mono { font-family: var(--font-mono); }
   to { transform: rotate(360deg); }
 }
 @keyframes pulse-ring {
-  0%   { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(220,38,38,0.4); }
-  70%  { transform: scale(1);    box-shadow: 0 0 0 10px rgba(220,38,38,0); }
-  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(220,38,38,0); }
+  0%   { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0,0,0,0.2); }
+  70%  { transform: scale(1);    box-shadow: 0 0 0 10px rgba(0,0,0,0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0,0,0,0); }
 }
 
 .animate-fade-in-up {
@@ -85,7 +85,7 @@ code, kbd, samp, .font-mono { font-family: var(--font-mono); }
 .animate-fade-in-up-delay-5 { animation: fadeInUp 0.35s 0.25s ease-out both; }
 
 .skeleton-shimmer {
-  background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+  background: linear-gradient(90deg, #e4e4e7 25%, #f4f4f5 50%, #e4e4e7 75%);
   background-size: 200% 100%;
   animation: shimmer 1.4s infinite;
 }
@@ -96,8 +96,8 @@ code, kbd, samp, .font-mono { font-family: var(--font-mono); }
    Navigation active indicator
    ========================================================================= */
 .nav-link-active {
-  color: var(--navy-800) !important;
-  background-color: var(--navy-50) !important;
+  color: #000000 !important;
+  background-color: #f4f4f5 !important;
   font-weight: 600;
 }
 
@@ -207,7 +207,7 @@ code, kbd, samp, .font-mono { font-family: var(--font-mono); }
    ========================================================================= */
 .model-toggle {
   display: inline-flex;
-  background: #f1f5f9;
+  background: #f4f4f5;
   border-radius: 10px;
   padding: 3px;
   gap: 2px;
@@ -220,13 +220,13 @@ code, kbd, samp, .font-mono { font-family: var(--font-mono); }
   border: none;
   cursor: pointer;
   transition: all 0.2s ease;
-  color: #64748b;
+  color: #71717a;
   background: transparent;
 }
 .model-toggle-btn.active {
-  background: var(--navy-800);
+  background: #000000;
   color: white;
-  box-shadow: 0 2px 8px rgba(30,58,95,0.25);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
 }
 
 /* =========================================================================

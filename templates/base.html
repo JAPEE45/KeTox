@@ -15,126 +15,81 @@
       {% block title %}KeTox{% endblock %} | CYP3A4 Hepatotoxicity Predictor
     </title>
 
-    <!-- Google Fonts: Inter + JetBrains Mono -->
-
+    <!-- Google Fonts: Plus Jakarta Sans, Outfit, Inter + JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
-
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
 
     <!-- Tailwind CSS v4 Browser CDN -->
-
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
 
     <!-- Custom styles -->
-
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='css/output.css') }}"
     />
 
     <!-- Chart.js -->
-
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
     <!-- Lucide Icons -->
-
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 
     <!-- Custom Tailwind theme + component classes -->
-
     <style type="text/tailwindcss">
       @theme {
-        --font-family-sans: "Inter", system-ui, -apple-system, sans-serif;
-
+        --font-family-sans: "Plus Jakarta Sans", "Outfit", "Google Sans", system-ui, -apple-system, sans-serif;
         --font-family-mono: "JetBrains Mono", "Fira Code", monospace;
 
-        --color-navy-50: #f0f4f9;
+        --color-navy-50: #f4f4f5;
+        --color-navy-100: #e4e4e7;
+        --color-navy-200: #d4d4d8;
+        --color-navy-300: #a1a1aa;
+        --color-navy-700: #27272a;
+        --color-navy-800: #09090b;
+        --color-navy-900: #000000;
 
-        --color-navy-100: #dde6f0;
-
-        --color-navy-200: #b9cde2;
-
-        --color-navy-300: #8aaed0;
-
-        --color-navy-700: #25476e;
-
-        --color-navy-800: #1e3a5f;
-
-        --color-navy-900: #152a47;
-
-        --color-teal-ketox: #0d9488;
+        --color-teal-ketox: #18181b;
 
         --color-toxic: #dc2626;
-
         --color-toxic-light: #fef2f2;
-
         --color-toxic-border: #fca5a5;
-
         --color-safe: #16a34a;
-
         --color-safe-light: #f0fdf4;
-
         --color-safe-border: #86efac;
-
         --color-elevated: #d97706;
       }
 
       @layer components {
         .card {
-          @apply bg-white rounded-xl border border-slate-200 shadow-sm;
+          @apply bg-white rounded-xl border border-neutral-200 shadow-sm;
         }
 
         .card-elevated {
-          @apply bg-white rounded-xl border border-slate-200 shadow-md;
+          @apply bg-white rounded-xl border border-neutral-200 shadow-md;
         }
 
         .btn-primary {
-          @apply bg-navy-800 text-white px-6 py-3 rounded-lg font-semibold text-sm
-
-
-
-
-
-
-               hover:bg-navy-700 active:scale-[0.98]
-
-
-
-
-
-
-               transition-all duration-200 flex items-center justify-center gap-2
-
-
-
-
-
-
-               disabled:opacity-50 disabled:cursor-not-allowed;
+          @apply bg-black text-white px-6 py-3 rounded-lg font-semibold text-sm
+                 hover:bg-neutral-800 active:scale-[0.98]
+                 transition-all duration-200 flex items-center justify-center gap-2
+                 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm;
         }
 
         .btn-tab {
           @apply px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200
-
-
-
-
-
-
-               text-slate-500 hover:text-slate-700 hover:bg-slate-100;
+                 text-neutral-500 hover:text-black hover:bg-neutral-100;
         }
 
         .btn-tab-active {
-          @apply bg-navy-800 text-white shadow-sm;
+          @apply bg-black text-white shadow-sm;
         }
 
         .badge-toxic {
-          @apply bg-red-100  text-red-700  border border-red-200  px-3 py-1 rounded-full text-sm  font-bold  tracking-wide;
+          @apply bg-red-100 text-red-700 border border-red-200 px-3 py-1 rounded-full text-sm font-bold tracking-wide;
         }
 
         .badge-safe {
@@ -150,58 +105,28 @@
         }
 
         .badge-sibling {
-          @apply bg-orange-100 text-orange-700 border border-orange-200 px-2.5 py-0.5 rounded-full text-xs font-semibold;
+          @apply bg-neutral-100 text-neutral-800 border border-neutral-300 px-2.5 py-0.5 rounded-full text-xs font-semibold;
         }
 
         .badge-stranger {
-          @apply bg-slate-100 text-slate-600 border border-slate-200 px-2.5 py-0.5 rounded-full text-xs font-semibold;
+          @apply bg-neutral-100 text-neutral-600 border border-neutral-200 px-2.5 py-0.5 rounded-full text-xs font-semibold;
         }
 
         .input-smiles {
-          @apply w-full font-mono text-sm bg-slate-50 border border-slate-300 rounded-lg px-4 py-3
-
-
-
-
-
-
-               focus:outline-none focus:ring-2 focus:ring-navy-800 focus:border-navy-800
-
-
-
-
-
-
-               transition-all duration-200 placeholder:text-slate-400;
+          @apply w-full font-mono text-sm bg-neutral-50 border border-neutral-300 rounded-lg px-4 py-3
+                 focus:outline-none focus:ring-2 focus:ring-black focus:border-black
+                 transition-all duration-200 placeholder:text-neutral-400;
         }
 
         .chip {
           @apply inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium
-
-
-
-
-
-
-               border border-slate-200 bg-white text-slate-600
-
-
-
-
-
-
-               hover:border-navy-300 hover:text-navy-700 hover:bg-navy-50
-
-
-
-
-
-
-               cursor-pointer transition-all duration-150 select-none;
+                 border border-neutral-200 bg-white text-neutral-600
+                 hover:border-black hover:text-black hover:bg-neutral-50
+                 cursor-pointer transition-all duration-150 select-none;
         }
 
         .chip-toxic {
-          @apply border-red-200  bg-red-50  text-red-700  hover:border-red-300  hover:bg-red-100;
+          @apply border-red-200 bg-red-50 text-red-700 hover:border-red-300 hover:bg-red-100;
         }
 
         .chip-safe {
@@ -209,11 +134,11 @@
         }
 
         .section-label {
-          @apply text-xs font-semibold uppercase tracking-widest text-slate-400;
+          @apply text-xs font-semibold uppercase tracking-widest text-neutral-400;
         }
 
         .skeleton {
-          @apply bg-slate-200 rounded animate-pulse;
+          @apply bg-neutral-200 rounded animate-pulse;
         }
       }
     </style>
@@ -222,10 +147,10 @@
   </head>
 
   <body
-    class="bg-slate-50 text-slate-900 antialiased min-h-screen flex flex-col"
+    class="bg-neutral-50 text-neutral-900 antialiased min-h-screen flex flex-col"
   >
-    <!-- ═══════════════════════════ PARTICLE CANVAS ════════════════════════ -->
-
+    {% if request.path == '/' %}
+    <!-- ═══════════════════════════ PARTICLE CANVAS (Home only) ══════════ -->
     <canvas
       id="particle-canvas"
       style="
@@ -238,10 +163,11 @@
       "
       aria-hidden="true"
     ></canvas>
+    {% endif %}
 
     <!-- ═══════════════════════════ NAVIGATION ═══════════════════════════ -->
 
-    <nav class="sticky top-0 z-40 bg-slate-50/80 backdrop-blur-md">
+    <nav class="sticky top-0 z-40 bg-white/10 backdrop-blur-md" style="backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
           <!-- Wordmark -->
@@ -252,7 +178,7 @@
             aria-label="KeTox Home"
           >
             <div
-              class="w-9 h-9 bg-navy-800 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm group-hover:bg-navy-700 transition-colors duration-200"
+              class="w-9 h-9 bg-black rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm group-hover:bg-neutral-800 transition-colors duration-200"
             >
               <svg
                 viewBox="0 0 24 24"
@@ -337,12 +263,12 @@
             </div>
 
             <div class="leading-tight">
-              <div class="text-lg font-bold text-navy-900 tracking-tight">
+              <div class="text-xl font-bold text-black tracking-tight">
                 KeTox
               </div>
 
               <div
-                class="text-[10px] text-slate-500 font-medium hidden sm:block"
+                class="text-xs text-neutral-500 font-medium hidden sm:block"
               >
                 CYP3A4 Hepatotoxicity Predictor
               </div>
@@ -351,23 +277,23 @@
 
           <!-- Nav links -->
 
-          <div class="flex items-center gap-0.5">
+          <div class="flex items-center gap-1">
             <a
               href="/"
               data-nav-path="/"
-              class="px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-navy-800 hover:bg-navy-50 transition-all duration-200"
+              class="px-4 py-2.5 rounded-lg text-base font-medium text-neutral-600 hover:text-black hover:bg-neutral-100 transition-all duration-200"
               >Home</a
             >
             <a
               href="/about"
               data-nav-path="/about"
-              class="px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-navy-800 hover:bg-navy-50 transition-all duration-200"
+              class="px-4 py-2.5 rounded-lg text-base font-medium text-neutral-600 hover:text-black hover:bg-neutral-100 transition-all duration-200"
               >About</a
             >
             <a
               href="/performance"
               data-nav-path="/performance"
-              class="px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-navy-800 hover:bg-navy-50 transition-all duration-200"
+              class="px-4 py-2.5 rounded-lg text-base font-medium text-neutral-600 hover:text-black hover:bg-neutral-100 transition-all duration-200"
               >Model Performance</a
             >
           </div>
@@ -395,33 +321,25 @@
 
     {% block scripts %}{% endblock %}
 
-    <!-- =============== PARTICLE ANIMATION =============== -->
-
+    {% if request.path == '/' %}
+    <!-- =============== PARTICLE ANIMATION (Home only) =============== -->
     <script>
       (() => {
         const canvas = document.getElementById("particle-canvas");
+        if (!canvas) return;
 
         const ctx = canvas.getContext("2d");
 
         // HSL palette – vivid hues that shift smoothly
-
         const PALETTE = [
           [217, 89, 61], // blue
-
           [4, 80, 58], // red
-
           [43, 96, 55], // yellow
-
           [145, 60, 44], // green
-
           [232, 47, 58], // indigo
-
           [175, 60, 40], // teal
-
           [21, 90, 59], // orange
-
           [280, 55, 55], // violet
-
           [195, 85, 52], // cyan
         ];
 
@@ -776,9 +694,17 @@
           }, 620);
         };
 
+        // Immediately destroy if user clicks About or Model Performance from Home
+        document.querySelectorAll('a[href="/about"], a[href="/performance"]').forEach((link) => {
+          link.addEventListener("click", () => {
+            window.destroyParticles?.();
+          });
+        });
+
         init();
         requestAnimationFrame(loop);
       })();
     </script>
+    {% endif %}
   </body>
 </html>
