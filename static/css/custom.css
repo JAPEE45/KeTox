@@ -56,6 +56,13 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Header & navigation links — remove default browser underlines */
+nav a,
+header a,
+.nav-link-active {
+  text-decoration: none;
+}
+
 code,
 kbd,
 samp,
@@ -187,6 +194,9 @@ samp,
   font-size: 0.75rem;
   font-weight: 600;
   margin-bottom: 8px;
+  background: transparent;
+  border: none;
+  padding: 0;
 }
 .badge-normal {
   display: inline-flex;
@@ -195,6 +205,9 @@ samp,
   font-size: 0.75rem;
   font-weight: 600;
   margin-bottom: 8px;
+  background: transparent;
+  border: none;
+  padding: 0;
 }
 .badge-sibling {
   display: inline-flex;
@@ -350,6 +363,13 @@ samp,
 }
 .animate-fade-in-up-delay-5 {
   animation: fadeInUp 0.35s 0.25s ease-out both;
+}
+
+.loading-bar-animate {
+  width: 100%;
+  background: linear-gradient(90deg, #09090b 0%, #a1a1aa 50%, #09090b 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s linear infinite;
 }
 
 .skeleton-shimmer {
@@ -607,9 +627,9 @@ details.bibliography[open] .bib-chevron {
    Loading spinner
    ========================================================================= */
 .spinner {
-  width: 32px;
-  height: 32px;
-  border: 3px solid #e2e8f0;
+  width: 20px;
+  height: 20px;
+  border: 2.5px solid #e2e8f0;
   border-top-color: var(--navy-800);
   border-radius: 50%;
   animation: spin-slow 0.7s linear infinite;

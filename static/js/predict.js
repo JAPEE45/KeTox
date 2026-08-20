@@ -102,10 +102,12 @@
       mainGrid.classList.remove("pt-8", "pb-16");
     }
 
-    // Collapse grid to single column so no 340px right-track is reserved,
-    // allowing left-column to fill full width for proper horizontal centering
+    // Ensure 1-column grid when results are hidden
     const gridWrapper = document.getElementById("results-grid-wrapper");
-    if (gridWrapper) gridWrapper.style.gridTemplateColumns = "1fr";
+    if (gridWrapper) {
+      gridWrapper.classList.remove("lg:grid-cols-[1fr_340px]");
+      gridWrapper.style.gridTemplateColumns = "";
+    }
 
     const predictSec = document.getElementById("predict-section");
     if (predictSec) {
@@ -127,9 +129,12 @@
       mainGrid.classList.add("pt-8", "pb-16");
     }
 
-    // Restore two-column grid (clears the single-column inline style override)
+    // Switch to two-column grid on desktop
     const gridWrapper = document.getElementById("results-grid-wrapper");
-    if (gridWrapper) gridWrapper.style.gridTemplateColumns = "";
+    if (gridWrapper) {
+      gridWrapper.classList.add("lg:grid-cols-[1fr_340px]");
+      gridWrapper.style.gridTemplateColumns = "";
+    }
 
     // Expand left column back to full-width flow (no centering override)
     const leftCol = document.getElementById("left-column");
@@ -428,10 +433,6 @@
 
   // ─── Wire up tab button clicks + example chips + initial page state ─────────
   document.addEventListener("DOMContentLoaded", () => {
-    // Collapse grid to single column on load so the form centers in full width
-    const gridWrapper = document.getElementById("results-grid-wrapper");
-    if (gridWrapper) gridWrapper.style.gridTemplateColumns = "1fr";
-
     // Tab button click listeners
     document.querySelectorAll("[data-tab]").forEach((btn) => {
       btn.addEventListener("click", () => {
