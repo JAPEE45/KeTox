@@ -5,32 +5,37 @@ GraphGrad-CAM explainability.{% endblock %} {% block content %}
 
 <!-- ═══════════════════════════ MAIN WRAPPER ═══════════════════════════════ -->
 <div
-  class="max-w-7xl mx-auto w-full px-6 sm:px-8 lg:px-12 flex-1 flex flex-col"
+  class="max-w-7xl mx-auto w-full px-6 sm:px-8 lg:px-12 flex-1 flex flex-col relative"
 >
-  <!-- ═════════════════════════ ERROR BANNER ═══════════════════════════════ -->
-  <div id="error-banner" class="hidden w-full my-4" style="display: none">
-    <div
-      class="flex items-start gap-3 bg-red-50 border border-red-200 rounded-lg px-5 py-4"
-    >
-      <i
-        data-lucide="circle-x"
-        class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5"
-      ></i>
-      <div>
-        <p class="text-sm font-semibold text-red-800">Prediction Error</p>
-        <p id="error-message" class="text-sm text-red-700 mt-0.5"></p>
-      </div>
-      <button
-        onclick="document.getElementById('error-banner').style.display = 'none'"
-        class="ml-auto text-red-400 hover:text-red-600 transition-colors flex-shrink-0"
-      >
-        <i data-lucide="x" class="w-4 h-4"></i>
-      </button>
+  <!-- ═════════════════════════ FLOATING ERROR POPUP (TOAST) ════════════════ -->
+  <div
+    id="error-banner"
+    class="fixed top-6 right-6 z-50 transition-all duration-300 transform translate-y-0 shadow-2xl rounded-xl bg-white border border-red-200 p-4 max-w-sm flex items-start gap-3"
+    style="display: none"
+  >
+    <i
+      data-lucide="alert-circle"
+      class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5"
+    ></i>
+    <div class="flex-1 pr-2">
+      <h4 class="text-sm font-bold text-red-900">Prediction Error</h4>
+      <p
+        id="error-message"
+        class="text-xs text-red-700 mt-1 leading-relaxed"
+      ></p>
     </div>
+    <button
+      type="button"
+      onclick="hideError()"
+      class="text-slate-400 hover:text-slate-600 p-1 rounded-md transition-colors"
+      aria-label="Close error"
+    >
+      <i data-lucide="x" class="w-4 h-4"></i>
+    </button>
   </div>
 
   <!-- ═════════════════════════ LOADING STATE ══════════════════════════════ -->
-  <div id="loading-state" style="display: none" class="w-full pb-12">
+  <div id="loading-state" style="display: none" class="w-full pb-4">
     <div class="flex flex-col items-center justify-center gap-4 py-14">
       <div class="spinner"></div>
       <p class="text-sm font-medium text-slate-500">Running ML inference...</p>
@@ -43,11 +48,14 @@ GraphGrad-CAM explainability.{% endblock %} {% block content %}
   <!-- ═════════════════════════ MAIN CONTENT GRID ══════════════════════════ -->
   <div
     id="main-content-grid"
-    class="flex-1 flex flex-col justify-center transition-all duration-300"
+    class="flex-1 flex flex-col justify-center -mt-16 transition-all duration-300"
   >
-    <div class="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-10 items-start">
+    <div
+      id="results-grid-wrapper"
+      class="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-10 items-start"
+    >
       <!-- ── LEFT COLUMN ─────────────────────────────────────────────────── -->
-      <div id="left-column" class="flex flex-col relative min-w-0">
+      <div id="left-column" class="flex flex-col items-center relative min-w-0">
         <!-- ── RESULTS SECTION (Hidden initially, revealed on prediction) ── -->
         <div
           id="results-section"
@@ -350,7 +358,10 @@ GraphGrad-CAM explainability.{% endblock %} {% block content %}
         <!-- /#results-section -->
 
         <!-- ── PREDICT FORM (Centered initially, Sticky Bottom in Results mode) ── -->
-        <div id="predict-section" class="w-full transition-all duration-300">
+        <div
+          id="predict-section"
+          class="w-full max-w-xl transition-all duration-300"
+        >
           <form
             id="predict-form"
             class="flex flex-col items-start gap-3 w-full"
@@ -359,7 +370,7 @@ GraphGrad-CAM explainability.{% endblock %} {% block content %}
             <label
               for="compound-input"
               id="compound-label"
-              class="block text-base font-semibold text-slate-700"
+              class="block text-xl font-semibold text-slate-700"
             >
               Enter Molecule Name
             </label>

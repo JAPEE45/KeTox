@@ -16,11 +16,11 @@
    e.g., bg-navy-800, text-teal-ketox, bg-toxic-light
    ------------------------------------------------------------------------- */
 @theme {
-  --font-family-sans: 'Inter', system-ui, -apple-system, sans-serif;
-  --font-family-mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+  --font-family-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-family-mono: "JetBrains Mono", "Fira Code", "Courier New", monospace;
 
   /* Navy palette */
-  --color-navy-50:  #f0f4f9;
+  --color-navy-50: #f0f4f9;
   --color-navy-100: #dde6f0;
   --color-navy-200: #b9cde2;
   --color-navy-300: #8aaed0;
@@ -32,18 +32,18 @@
 
   /* Teal accent */
   --color-teal-ketox: #0d9488;
-  --color-teal-light:  #ccfbf1;
+  --color-teal-light: #ccfbf1;
 
   /* Verdict colours */
-  --color-toxic:        #dc2626;
-  --color-toxic-mid:    #ef4444;
-  --color-toxic-light:  #fef2f2;
+  --color-toxic: #dc2626;
+  --color-toxic-mid: #ef4444;
+  --color-toxic-light: #fef2f2;
   --color-toxic-border: #fca5a5;
-  --color-safe:         #16a34a;
-  --color-safe-mid:     #22c55e;
-  --color-safe-light:   #f0fdf4;
-  --color-safe-border:  #86efac;
-  --color-elevated:     #d97706;
+  --color-safe: #16a34a;
+  --color-safe-mid: #22c55e;
+  --color-safe-light: #f0fdf4;
+  --color-safe-border: #86efac;
+  --color-elevated: #d97706;
   --color-elevated-light: #fffbeb;
 }
 
@@ -51,7 +51,6 @@
    Reusable component classes
    ------------------------------------------------------------------------- */
 @layer components {
-
   /* Card */
   .card {
     @apply bg-white rounded-xl border border-slate-200 shadow-sm;
@@ -137,7 +136,7 @@
            shadow-lg leading-relaxed text-center;
   }
   .tooltip-box::after {
-    content: '';
+    content: "";
     @apply absolute top-full left-1/2 -translate-x-1/2
            border-4 border-transparent;
     border-top-color: #152a47;

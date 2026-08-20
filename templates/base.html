@@ -1,63 +1,86 @@
 <!doctype html>
+
 <html lang="en" class="scroll-smooth">
   <head>
     <meta charset="UTF-8" />
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <meta
       name="description"
       content="{% block meta_description %}KeTox — CYP3A4 hepatotoxicity prediction using Ketoconazole as a reference standard. Powered by Random Forest and Graph Convolutional Network models.{% endblock %}"
     />
+
     <title>
       {% block title %}KeTox{% endblock %} | CYP3A4 Hepatotoxicity Predictor
     </title>
 
     <!-- Google Fonts: Inter + JetBrains Mono -->
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
+
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
 
-    <!-- Tailwind CSS v4 Browser CDN — processes all Tailwind classes in this page at runtime.
-       For production, replace with compiled output from:
-         ./tailwindcss.exe -i static/css/input.css -o static/css/output.css --minify       -->
+    <!-- Tailwind CSS v4 Browser CDN -->
+
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
 
-    <!-- Custom styles: animations, tooltips, gauges, verdict card styles -->
+    <!-- Custom styles -->
+
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='css/output.css') }}"
     />
 
     <!-- Chart.js -->
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
     <!-- Lucide Icons -->
+
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 
-    <!-- Custom Tailwind theme + component classes (processed by browser CDN) -->
+    <!-- Custom Tailwind theme + component classes -->
+
     <style type="text/tailwindcss">
       @theme {
         --font-family-sans: "Inter", system-ui, -apple-system, sans-serif;
+
         --font-family-mono: "JetBrains Mono", "Fira Code", monospace;
 
         --color-navy-50: #f0f4f9;
+
         --color-navy-100: #dde6f0;
+
         --color-navy-200: #b9cde2;
+
         --color-navy-300: #8aaed0;
+
         --color-navy-700: #25476e;
+
         --color-navy-800: #1e3a5f;
+
         --color-navy-900: #152a47;
 
         --color-teal-ketox: #0d9488;
 
         --color-toxic: #dc2626;
+
         --color-toxic-light: #fef2f2;
+
         --color-toxic-border: #fca5a5;
+
         --color-safe: #16a34a;
+
         --color-safe-light: #f0fdf4;
+
         --color-safe-border: #86efac;
+
         --color-elevated: #d97706;
       }
 
@@ -65,20 +88,47 @@
         .card {
           @apply bg-white rounded-xl border border-slate-200 shadow-sm;
         }
+
         .card-elevated {
           @apply bg-white rounded-xl border border-slate-200 shadow-md;
         }
 
         .btn-primary {
           @apply bg-navy-800 text-white px-6 py-3 rounded-lg font-semibold text-sm
+
+
+
+
+
+
                hover:bg-navy-700 active:scale-[0.98]
+
+
+
+
+
+
                transition-all duration-200 flex items-center justify-center gap-2
+
+
+
+
+
+
                disabled:opacity-50 disabled:cursor-not-allowed;
         }
+
         .btn-tab {
           @apply px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200
+
+
+
+
+
+
                text-slate-500 hover:text-slate-700 hover:bg-slate-100;
         }
+
         .btn-tab-active {
           @apply bg-navy-800 text-white shadow-sm;
         }
@@ -86,36 +136,74 @@
         .badge-toxic {
           @apply bg-red-100  text-red-700  border border-red-200  px-3 py-1 rounded-full text-sm  font-bold  tracking-wide;
         }
+
         .badge-safe {
           @apply bg-green-100 text-green-700 border border-green-200 px-3 py-1 rounded-full text-sm font-bold tracking-wide;
         }
+
         .badge-elevated {
           @apply bg-amber-100 text-amber-700 border border-amber-200 px-2.5 py-0.5 rounded-full text-xs font-semibold;
         }
+
         .badge-normal {
           @apply bg-green-100 text-green-700 border border-green-200 px-2.5 py-0.5 rounded-full text-xs font-semibold;
         }
+
         .badge-sibling {
           @apply bg-orange-100 text-orange-700 border border-orange-200 px-2.5 py-0.5 rounded-full text-xs font-semibold;
         }
+
         .badge-stranger {
           @apply bg-slate-100 text-slate-600 border border-slate-200 px-2.5 py-0.5 rounded-full text-xs font-semibold;
         }
 
         .input-smiles {
           @apply w-full font-mono text-sm bg-slate-50 border border-slate-300 rounded-lg px-4 py-3
+
+
+
+
+
+
                focus:outline-none focus:ring-2 focus:ring-navy-800 focus:border-navy-800
+
+
+
+
+
+
                transition-all duration-200 placeholder:text-slate-400;
         }
+
         .chip {
           @apply inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium
+
+
+
+
+
+
                border border-slate-200 bg-white text-slate-600
+
+
+
+
+
+
                hover:border-navy-300 hover:text-navy-700 hover:bg-navy-50
+
+
+
+
+
+
                cursor-pointer transition-all duration-150 select-none;
         }
+
         .chip-toxic {
           @apply border-red-200  bg-red-50  text-red-700  hover:border-red-300  hover:bg-red-100;
         }
+
         .chip-safe {
           @apply border-green-200 bg-green-50 text-green-700 hover:border-green-300 hover:bg-green-100;
         }
@@ -132,14 +220,32 @@
 
     {% block head %}{% endblock %}
   </head>
+
   <body
     class="bg-slate-50 text-slate-900 antialiased min-h-screen flex flex-col"
   >
+    <!-- ═══════════════════════════ PARTICLE CANVAS ════════════════════════ -->
+
+    <canvas
+      id="particle-canvas"
+      style="
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 0;
+      "
+      aria-hidden="true"
+    ></canvas>
+
     <!-- ═══════════════════════════ NAVIGATION ═══════════════════════════ -->
-    <nav class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+
+    <nav class="sticky top-0 z-40 bg-slate-50/80 backdrop-blur-md">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
           <!-- Wordmark -->
+
           <a
             href="/"
             class="flex items-center gap-3 group"
@@ -155,12 +261,19 @@
                 aria-hidden="true"
               >
                 <circle cx="12" cy="12" r="2.2" />
+
                 <circle cx="4.5" cy="7.5" r="1.6" />
+
                 <circle cx="19.5" cy="7.5" r="1.6" />
+
                 <circle cx="4.5" cy="16.5" r="1.6" />
+
                 <circle cx="19.5" cy="16.5" r="1.6" />
+
                 <circle cx="12" cy="3" r="1.3" />
+
                 <circle cx="12" cy="21" r="1.3" />
+
                 <line
                   x1="12"
                   y1="9.8"
@@ -170,6 +283,7 @@
                   stroke-width="1.3"
                   stroke-linecap="round"
                 />
+
                 <line
                   x1="12"
                   y1="9.8"
@@ -179,6 +293,7 @@
                   stroke-width="1.3"
                   stroke-linecap="round"
                 />
+
                 <line
                   x1="12"
                   y1="14.2"
@@ -188,6 +303,7 @@
                   stroke-width="1.3"
                   stroke-linecap="round"
                 />
+
                 <line
                   x1="12"
                   y1="14.2"
@@ -197,6 +313,7 @@
                   stroke-width="1.3"
                   stroke-linecap="round"
                 />
+
                 <line
                   x1="12"
                   y1="9.8"
@@ -206,6 +323,7 @@
                   stroke-width="1.3"
                   stroke-linecap="round"
                 />
+
                 <line
                   x1="12"
                   y1="14.2"
@@ -217,10 +335,12 @@
                 />
               </svg>
             </div>
+
             <div class="leading-tight">
               <div class="text-lg font-bold text-navy-900 tracking-tight">
                 KeTox
               </div>
+
               <div
                 class="text-[10px] text-slate-500 font-medium hidden sm:block"
               >
@@ -230,6 +350,7 @@
           </a>
 
           <!-- Nav links -->
+
           <div class="flex items-center gap-0.5">
             <a
               href="/"
@@ -255,18 +376,409 @@
     </nav>
 
     <!-- ═══════════════════════════ MAIN CONTENT ═════════════════════════ -->
+
     <main class="flex-1 flex flex-col">{% block content %}{% endblock %}</main>
 
     <!-- Scripts: ui.js → charts.js → predict.js (order matters) -->
+
     <script src="{{ url_for('static', filename='js/ui.js') }}"></script>
+
     <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+
     <script src="{{ url_for('static', filename='js/predict.js') }}"></script>
 
     <!-- Lucide icon init (after DOM ready) -->
+
     <script>
       document.addEventListener("DOMContentLoaded", () => lucide.createIcons());
     </script>
 
     {% block scripts %}{% endblock %}
+
+    <!-- =============== PARTICLE ANIMATION =============== -->
+
+    <script>
+      (() => {
+        const canvas = document.getElementById("particle-canvas");
+
+        const ctx = canvas.getContext("2d");
+
+        // HSL palette – vivid hues that shift smoothly
+
+        const PALETTE = [
+          [217, 89, 61], // blue
+
+          [4, 80, 58], // red
+
+          [43, 96, 55], // yellow
+
+          [145, 60, 44], // green
+
+          [232, 47, 58], // indigo
+
+          [175, 60, 40], // teal
+
+          [21, 90, 59], // orange
+
+          [280, 55, 55], // violet
+
+          [195, 85, 52], // cyan
+        ];
+
+        const COUNT = 280;
+
+        const CLUSTER_R = 340;
+
+        const SPRING = 0.055;
+
+        const DAMP = 0.82;
+
+        const REPEL_R = 150;
+
+        const REPEL_F = 7;
+
+        const FOLLOW = 0.015; // lazy cursor-chase delay
+
+        // Global breathing frequencies (millisecond-based, t = ms from rAF)
+
+        const G_FREQ1 = 0.0006; // ~10s cycle
+
+        const G_FREQ2 = 0.00097; // ~6.5s cycle
+
+        // Size pulse: particles shrink to SIZE_MIN and return to 1.0 each breath
+
+        // Synced to G_FREQ1 so the size pulse matches the cloud expand/compress
+
+        const SIZE_MIN = 0.55; // shrink to 55% of base length (clearly visible)
+
+        const SIZE_MAX = 1.0; // return to full length
+
+        let W, H;
+
+        let lastTime = 0;
+
+        let clock = 0; // seconds, for wobble oscillators
+
+        let mouse = { x: -1, y: -1 };
+
+        let clusterX, clusterY;
+
+        let particles = [];
+
+        function rand(lo, hi) {
+          return lo + Math.random() * (hi - lo);
+        }
+
+        function randInt(n) {
+          return Math.floor(Math.random() * n);
+        }
+
+        function lerpHue(a, b, t) {
+          let d = b - a;
+
+          if (d > 180) d -= 360;
+
+          if (d < -180) d += 360;
+
+          return (a + d * t + 360) % 360;
+        }
+
+        class Particle {
+          constructor() {
+            this.init();
+          }
+
+          init() {
+            const r = Math.sqrt(Math.random()) * CLUSTER_R;
+
+            const theta = rand(0, Math.PI * 2);
+
+            this.offX = r * Math.cos(theta);
+
+            this.offY = r * Math.sin(theta);
+
+            this.x = (clusterX || W / 2) + this.offX;
+
+            this.y = (clusterY || H / 2) + this.offY;
+
+            this.vx = 0;
+
+            this.vy = 0;
+
+            // Organic position wobble
+
+            this.phX = rand(0, Math.PI * 2);
+
+            this.phY = rand(0, Math.PI * 2);
+
+            this.fqX = rand(0.5, 1.2);
+
+            this.fqY = rand(0.4, 1.0);
+
+            this.aX = rand(10, 24);
+
+            this.aY = rand(8, 18);
+
+            // Per-particle cloud-edge breathing (keeps shape organic, not a circle)
+
+            this.bPhase = rand(0, Math.PI * 2);
+
+            this.bFreq = rand(0.0008, 0.0018);
+
+            this.bAmp = rand(0.07, 0.15);
+
+            // Size pulse: each particle has a small personal phase offset
+
+            // so they don't all shrink at exactly the same instant
+
+            this.sizePhase = rand(-0.4, 0.4); // small random offset in seconds
+
+            // Geometry
+
+            this.baseLen = rand(5, 15);
+
+            this.len = this.baseLen;
+
+            this.thick = rand(1.2, 2.6);
+
+            this.angle = rand(0, Math.PI);
+
+            this.spin = rand(-0.008, 0.008);
+
+            this.alpha = rand(0.5, 0.9);
+
+            // Color cycling
+
+            this.colA = randInt(PALETTE.length);
+
+            this.colB =
+              (this.colA + 1 + randInt(PALETTE.length - 1)) % PALETTE.length;
+
+            this.colFreq = rand(0.00015, 0.0004);
+          }
+
+          // HSL color interpolated between two palette entries
+
+          currentColor(t) {
+            const progress =
+              (Math.sin(t * this.colFreq * Math.PI * 2 + this.bPhase) + 1) / 2;
+
+            const [hA, sA, lA] = PALETTE[this.colA];
+
+            const [hB, sB, lB] = PALETTE[this.colB];
+
+            const h = lerpHue(hA, hB, progress);
+
+            const s = sA + (sB - sA) * progress;
+
+            const l = lA + (lB - lA) * progress;
+
+            return `hsl(${h.toFixed(1)},${s.toFixed(1)}%,${l.toFixed(1)}%)`;
+          }
+
+          update(t) {
+            // ── Cloud position breathing (expand / compress) ──────────────────
+
+            const globalScale =
+              1 +
+              0.22 * Math.sin(t * G_FREQ1) +
+              0.1 * Math.sin(t * G_FREQ2 + 1.2);
+
+            const localScale =
+              1 + this.bAmp * Math.sin(t * this.bFreq + this.bPhase);
+
+            const scale = globalScale * localScale;
+
+            // Spring target (breathing + wobble)
+
+            const tx =
+              clusterX +
+              this.offX * scale +
+              Math.sin(clock * this.fqX + this.phX) * this.aX;
+
+            const ty =
+              clusterY +
+              this.offY * scale +
+              Math.cos(clock * this.fqY + this.phY) * this.aY;
+
+            this.vx += (tx - this.x) * SPRING;
+
+            this.vy += (ty - this.y) * SPRING;
+
+            // Cursor repulsion
+
+            if (mouse.x > 0) {
+              const dx = this.x - mouse.x;
+
+              const dy = this.y - mouse.y;
+
+              const dist = Math.hypot(dx, dy) || 1;
+
+              if (dist < REPEL_R) {
+                const ratio = 1 - dist / REPEL_R;
+
+                this.vx += (dx / dist) * ratio * ratio * REPEL_F;
+
+                this.vy += (dy / dist) * ratio * ratio * REPEL_F;
+              }
+            }
+
+            this.vx *= DAMP;
+
+            this.vy *= DAMP;
+
+            this.x += this.vx;
+
+            this.y += this.vy;
+
+            this.angle += this.spin;
+
+            // ── Size pulse synced to global breath ────────────────────────────
+
+            // sin goes -1 → +1; remap to SIZE_MIN → SIZE_MAX
+
+            // Use clock (seconds) so it's frame-rate independent
+
+            const breathCycle = Math.sin(
+              (clock + this.sizePhase) * G_FREQ1 * 1000,
+            );
+
+            const lenScale =
+              SIZE_MIN + (SIZE_MAX - SIZE_MIN) * ((breathCycle + 1) / 2);
+
+            this.len = this.baseLen * lenScale;
+
+            // Cache color
+
+            this._color = this.currentColor(t);
+          }
+
+          draw() {
+            ctx.save();
+
+            ctx.globalAlpha = this.alpha;
+
+            ctx.strokeStyle = this._color;
+
+            ctx.lineWidth = this.thick;
+
+            ctx.lineCap = "round";
+
+            ctx.translate(this.x, this.y);
+
+            ctx.rotate(this.angle);
+
+            ctx.beginPath();
+
+            ctx.moveTo(-this.len / 2, 0);
+
+            ctx.lineTo(this.len / 2, 0);
+
+            ctx.stroke();
+
+            ctx.restore();
+          }
+        }
+
+        function resize() {
+          W = canvas.width = window.innerWidth;
+
+          H = canvas.height = window.innerHeight;
+
+          if (!clusterX) {
+            clusterX = W / 2;
+            clusterY = H / 2;
+          }
+        }
+
+        function init() {
+          resize();
+
+          clusterX = W / 2;
+
+          clusterY = H / 2;
+
+          particles = Array.from({ length: COUNT }, () => new Particle());
+        }
+
+        function loop(ts) {
+          const dt = Math.min(ts - lastTime, 50);
+
+          lastTime = ts;
+
+          clock += dt * 0.001; // advance clock in seconds
+
+          const targetX = mouse.x > 0 ? mouse.x : W / 2;
+
+          const targetY = mouse.x > 0 ? mouse.y : H / 2;
+
+          clusterX += (targetX - clusterX) * FOLLOW;
+
+          clusterY += (targetY - clusterY) * FOLLOW;
+
+          ctx.clearRect(0, 0, W, H);
+
+          // Pass ts (milliseconds) to update for color cycling;
+
+          // clock (seconds) is used via closure for size/breathing
+
+          for (const p of particles) {
+            p.update(ts);
+            p.draw();
+          }
+
+          requestAnimationFrame(loop);
+        }
+
+        window.addEventListener("resize", () => {
+          resize();
+          particles.forEach((p) => p.init());
+        });
+
+        window.addEventListener("mousemove", (e) => {
+          mouse.x = e.clientX;
+          mouse.y = e.clientY;
+        });
+
+        window.addEventListener("mouseleave", () => {
+          mouse.x = -1;
+          mouse.y = -1;
+        });
+
+        window.addEventListener(
+          "touchmove",
+          (e) => {
+            mouse.x = e.touches[0].clientX;
+
+            mouse.y = e.touches[0].clientY;
+          },
+          { passive: true },
+        );
+
+        window.addEventListener("touchend", () => {
+          mouse.x = -1;
+          mouse.y = -1;
+        });
+
+        // ── Public API: call to gracefully kill the animation ────────────
+        window.destroyParticles = function () {
+          if (window._particleDestroyed) return;
+          window._particleDestroyed = true;
+
+          // Fade out the canvas over 600ms then hide it
+          canvas.style.transition = "opacity 0.6s ease";
+          canvas.style.opacity = "0";
+          setTimeout(() => {
+            canvas.style.display = "none";
+            // Stop the rAF loop by never calling requestAnimationFrame again;
+            // we achieve this by replacing loop with a no-op
+            loop = function () {};
+          }, 620);
+        };
+
+        init();
+        requestAnimationFrame(loop);
+      })();
+    </script>
   </body>
 </html>

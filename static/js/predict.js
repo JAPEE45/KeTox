@@ -65,14 +65,27 @@ function hideLoading() {
   }
 }
 
+let errorTimeout = null;
+
 function showError(msg) {
-  if (errorBanner) errorBanner.style.display = "flex";
-  if (errorMsg) errorMsg.textContent = msg;
-  hideResults();
+  if (errorBanner) {
+    if (errorMsg) errorMsg.textContent = msg;
+    errorBanner.style.display = "flex";
+    if (window.lucide) lucide.createIcons();
+    
+    // Auto-dismiss after 5 seconds
+    if (errorTimeout) clearTimeout(errorTimeout);
+    errorTimeout = setTimeout(() => {
+      hideError();
+    }, 5000);
+  }
 }
 
 function hideError() {
-  if (errorBanner) errorBanner.style.display = "none";
+  if (errorBanner) {
+    errorBanner.style.display = "none";
+    if (errorTimeout) clearTimeout(errorTimeout);
+  }
 }
 
 function hideResults() {
@@ -85,31 +98,51 @@ function hideResults() {
 
   const mainGrid = document.getElementById("main-content-grid");
   if (mainGrid) {
-    mainGrid.classList.add("flex-1", "justify-center");
+    mainGrid.classList.add("flex-1", "justify-center", "-mt-16");
     mainGrid.classList.remove("pt-8", "pb-16");
   }
+
+  // Collapse grid to single column so no 340px right-track is reserved,
+  // allowing left-column to fill full width for proper horizontal centering
+  const gridWrapper = document.getElementById("results-grid-wrapper");
+  if (gridWrapper) gridWrapper.style.gridTemplateColumns = "1fr";
 
   const predictSec = document.getElementById("predict-section");
   if (predictSec) {
     predictSec.classList.remove("predict-sticky-bottom");
+    predictSec.classList.add("max-w-xl");
   }
+
+  const leftCol = document.getElementById("left-column");
+  if (leftCol) leftCol.classList.add("items-center");
 }
 
 function showResults() {
+  // Destroy particle background — it only belongs on the initial landing page
+  window.destroyParticles?.();
+
   const mainGrid = document.getElementById("main-content-grid");
   if (mainGrid) {
-    mainGrid.classList.remove("flex-1", "justify-center");
+    mainGrid.classList.remove("flex-1", "justify-center", "-mt-16");
     mainGrid.classList.add("pt-8", "pb-16");
   }
 
+  // Restore two-column grid (clears the single-column inline style override)
+  const gridWrapper = document.getElementById("results-grid-wrapper");
+  if (gridWrapper) gridWrapper.style.gridTemplateColumns = "";
+
+  // Expand left column back to full-width flow (no centering override)
+  const leftCol = document.getElementById("left-column");
+  if (leftCol) leftCol.classList.remove("items-center");
+
   const predictSec = document.getElementById("predict-section");
   if (predictSec) {
+    predictSec.classList.remove("max-w-xl");
     predictSec.classList.add("predict-sticky-bottom");
   }
 
   if (resultsSection) {
     resultsSection.style.display = "flex";
-    // Trigger stagger animation on next frame
     requestAnimationFrame(() => resultsSection.classList.add("revealed"));
   }
 
@@ -377,12 +410,16 @@ function setText(id, text) {
   if (el) el.textContent = text;
 }
 
-// ─── Wire up tab button clicks ─────────────────────────────────────────────
+// ─── Wire up tab button clicks + initial page state ────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
+  // Collapse grid to single column on load so the form centers in full width
+  const gridWrapper = document.getElementById("results-grid-wrapper");
+  if (gridWrapper) gridWrapper.style.gridTemplateColumns = "1fr";
+
+  // Tab button click listeners
   document.querySelectorAll("[data-tab]").forEach((btn) => {
     btn.addEventListener("click", () => {
       switchTab(btn.getAttribute("data-tab"));
     });
   });
 });
-
