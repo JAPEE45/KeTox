@@ -9,14 +9,19 @@ Data lives in:   data/mock_compounds.py  (KNOWN_COMPOUNDS, COMPOUND_ALIASES,
 
 ML inference:    services/predictor.py   (predict_compound stub — wire in when
                                           RDKit + trained models are ready)
+
+Configuration:   config.py              (reads FLASK_ENV / FLASK_DEBUG / SECRET_KEY)
 """
 
+import os
 from flask import Flask
 
+from config import get_config
 from routes.pages import pages_bp
 from routes.api   import api_bp
 
 app = Flask(__name__)
+app.config.from_object(get_config())
 
 # Register blueprints
 app.register_blueprint(pages_bp)
@@ -24,8 +29,9 @@ app.register_blueprint(api_bp)
 
 
 # ---------------------------------------------------------------------------
-# Dev server
+# Dev server — debug and port come from environment, never hardcoded.
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    app.run(debug=True, host="127.0.0.1", port=5000)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="127.0.0.1", port=port)

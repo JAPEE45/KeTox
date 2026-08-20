@@ -355,6 +355,15 @@
         const canvas = document.getElementById("particle-canvas");
         if (!canvas) return;
 
+        // Accessibility: respect the OS "reduce motion" preference.
+        // If set, hide the canvas and skip the animation entirely.
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+          canvas.style.display = "none";
+          // Still expose a no-op destroyParticles so predict.js can call it safely.
+          window.destroyParticles = () => {};
+          return;
+        }
+
         const ctx = canvas.getContext("2d");
 
         // HSL palette – vivid hues that shift smoothly

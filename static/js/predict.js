@@ -19,9 +19,18 @@
   // Change this one value to rescale the gauge across the entire app.
   const PBPK_GAUGE_MAX = 3.0;
 
-  // ─── Example Molecule chips ────────────────────────────────────────────────
-  // Clicking an example populates the molecule name into the search input.
-  // IDs must match <button id="ex-…"> elements in index.html.
+  // ─── Minimum loading display time ──────────────────────────────────────────
+  // The fetch + this timer run in parallel via Promise.all(), so the loading
+  // screen is shown for at least MIN_LOADING_MS milliseconds.
+  //
+  // Currently 5 s because the mock server responds in <10 ms and the animated
+  // result cards need time to be appreciated.
+  //
+  // REDUCE THIS once real ML inference is wired in:
+  //   • RDKit + RF:   ~200–400 ms  → set to 500
+  //   • GCN:          ~1–3 s       → set to 0 (real latency is the floor)
+  //   • Full pipeline: measure p95 → use that as the floor
+  const MIN_LOADING_MS = 5000;
 
   // ─── DOM references ────────────────────────────────────────────────────────
   const form = document.getElementById("predict-form");
@@ -163,9 +172,10 @@
       showLoading();
 
       try {
-        // Run the fetch call in parallel with a minimum 5-second delay timer
+        // Run the fetch call in parallel with a minimum loading delay timer.
+        // See MIN_LOADING_MS at the top of this file to adjust the floor.
         const minLoadingTime = new Promise((resolve) =>
-          setTimeout(resolve, 5000),
+          setTimeout(resolve, MIN_LOADING_MS),
         );
 
         const fetchPromise = fetch("/predict", {
@@ -365,6 +375,9 @@
 
   // ExplainabilityTabs — charts
   function renderExplainability(shap, lime) {
+    // Cache data so switchTab() can re-render on tab switch
+    window._lastSHAP = shap;
+    window._lastLIME = lime;
     // Small delay so the tab panels are visible in DOM before Chart.js measures them
     setTimeout(() => {
       KeToxCharts.renderSHAPChart(shap);
