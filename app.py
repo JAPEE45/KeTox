@@ -19,6 +19,7 @@ from flask import Flask
 from config import get_config
 from routes.pages import pages_bp
 from routes.api   import api_bp
+from routes.auth  import auth_bp
 
 app = Flask(__name__)
 app.config.from_object(get_config())
@@ -26,6 +27,7 @@ app.config.from_object(get_config())
 # Register blueprints
 app.register_blueprint(pages_bp)
 app.register_blueprint(api_bp)
+app.register_blueprint(auth_bp)
 
 
 # ---------------------------------------------------------------------------

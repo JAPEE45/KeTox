@@ -586,12 +586,6 @@
     <!-- end page content wrapper -->
 
     <script>
-      // ── Credentials Setup (Ready for backend replacement) ───────────────
-      const STATIC_CREDENTIALS = {
-        email: "admin@g.c",
-        password: "admin"
-      };
-
       let errorTimeout = null;
 
       function showPanel(name) {
@@ -659,8 +653,8 @@
         if (errorTimeout) clearTimeout(errorTimeout);
       }
 
-      // ── Auth Submission Flows ─────────────────────────────────────────────
-      function handleSignIn(e) {
+      // ── Auth Submission Flows (Connected to MongoDB Backend) ─────────────
+      async function handleSignIn(e) {
         e.preventDefault();
         hideError();
 
@@ -669,45 +663,87 @@
 
         showLoadingModal('Signing in...', 'Verifying credentials with KeTox...');
 
-        // Simulate backend network latency (700ms)
-        setTimeout(() => {
+        try {
+          const res = await fetch('/api/auth/signin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+          });
+          const data = await res.json();
           hideLoadingModal();
 
-          if (email === STATIC_CREDENTIALS.email && password === STATIC_CREDENTIALS.password) {
-            // Valid credentials -> Redirect to home predictor
+          if (res.ok && data.status === 'ok') {
             window.location.href = '/home';
           } else {
-            // Invalid credentials -> Trigger error popup
-            showError('Invalid Credentials', 'The email or password you entered is incorrect.');
+            showError('Invalid Credentials', data.message || 'The email or password you entered is incorrect.');
           }
-        }, 700);
+        } catch (err) {
+          hideLoadingModal();
+          showError('Connection Error', 'Could not reach server. Please check your network or database connection.');
+        }
       }
 
-      function handleSignUp(e) {
+      async function handleSignUp(e) {
         e.preventDefault();
         hideError();
+
+        const firstName = document.getElementById('signup-firstname').value.trim();
+        const lastName = document.getElementById('signup-lastname').value.trim();
+        const email = document.getElementById('signup-email').value.trim();
+        const password = document.getElementById('signup-password').value;
+        const role = document.getElementById('signup-role').value;
+        const otherRole = document.getElementById('signup-other-role') ? document.getElementById('signup-other-role').value.trim() : '';
 
         showLoadingModal('Creating account...', 'Registering user with KeTox...');
 
-        setTimeout(() => {
+        try {
+          const res = await fetch('/api/auth/signup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              first_name: firstName,
+              last_name: lastName,
+              email: email,
+              password: password,
+              role: role,
+              other_role: otherRole
+            })
+          });
+          const data = await res.json();
           hideLoadingModal();
-          // Mock successful account creation redirect
-          window.location.href = '/home';
-        }, 900);
+
+          if (res.ok && data.status === 'ok') {
+            window.location.href = '/home';
+          } else {
+            showError('Registration Failed', data.message || 'Could not complete registration.');
+          }
+        } catch (err) {
+          hideLoadingModal();
+          showError('Connection Error', 'Could not reach server. Please check your network or database connection.');
+        }
       }
 
-      function handleResetPassword(e) {
+      async function handleResetPassword(e) {
         e.preventDefault();
         hideError();
 
+        const email = document.getElementById('reset-email').value.trim();
         showLoadingModal('Sending link...', 'Generating password reset email...');
 
-        setTimeout(() => {
+        try {
+          const res = await fetch('/api/auth/reset-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+          });
+          const data = await res.json();
           hideLoadingModal();
           showPanel('signin');
-          showError('Email Sent', 'If an account exists with that email, a password reset link has been dispatched.');
-          document.getElementById('error-title').classList.replace('text-neutral-900', 'text-neutral-900');
-        }, 800);
+          showError('Email Sent', data.message || 'If an account exists with that email, a password reset link has been dispatched.');
+        } catch (err) {
+          hideLoadingModal();
+          showError('Connection Error', 'Could not reach server.');
+        }
       }
 
       if (typeof lucide !== 'undefined') {

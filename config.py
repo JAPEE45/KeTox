@@ -15,12 +15,20 @@ In production, set FLASK_ENV=production and provide a SECRET_KEY env var.
 """
 
 import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file if present
+load_dotenv()
 
 
 class _Base:
     """Shared settings for all environments."""
     SECRET_KEY: str = os.environ.get("SECRET_KEY", "dev-insecure-change-in-production")
     JSON_SORT_KEYS: bool = False
+
+    # MongoDB configuration
+    MONGO_URI: str = os.environ.get("MONGO_URI", "mongodb://127.0.0.1:27017/ketox")
+    MONGO_DB_NAME: str = os.environ.get("MONGO_DB_NAME", "ketox")
 
 
 class Development(_Base):

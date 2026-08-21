@@ -201,24 +201,35 @@
               class="px-4 py-2.5 rounded-lg text-base font-medium text-neutral-600 hover:text-black hover:bg-neutral-100 no-underline transition-all duration-200"
               >Home</a
             >
+            {% if session.get('user_name') %}
             <a
               href="/home"
               data-nav-path="/home"
               class="px-4 py-2.5 rounded-lg text-base font-medium text-neutral-600 hover:text-black hover:bg-neutral-100 no-underline transition-all duration-200"
               >Predict</a
             >
+            {% endif %}
             <a
               href="/performance"
               data-nav-path="/performance"
               class="px-4 py-2.5 rounded-lg text-base font-medium text-neutral-600 hover:text-black hover:bg-neutral-100 no-underline transition-all duration-200"
               >Model Performance</a
             >
+            {% if session.get('user_name') %}
+            <a
+              href="/api/auth/logout"
+              class="ml-2 px-4 py-2 rounded-lg text-sm font-semibold text-white bg-black hover:bg-neutral-800 no-underline transition-all duration-200"
+              onclick="event.preventDefault(); fetch('/api/auth/logout', {method: 'POST'}).then(() => window.location.reload());"
+              >Log out</a
+            >
+            {% else %}
             <a
               href="/login"
               data-nav-path="/login"
               class="ml-2 px-4 py-2 rounded-lg text-sm font-semibold text-white bg-black hover:bg-neutral-800 no-underline transition-all duration-200"
               >Login / Sign up</a
             >
+            {% endif %}
           </div>
 
           <!-- Mobile Accordion Toggle Button (visible on mobile only) -->
@@ -283,6 +294,7 @@
             <span>Home</span>
             <svg class="w-4 h-4 opacity-40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
           </a>
+          {% if session.get('user_name') %}
           <a
             href="/home"
             data-nav-path="/home"
@@ -291,6 +303,7 @@
             <span>Predict</span>
             <svg class="w-4 h-4 opacity-40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
           </a>
+          {% endif %}
           <a
             href="/performance"
             data-nav-path="/performance"
@@ -299,6 +312,16 @@
             <span>Model Performance</span>
             <svg class="w-4 h-4 opacity-40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
           </a>
+          {% if session.get('user_name') %}
+          <a
+            href="/api/auth/logout"
+            class="px-4 py-3 rounded-xl text-base font-semibold text-white bg-black hover:bg-neutral-800 no-underline transition-colors flex items-center justify-between mt-1"
+            onclick="event.preventDefault(); fetch('/api/auth/logout', {method: 'POST'}).then(() => window.location.reload());"
+          >
+            <span>Log out</span>
+            <svg class="w-4 h-4 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </a>
+          {% else %}
           <a
             href="/login"
             data-nav-path="/login"
@@ -307,6 +330,7 @@
             <span>Login / Sign up</span>
             <svg class="w-4 h-4 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
           </a>
+          {% endif %}
         </div>
       </div>
     </nav>
