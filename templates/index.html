@@ -1,633 +1,883 @@
-{% extends "base.html" %} {% block title %}Predict{% endblock %} {% block
-meta_description %}Enter a molecule or drug name to predict CYP3A4
-hepatotoxicity. KeTox uses Random Forest and GCN models with SHAP, LIME, and
-GraphGrad-CAM explainability.{% endblock %} {% block content %}
+{% extends "base.html" %} {% block title %}About & Methodology{% endblock %} {%
+block meta_description %}KeTox methodology: data sources (PubChem AID 884 / AID
+1851), Random Forest and GCN models, PBPK modelling, SHAP/LIME/GraphGrad-CAM
+explainability, and the Sibling-Stranger-Safe validation framework.{% endblock
+%}
 
-<!-- ═══════════════════════════ MAIN WRAPPER ═══════════════════════════════ -->
-<div
-  class="max-w-7xl mx-auto w-full px-6 sm:px-8 lg:px-12 flex-1 flex flex-col relative"
->
-  <!-- ═════════════════════════ FLOATING ERROR POPUP (TOAST) ════════════════ -->
-  <div
-    id="error-banner"
-    class="fixed top-6 right-6 z-50 transition-all duration-300 shadow-xl rounded-2xl bg-white border border-neutral-200/90 p-4 max-w-sm flex items-start gap-3.5"
-    style="
-      display: none;
-      box-shadow:
-        0 10px 30px -5px rgba(0, 0, 0, 0.12),
-        0 4px 12px -2px rgba(0, 0, 0, 0.05);
-    "
-    role="alert"
-    aria-live="assertive"
-  >
-    <div
-      class="w-8 h-8 rounded-full bg-red-50 border border-red-100 text-red-600 flex items-center justify-center flex-shrink-0 mt-0.5"
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        class="w-4 h-4"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      >
-        <circle cx="12" cy="12" r="10"></circle>
-        <line x1="12" y1="8" x2="12" y2="12"></line>
-        <line x1="12" y1="16" x2="12.01" y2="16"></line>
-      </svg>
-    </div>
-    <div class="flex-1 min-w-0 pr-1">
-      <h4 class="text-sm font-semibold text-neutral-900 leading-tight">
-        Prediction Error
-      </h4>
-      <p
-        id="error-message"
-        class="text-xs text-neutral-600 mt-1 leading-relaxed"
-      ></p>
-    </div>
-    <button
-      type="button"
-      id="error-close-btn"
-      class="text-neutral-400 hover:text-neutral-800 p-1.5 rounded-lg hover:bg-neutral-100 transition-colors flex-shrink-0 -mr-1 -mt-1"
-      style="background: transparent; border: none; cursor: pointer"
-      aria-label="Close error"
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        class="w-4 h-4"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      >
-        <line x1="18" y1="6" x2="6" y2="18"></line>
-        <line x1="6" y1="6" x2="18" y2="18"></line>
-      </svg>
-    </button>
-  </div>
-
-  <!-- ═════════════════════════ MAIN CONTENT GRID ══════════════════════════ -->
-  <div
-    id="main-content-grid"
-    class="flex-1 flex flex-col justify-center -mt-16 transition-all duration-300"
-  >
-    <div
-      id="results-grid-wrapper"
-      class="grid grid-cols-1 gap-10 items-start w-full"
-    >
-      <!-- ── LEFT COLUMN ─────────────────────────────────────────────────── -->
-      <div id="left-column" class="flex flex-col items-center relative min-w-0">
-        <!-- ── RESULTS SECTION (Hidden initially, revealed on prediction) ── -->
-        <div
-          id="results-section"
-          style="display: none"
-          class="flex flex-col gap-12 pb-4"
-        >
-          <!-- 1. Ensemble Verdict ────────────────────────────────────────── -->
-          <div id="verdict-card">
-            <p
-              class="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3"
-            >
-              Ensemble Prediction
-            </p>
-
-            <!-- Big headline: "87%  TOXIC" -->
-            <div class="flex flex-wrap items-baseline gap-4 mb-2">
-              <span
-                id="verdict-confidence"
-                class="text-7xl font-black leading-none text-red-700"
-                >--</span
-              >
-              <span
-                id="verdict-badge"
-                class="text-5xl font-black leading-none text-red-700"
-                >--</span
-              >
-            </div>
-
-            <!-- Compound name tag -->
-            <p
-              id="verdict-compound-name"
-              class="text-sm text-slate-400 mb-3"
-            ></p>
-
-            <!-- Model sub-scores pill -->
-            <div
-              class="inline-flex items-center bg-slate-100 rounded-full px-4 py-1.5 mb-4"
-            >
-              <span class="text-sm text-slate-600" id="verdict-ensemble"
-                >--</span
-              >
-            </div>
-
-            <!-- Summary paragraph -->
-            <p
-              id="verdict-summary"
-              class="text-slate-700 text-base leading-relaxed max-w-2xl"
-            ></p>
-          </div>
-
-          <!-- 2. Model 1 / Model 2 — side-by-side with vertical divider ───── -->
-          <div class="grid grid-cols-2 divide-x divide-slate-200">
-            <!-- Random Forest -->
-            <div class="pr-8">
-              <p
-                class="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-1"
-              >
-                Model 1
-              </p>
-              <p class="text-sm font-bold text-slate-900 mb-4">Random Forest</p>
-              <div class="flex items-center justify-between mb-2">
-                <span id="rf-verdict" class="text-base font-black text-red-600"
-                  >--</span
-                >
-                <span
-                  id="rf-probability"
-                  class="text-3xl font-black text-red-700"
-                  >--</span
-                >
-              </div>
-              <div
-                class="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden mb-1"
-              >
-                <div
-                  id="rf-bar"
-                  class="h-full rounded-full transition-all duration-700 bg-red-700"
-                  style="width: 0%"
-                ></div>
-              </div>
-              <p class="text-[10px] text-slate-400 mt-1">
-                Inhibition Probability
-              </p>
-            </div>
-
-            <!-- GCN -->
-            <div class="pl-8">
-              <p
-                class="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-1"
-              >
-                Model 2
-              </p>
-              <p class="text-sm font-bold text-slate-900 mb-4">GCN</p>
-              <div class="flex items-center justify-between mb-2">
-                <span id="gcn-verdict" class="text-base font-black text-red-600"
-                  >--</span
-                >
-                <span
-                  id="gcn-probability"
-                  class="text-3xl font-black text-red-700"
-                  >--</span
-                >
-              </div>
-              <div
-                class="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden mb-1"
-              >
-                <div
-                  id="gcn-bar"
-                  class="h-full rounded-full transition-all duration-700 bg-red-700"
-                  style="width: 0%"
-                ></div>
-              </div>
-              <p class="text-[10px] text-slate-400 mt-1">
-                Inhibition Probability
-              </p>
-            </div>
-          </div>
-
-          <!-- 3. Ketoconazole Similarity ─────────────────────────────────── -->
-          <div id="similarity-card">
-            <p
-              class="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3"
-            >
-              Ketoconazole Similarity
-            </p>
-
-            <!-- Big score: "0.95 / 1.0" -->
-            <div class="flex items-baseline gap-2 mb-1">
-              <span
-                class="text-5xl font-black text-slate-900"
-                id="tanimoto-value"
-                >--</span
-              >
-              <span class="text-3xl font-black text-slate-300">/ 1.0</span>
-            </div>
-
-            <!-- Input label (populated by JS) -->
-            <p
-              id="similarity-input-label"
-              class="text-xs text-slate-400 mb-2"
-            ></p>
-
-            <!-- Right-aligned label -->
-            <div class="flex justify-end mb-1">
-              <span class="text-[11px] text-slate-400">Tanimoto coeff.</span>
-            </div>
-
-            <!-- Tanimoto gauge bar: fills left-to-right (red=low similarity → green=high) -->
-            <div class="gauge-track mb-2">
-              <div
-                id="tanimoto-gauge-fill"
-                class="gauge-fill"
-                style="
-                  width: 0%;
-                  background: linear-gradient(
-                    90deg,
-                    #dc2626 0%,
-                    #b45309 35%,
-                    #ca8a04 55%,
-                    #16a34a 100%
-                  );
-                "
-              ></div>
-            </div>
-            <div class="flex justify-between text-[10px] text-slate-400 mb-3">
-              <span>0.0 - Unrelated</span>
-              <span>0.4 - Structural Overlap</span>
-              <span>1.0 - Identical</span>
-            </div>
-
-            <!-- Category badge -->
-            <span
-              id="similarity-category"
-              class="badge-stranger mb-3 inline-block"
-              >--</span
-            >
-
-            <p
-              id="similarity-description"
-              class="text-sm text-slate-600 leading-relaxed"
-            ></p>
-          </div>
-
-          <!-- 4. Explainability Tabs ─────────────────────────────────────── -->
-          <div class="border border-slate-200 rounded-xl overflow-hidden">
-            <!-- Tab bar -->
-            <div
-              class="flex items-center gap-1 px-5 pt-4 pb-3 border-b border-slate-100 bg-white"
-            >
-              <div
-                class="text-xs font-semibold uppercase tracking-widest text-slate-400 mr-3 hidden sm:block"
-              >
-                Explainability
-              </div>
-              <button
-                class="btn-tab btn-tab-active"
-                data-tab="shap"
-                id="tab-btn-shap"
-              >
-                SHAP
-              </button>
-              <button class="btn-tab" data-tab="lime" id="tab-btn-lime">
-                LIME
-              </button>
-              <button class="btn-tab" data-tab="heatmap" id="tab-btn-heatmap">
-                Structure Heatmap
-              </button>
-            </div>
-
-            <div class="p-5 bg-white">
-              <!-- SHAP panel -->
-              <div id="tab-shap" class="tab-panel active">
-                <div class="flex items-start justify-between mb-3">
-                  <div>
-                    <h3 class="text-sm font-bold text-navy-900">
-                      SHAP Feature Importances
-                    </h3>
-                    <p class="text-xs text-slate-500 mt-0.5">
-                      <span class="tooltip-wrapper">
-                        <span class="tooltip-anchor">SHAP values</span>
-                        <span class="tooltip-box"
-                          >SHapley Additive exPlanations — assigns each
-                          molecular feature a contribution score toward the
-                          model's prediction.</span
-                        >
-                      </span>
-                      for the Random Forest model &middot; Red bars push toward
-                      Toxic, teal bars toward Safe
-                    </p>
-                  </div>
-                  <span
-                    class="text-[10px] text-slate-400 bg-slate-50 rounded px-2 py-1 border border-slate-100 flex-shrink-0"
-                    >RF model</span
-                  >
-                </div>
-                <div class="chart-container" style="height: 240px">
-                  <canvas
-                    id="shap-chart"
-                    aria-label="SHAP feature importance bar chart"
-                  ></canvas>
-                </div>
-              </div>
-
-              <!-- LIME panel -->
-              <div id="tab-lime" class="tab-panel">
-                <div class="flex items-start justify-between mb-3">
-                  <div>
-                    <h3 class="text-sm font-bold text-navy-900">
-                      LIME Local Explanation
-                    </h3>
-                    <p class="text-xs text-slate-500 mt-0.5">
-                      <span class="tooltip-wrapper">
-                        <span class="tooltip-anchor">LIME</span>
-                        <span class="tooltip-box"
-                          >Local Interpretable Model-Agnostic Explanations —
-                          approximates the model locally to explain which
-                          structural rules drove the prediction.</span
-                        >
-                      </span>
-                      &mdash; Green bars push toward Safe, red bars push toward
-                      Toxic
-                    </p>
-                  </div>
-                  <div
-                    class="flex items-center gap-3 text-[10px] text-slate-500 flex-shrink-0"
-                  >
-                    <span class="flex items-center gap-1"
-                      ><span
-                        class="inline-block w-2.5 h-2.5 rounded bg-red-400"
-                      ></span
-                      >Toxic</span
-                    >
-                    <span class="flex items-center gap-1"
-                      ><span
-                        class="inline-block w-2.5 h-2.5 rounded bg-green-500"
-                      ></span
-                      >Safe</span
-                    >
-                  </div>
-                </div>
-                <div class="chart-container" style="height: 220px">
-                  <canvas
-                    id="lime-chart"
-                    aria-label="LIME feature weight bar chart"
-                  ></canvas>
-                </div>
-              </div>
-
-              <!-- Heatmap panel -->
-              <div id="tab-heatmap" class="tab-panel">
-                <div class="mb-3">
-                  <h3 class="text-sm font-bold text-navy-900">
-                    GraphGrad-CAM Structure Heatmap
-                  </h3>
-                  <p class="text-xs text-slate-500 mt-0.5">
-                    Atom-level contributions from the Graph Convolutional
-                    Network. Red/orange atoms contribute most strongly to the
-                    toxicity prediction; blue/cyan atoms reduce it.
-                  </p>
-                </div>
-                <div
-                  class="bg-slate-50 rounded-xl border border-slate-100 overflow-hidden flex flex-col items-center justify-center p-4"
-                >
-                  <img
-                    src="{{ url_for('static', filename='img/heatmap_placeholder.jpg') }}"
-                    alt="GraphGrad-CAM structural heatmap showing atom-level toxicity contributions"
-                    class="max-h-72 object-contain rounded-lg"
-                  />
-                  <p
-                    class="text-[10px] text-slate-400 mt-3 text-center max-w-sm"
-                  >
-                    <strong>Placeholder</strong> &mdash; actual heatmap will be
-                    generated by the GCN&rsquo;s GraphGrad-CAM layer and
-                    returned by the backend. Highlighted atoms = contribution
-                    strength.
-                  </p>
-                </div>
-              </div>
-            </div>
-            <!-- /tab content -->
-          </div>
-          <!-- /explainability card -->
-        </div>
-        <!-- /#results-section -->
-
-        <!-- ── PREDICT FORM (Centered initially, Sticky Bottom in Results mode) ── -->
-        <div
-          id="predict-section"
-          class="w-full max-w-xl transition-all duration-300"
-        >
-          <form
-            id="predict-form"
-            class="flex flex-col items-start gap-4 w-full"
-            novalidate
-          >
-            <label
-              for="compound-input"
-              id="compound-label"
-              class="block text-2xl sm:text-3xl font-semibold text-neutral-900"
-            >
-              Enter Molecule Name
-            </label>
-
-            <!-- ═════════════════════════ LOADING STATE ══════════════════════════════ -->
-            <div
-              id="loading-state"
-              style="display: none"
-              class="w-full py-2"
-            >
-              <div class="flex items-center justify-center gap-2.5">
-                <div
-                  class="w-4 h-4 rounded-full border-2 border-neutral-300 border-t-neutral-900 animate-spin flex-shrink-0"
-                ></div>
-                <span class="text-sm font-medium text-neutral-800">
-                  Running ML Inference Pipeline...
-                </span>
-              </div>
-            </div>
-
-            <!-- Input box -->
-            <input
-              type="text"
-              id="compound-input"
-              name="compound_name"
-              class="w-full text-base sm:text-lg bg-white border border-neutral-200 rounded-lg px-5 py-3.5 shadow-sm outline-none focus:outline-none focus:ring-0 focus:border-neutral-300 transition-all placeholder:text-neutral-400"
-              placeholder="e.g. Ketoconazole, Aspirin, Fluconazole..."
-              aria-label="Molecule name input"
-              autocomplete="off"
-              spellcheck="false"
-            />
-
-            <!-- Run Prediction button placed always below input -->
-            <button
-              type="submit"
-              id="submit-btn"
-              style="
-                font-family:
-                  &quot;Plus Jakarta Sans&quot;, &quot;Outfit&quot;,
-                  &quot;Google Sans&quot;, sans-serif;
-              "
-              class="btn-primary bg-black text-white px-8 py-2 rounded-full font-medium tracking-[1px] text-lg hover:bg-neutral-800 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 shadow-sm flex-shrink-0 cursor-pointer"
-            >
-              <span id="submit-btn-text" class="text-white text-lg"
-                >Run Prediction</span
-              >
-            </button>
-          </form>
-        </div>
-      </div>
-      <!-- /left column -->
-
-      <!-- ── RIGHT SIDEBAR (Hidden initially, revealed on prediction) ───── -->
-      <div
-        id="right-sidebar"
-        style="display: none"
-        class="sticky top-20 border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-sm"
-      >
-        <!-- Structure Preview -->
-        <div class="p-5">
-          <p
-            class="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-3 flex items-center gap-1.5"
-          >
-            <i data-lucide="atom" class="w-3.5 h-3.5"></i>
-            Structure Preview
-          </p>
-          <div
-            class="bg-slate-100 rounded-lg overflow-hidden flex items-center justify-center"
-            style="min-height: 200px"
-          >
-            <img
-              id="structure-preview-img"
-              src="{{ url_for('static', filename='img/mol_input_placeholder.jpg') }}"
-              alt="2D molecular structure preview"
-              class="max-h-52 w-full object-contain"
-            />
-          </div>
-        </div>
-
-        <!-- Divider -->
-        <div class="border-t border-slate-200"></div>
-
-        <!-- PBPK Modeling -->
-        <div class="p-5">
-          <p
-            class="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-4 flex items-center gap-1.5"
-          >
-            <i data-lucide="activity" class="w-3.5 h-3.5"></i>
-            PBPK Modeling
-          </p>
-
-          <p class="text-xs text-slate-500 mb-1">
-            Predicted steady-state liver concentration
-          </p>
-
-          <!-- Css value -->
-          <div class="flex items-baseline gap-2 mb-3">
-            <span class="text-5xl font-black text-slate-900" id="css-value"
-              >--</span
-            >
-            <span class="text-base text-slate-500 font-medium">mg/L</span>
-            <span class="tooltip-wrapper ml-0.5">
-              <span class="tooltip-anchor text-sm text-slate-400">Css</span>
-              <span class="tooltip-box"
-                >Steady-state concentration (Css) — the liver drug concentration
-                reached after repeated dosing. Higher values indicate greater
-                accumulation and toxicity risk.</span
-              >
-            </span>
-          </div>
-
-          <!-- Status badge -->
-          <span id="css-label" class="badge-normal mb-3 inline-block">--</span>
-
-          <!-- Threshold gauge bar -->
-          <div class="relative mb-1">
-            <div class="gauge-track">
-              <div
-                class="gauge-fill"
-                id="pbpk-gauge-fill"
-                style="width: 0%"
-              ></div>
-            </div>
-            <!-- IC50 threshold marker — position updated dynamically by JS -->
-            <div
-              id="pbpk-threshold-marker"
-              class="absolute top-0 h-full flex items-center"
-              style="left: 33.3%"
-            >
-              <div class="w-0.5 h-4 bg-slate-400 rounded relative -top-1">
-                <span
-                  class="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[9px] text-slate-400 whitespace-nowrap"
-                  >IC&#8325;&#8320;</span
-                >
-              </div>
-            </div>
-          </div>
-
-          <!-- Threshold label (populated by JS with css_threshold value) -->
-          <p class="text-[10px] text-slate-400 mt-5 mb-1">
-            Safety threshold:
-            <span id="css-threshold" class="font-semibold">--</span>
-          </p>
-
-          <!-- Interpretation note -->
-          <p
-            id="pbpk-note"
-            class="text-[11px] text-slate-500 mt-1 leading-relaxed"
-          ></p>
-        </div>
-      </div>
-      <!-- /sidebar -->
-    </div>
-    <!-- /2-col grid -->
-  </div>
-  <!-- /main-content-grid -->
-</div>
-
-{% endblock %} {% block scripts %}
+{% block head %}
 <style>
-  /* Sticky bottom styling for prediction form inside the left column */
-  #predict-section.predict-sticky-bottom {
-    position: sticky;
-    bottom: 0;
-    z-index: 30;
-    padding-top: 1.75rem;
-    padding-bottom: 1.25rem;
-    pointer-events: none;
+  /* ── About page scoped styles ───────────────────────────────────────────── */
+
+  /* Hero */
+  .about-hero {
+    position: relative;
+    background: #000;
+    color: #fff;
+    min-height: 88vh;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
   }
 
-  #predict-section.predict-sticky-bottom::before {
-    content: "";
+  /* Background overlays layer with smooth bottom fade/blur into dark background */
+  .about-hero__bg-layer {
     position: absolute;
     inset: 0;
-    top: -0.5rem;
-    background: linear-gradient(
-      to bottom,
-      rgba(250, 250, 250, 0) 0%,
-      rgba(250, 250, 250, 0.45) 25%,
-      rgba(250, 250, 250, 0.85) 60%,
-      rgba(250, 250, 250, 1) 100%
-    );
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(6px);
-    mask-image: linear-gradient(
-      to bottom,
-      transparent 0%,
-      white 35%,
-      white 100%
-    );
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 1;
     -webkit-mask-image: linear-gradient(
       to bottom,
-      transparent 0%,
-      black 35%,
-      black 100%
+      rgba(0, 0, 0, 1) 0%,
+      rgba(0, 0, 0, 1) 68%,
+      rgba(0, 0, 0, 0.4) 86%,
+      rgba(0, 0, 0, 0) 100%
     );
-    pointer-events: none;
-    z-index: -1;
+    mask-image: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 1) 0%,
+      rgba(0, 0, 0, 1) 68%,
+      rgba(0, 0, 0, 0.4) 86%,
+      rgba(0, 0, 0, 0) 100%
+    );
   }
 
-  /* Re-enable pointer events on the actual form and its children */
-  #predict-section.predict-sticky-bottom #predict-form {
-    position: relative;
-    pointer-events: auto;
+  /* CYP3A4 Protein ribbon: back, low opacity, large scale */
+  .about-hero__bg-protein {
+    position: absolute;
+    right: -4%;
+    top: 50%;
+    transform: translateY(-48%) scale(1.15);
+    width: clamp(480px, 58vw, 860px);
+    max-width: none;
+    opacity: 0.28;
+    filter: brightness(0.9) contrast(1.1);
     z-index: 1;
+    user-select: none;
   }
 
-  #predict-section.predict-sticky-bottom #compound-label {
-    display: none;
+  /* Ketoconazole Molecule: front, 100% opacity, rotated ~54deg, crisp shadow */
+  .about-hero__bg-molecule {
+    position: absolute;
+    right: 4%;
+    top: 50%;
+    transform: translateY(-48%) rotate(54deg) scale(1.22);
+    width: clamp(400px, 46vw, 700px);
+    max-width: none;
+    opacity: 1;
+    z-index: 2;
+    filter: drop-shadow(0 25px 50px rgba(0, 0, 0, 0.95));
+    user-select: none;
   }
+
+  /* Foreground content */
+  .about-hero__inner {
+    position: relative;
+    z-index: 10;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 7rem 3rem 5rem;
+    width: 100%;
+  }
+
+  @media (max-width: 900px) {
+    .about-hero {
+      min-height: auto;
+      padding-top: 2rem;
+    }
+    .about-hero__bg-layer {
+      position: relative;
+      inset: auto;
+      width: 100%;
+      height: 280px;
+      margin-bottom: -1rem;
+      -webkit-mask-image: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 1) 0%,
+        rgba(0, 0, 0, 1) 60%,
+        rgba(0, 0, 0, 0) 100%
+      );
+      mask-image: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 1) 0%,
+        rgba(0, 0, 0, 1) 60%,
+        rgba(0, 0, 0, 0) 100%
+      );
+    }
+    .about-hero {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .about-hero__inner {
+      padding: 1.5rem 1.5rem 4rem;
+    }
+    .about-hero__bg-protein {
+      right: 50%;
+      top: 50%;
+      transform: translate(50%, -50%) scale(1);
+      width: 320px;
+      opacity: 0.35;
+    }
+    .about-hero__bg-molecule {
+      right: 50%;
+      top: 50%;
+      transform: translate(50%, -45%) rotate(54deg) scale(1.05);
+      width: 280px;
+      opacity: 1;
+    }
+  }
+
+  .about-hero__text {
+    max-width: 720px;
+  }
+
+  .about-hero__title {
+    font-size: clamp(2.4rem, 5.2vw, 4.4rem);
+    font-weight: 900;
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+    color: #fff;
+  }
+
+  .about-hero__desc {
+    font-size: clamp(0.92rem, 1.25vw, 1.08rem);
+    font-weight: 500;
+    color: #d1d5db;
+    line-height: 1.75;
+    max-width: 680px;
+  }
+
+  .about-hero__desc strong {
+    color: #fff;
+    font-weight: 700;
+  }
+
+  /* Sections */
+  .about-section {
+    position: relative;
+    z-index: 20;
+    background: #000;
+    color: #fff;
+    padding: 6rem 0;
+  }
+  .about-section--last {
+    padding-bottom: 7rem;
+  }
+  .about-prose-section {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 3rem;
+    width: 100%;
+  }
+  @media (max-width: 768px) {
+    .about-prose-section {
+      padding: 0 1.5rem;
+    }
+  }
+  .about-section__title {
+    font-size: clamp(2rem, 4.2vw, 3.75rem);
+    font-weight: 900;
+    color: #fff;
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    margin-bottom: 1rem;
+  }
+  .about-section__sub {
+    font-size: 1rem;
+    color: #9ca3af;
+    margin-bottom: 2.5rem;
+    max-width: 760px;
+    line-height: 1.6;
+  }
+
+  /* ── Prediction Pipeline ── */
+  .pipeline-section {
+    position: relative;
+    background: #000;
+    color: #fff;
+    width: 100%;
+    overflow: hidden;
+  }
+  .pipeline-sticky-header {
+    position: absolute;
+    top: 50vh;
+    left: 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    pointer-events: none;
+    z-index: 1;
+    transform: translateY(-50%);
+  }
+  .pipeline-sticky-inner {
+    max-width: 960px;
+    padding: 0 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .pipeline-title {
+    font-size: clamp(3.2rem, 7vw, 6rem);
+    font-weight: 900;
+    color: #fff;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.25rem;
+    text-align: center;
+  }
+  .pipeline-sub {
+    font-size: clamp(1rem, 1.6vw, 1.3rem);
+    color: #9ca3af;
+    max-width: 720px;
+    margin: 0 auto;
+    text-align: center;
+    line-height: 1.6;
+  }
+  .pipeline-scroll-track {
+    position: relative;
+    z-index: 10;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 80vh 3.5rem 60vh;
+    display: flex;
+    flex-direction: column;
+    pointer-events: auto;
+  }
+  @media (max-width: 768px) {
+    .pipeline-scroll-track {
+      padding: 60vh 1.5rem 40vh;
+    }
+  }
+  .pipe-card {
+    display: flex;
+    width: 100%;
+    margin-bottom: 24vh;
+  }
+  .pipe-card:last-child { margin-bottom: 0; }
+  .pipe-card--left  { justify-content: flex-start;  padding-left: 1rem; }
+  .pipe-card--right { justify-content: flex-end;    padding-right: 1rem; }
+  @media (max-width: 768px) {
+    .pipe-card--left,
+    .pipe-card--right { justify-content: center; padding-left: 0; padding-right: 0; }
+  }
+  .pipe-card--data       { --accent-color: #2563eb; --accent-bg: rgba(37,99,235,0.08);  --accent-border: rgba(37,99,235,0.2); }
+  .pipe-card--features   { --accent-color: #ea580c; --accent-bg: rgba(234,88,12,0.08);  --accent-border: rgba(234,88,12,0.2); }
+  .pipe-card--pbpk       { --accent-color: #e11d48; --accent-bg: rgba(225,29,72,0.08);  --accent-border: rgba(225,29,72,0.2); }
+  .pipe-card--models     { --accent-color: #7c3aed; --accent-bg: rgba(124,58,237,0.08); --accent-border: rgba(124,58,237,0.2); }
+  .pipe-card--xai        { --accent-color: #0284c7; --accent-bg: rgba(2,132,199,0.08);  --accent-border: rgba(2,132,199,0.2); }
+  .pipe-card--prediction { --accent-color: #16a34a; --accent-bg: rgba(22,163,74,0.08);  --accent-border: rgba(22,163,74,0.2); }
+  .pipe-card__inner {
+    background: #fff;
+    color: #000;
+    width: 240px;
+    min-height: 240px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2.2rem 1.75rem;
+    border-radius: 12px;
+    border-top: 4px solid var(--accent-color, #000);
+    text-align: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.9), 0 0 35px rgba(0,0,0,0.5);
+    transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s ease;
+  }
+  .pipe-card:hover .pipe-card__inner {
+    transform: translateY(-4px);
+    box-shadow: 0 30px 60px -12px rgba(0,0,0,0.95), 0 0 45px rgba(0,0,0,0.6);
+  }
+  .pipe-card:hover .pipe-card__icon-wrap { transform: scale(1.05); }
+  .pipe-card__svg   { width: 48px; height: 48px; color: var(--accent-color,#000); stroke: var(--accent-color,#000); }
+  .pipe-card__label { font-size: 1.15rem; font-weight: 900; letter-spacing: 0.08em; color: var(--accent-color,#000); margin: 0; }
+  .pipe-card__desc  { font-size: 0.85rem; color: #4b5563; margin: 0; line-height: 1.5; }
+  @media (max-width: 640px) {
+    .pipe-card__inner { width: 190px; min-height: 190px; padding: 1.5rem 1.25rem; }
+    .pipe-card__icon-wrap { width: 64px; height: 64px; }
+    .pipe-card__svg { width: 38px; height: 38px; }
+  }
+
+  /* Datasets prose */
+  .about-prose { display: flex; flex-direction: column; gap: 1.4rem; max-width: 900px; }
+  .about-prose p { font-size: clamp(1rem, 1.4vw, 1.2rem); color: #9ca3af; line-height: 1.75; }
+  .about-prose p strong { color: #fff; font-weight: 700; }
+  .about-tooltip-anchor { text-decoration: underline; text-underline-offset: 2px; cursor: help; }
+
+  /* Validation cards */
+  .val-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.75rem; margin-top: 1.5rem; }
+  @media (max-width: 768px) { .val-grid { grid-template-columns: 1fr; } }
+  .val-card {
+    background: #fff; color: #000; border-radius: 16px; padding: 2.25rem 2rem;
+    display: flex; flex-direction: column; gap: 1rem; position: relative;
+    box-shadow: 0 20px 40px -15px rgba(0,0,0,0.7), 0 0 25px rgba(0,0,0,0.4);
+    transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s ease;
+  }
+  .val-card:hover { transform: translateY(-5px); box-shadow: 0 28px 55px -12px rgba(0,0,0,0.85), 0 0 35px rgba(0,0,0,0.5); }
+  .val-card--sibling  { --val-accent: #ea580c; --val-badge-bg: #fff7ed; --val-badge-text: #c2410c; }
+  .val-card--stranger { --val-accent: #2563eb; --val-badge-bg: #eff6ff; --val-badge-text: #1d4ed8; }
+  .val-card--safe     { --val-accent: #16a34a; --val-badge-bg: #f0fdf4; --val-badge-text: #15803d; }
+  .val-card__badge { align-self: flex-start; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--val-badge-text,#374151); }
+  .val-card__title { font-size: 1.7rem; font-weight: 900; color: #000; letter-spacing: -0.01em; margin: 0; }
+  .val-card__desc  { font-size: 0.92rem; color: #4b5563; line-height: 1.7; flex: 1; margin: 0; }
+  .val-card__tag {
+    font-size: 0.82rem; font-weight: 700; color: var(--val-accent,#111);
+    border-top: 1px solid #f3f4f6; padding-top: 1rem; margin: 0;
+    display: flex; align-items: center; gap: 0.4rem;
+  }
+  .val-card__tag::before { content: "•"; font-size: 1.2rem; line-height: 1; color: var(--val-accent,#111); }
+
+  /* XAI grid */
+  .xai-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 0; overflow: hidden; margin-top: 1.5rem; box-shadow: 0 20px 40px -15px rgba(0,0,0,0.8); }
+  @media (max-width: 768px) {
+    .xai-grid { grid-template-columns: 1fr; }
+    .xai-card { padding: 2rem 0 !important; border-right: none !important; }
+    .xai-card:not(:first-child) { padding-left: 0 !important; }
+    .xai-card:not(:last-child)  { border-right: none !important; border-bottom: none !important; }
+  }
+  .xai-card { color: white; padding: 2.75rem 0; display: flex; flex-direction: column; gap: 1rem; position: relative; transition: background-color 0.25s ease, transform 0.25s ease; }
+  .xai-card:not(:first-child) { padding-left: 2rem; }
+  .xai-card:not(:last-child)  { border-right: 1px solid #333333; }
+  .xai-card--shap    { --xai-accent: #7c3aed; --xai-badge-bg: #f5f3ff; --xai-badge-text: #6d28d9; --xai-badge-border: #ede9fe; }
+  .xai-card--lime    { --xai-accent: #0284c7; --xai-badge-bg: #f0f9ff; --xai-badge-text: #0369a1; --xai-badge-border: #e0f2fe; }
+  .xai-card--gradcam { --xai-accent: #059669; --xai-badge-bg: #ecfdf5; --xai-badge-text: #047857; --xai-badge-border: #d1fae5; }
+  .xai-card__badge { align-self: flex-start; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--xai-badge-text,#374151); }
+  .xai-card__title { font-size: 1.8rem; font-weight: 900; color: white; letter-spacing: -0.01em; margin: 0; }
+  .xai-card__desc  { font-size: 0.92rem; color: white; line-height: 1.7; flex: 1; margin: 0; }
+  .xai-card__tag {
+    font-size: 0.82rem; font-weight: 700; color: var(--xai-accent,#111);
+    padding-top: 1rem; margin: 0; display: flex; align-items: center; gap: 0.4rem;
+  }
+  .xai-card__tag::before { content: "\u2726"; font-size: 0.85rem; color: var(--xai-accent,#111); }
+
+  /* Team section */
+  .team-grid { display: flex; flex-direction: column; align-items: center; gap: 2.5rem; margin-top: 1.5rem; }
+  .team-block { text-align: center; display: flex; flex-direction: column; gap: 0.3rem; }
+  .team-label { font-size: 0.8rem; font-weight: 700; color: #6b7280; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.4rem; }
+  .team-name  { font-size: clamp(1rem,1.8vw,1.25rem); font-weight: 500; color: #fff; letter-spacing: 0.04em; }
+  .team-disclaimer { text-align: center; font-size: 0.75rem; color: #4b5563; margin-top: 3rem; max-width: 600px; margin-left: auto; margin-right: auto; line-height: 1.6; }
+
+  /* Bibliography */
+  .about-bib-section { background: #f9fafb; border-top: 1px solid #e5e7eb; padding: 2rem 0; }
+  .about-bib-inner { max-width: 1280px; margin: 0 auto; padding: 0 3rem; }
+  @media (max-width: 768px) { .about-bib-inner { padding: 0 1.5rem; } }
+  .bib-details { background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; overflow: hidden; }
+  .bib-summary { display: flex; align-items: center; gap: 0.75rem; padding: 1.25rem 1.5rem; cursor: pointer; list-style: none; user-select: none; }
+  .bib-summary::-webkit-details-marker { display: none; }
+  .bib-summary__label { font-size: 1rem; font-weight: 700; color: #111; flex: 1; }
+  .bib-summary__hint  { font-size: 0.7rem; color: #9ca3af; background: #f3f4f6; border-radius: 999px; padding: 0.2rem 0.6rem; font-weight: 500; }
+  .bib-chevron { width: 16px; height: 16px; color: #9ca3af; transition: transform 0.2s; flex-shrink: 0; }
+  details[open] .bib-chevron { transform: rotate(180deg); }
+  .bib-body { padding: 1.25rem 1.5rem 1.5rem; border-top: 1px solid #f3f4f6; }
+  .bib-list { list-style: decimal inside; display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.8rem; color: #6b7280; line-height: 1.6; }
+  .bib-list strong { color: #111; }
+  .bib-url  { color: #9ca3af; }
+  .bib-note { font-size: 0.7rem; color: #9ca3af; margin-top: 1rem; font-style: italic; }
 </style>
+{% endblock %}
+
+{% block content %}
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     HERO — full-width black with overlayed background molecule & protein
+════════════════════════════════════════════════════════════════════════════ -->
+<section class="about-hero" aria-labelledby="about-heading">
+  <!-- Background molecule & protein overlays -->
+  <div class="about-hero__bg-layer" aria-hidden="true">
+    <!-- CYP3A4 protein ribbon (back, low opacity) -->
+    <img
+      src="{{ url_for('static', filename='img/CYP3A4.png') }}"
+      alt=""
+      class="about-hero__bg-protein"
+    />
+    <!-- Ketoconazole molecule (front, full opacity, slightly rotated) -->
+    <img
+      src="{{ url_for('static', filename='img/KETOCONAZOLE.png') }}"
+      alt=""
+      class="about-hero__bg-molecule"
+    />
+  </div>
+
+  <!-- Foreground Content -->
+  <div class="about-hero__inner">
+    <div class="about-hero__text">
+      <h1 id="about-heading" class="about-hero__title">
+        About KeTox &amp;<br />Methodology
+      </h1>
+      <p class="about-hero__desc">
+        KeTox is a research prototype that predicts whether a small-molecule
+        compound is likely to inhibit <strong>CYP3A4</strong> — the primary
+        hepatic metabolic enzyme — using <strong>Ketoconazole</strong> as a
+        structural and pharmacological reference standard. The system combines
+        classical machine learning (Random Forest) with a graph neural network
+        (GCN), enriched by PBPK-derived liver concentration modelling and three
+        complementary XAI methods.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     PREDICTION PIPELINE — full-width black, sticky centered title, scrolling cards in front
+════════════════════════════════════════════════════════════════════════════ -->
+<section
+  id="pipeline-section"
+  class="pipeline-section"
+  aria-labelledby="pipeline-heading"
+>
+  <!-- STICKY CENTERED HEADER —— pins dead-center in the viewport -->
+  <div id="pipeline-sticky-header" class="pipeline-sticky-header">
+    <div class="pipeline-sticky-inner">
+      <h2 id="pipeline-heading" class="pipeline-title">Prediction Pipeline</h2>
+      <p class="pipeline-sub">
+        End-to-end flow from input molecule name to an explained toxicity
+        verdict.
+      </p>
+    </div>
+  </div>
+
+  <!-- FOREGROUND SCROLLING CARDS —— scroll on top and past the centered header -->
+  <div class="pipeline-scroll-track">
+    <!-- DATA -->
+    <div class="pipe-card pipe-card--left pipe-card--data">
+      <div class="pipe-card__inner">
+        <div class="pipe-card__icon-wrap">
+          <svg
+            viewBox="0 0 64 64"
+            class="pipe-card__svg"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="3.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <!-- Database cylinder stack -->
+            <ellipse cx="32" cy="15" rx="19" ry="6.5" />
+            <path d="M13 15v15c0 3.6 8.5 6.5 19 6.5s19-2.9 19-6.5V15" />
+            <path d="M13 30v15c0 3.6 8.5 6.5 19 6.5s19-2.9 19-6.5V30" />
+            <line x1="20" y1="22.5" x2="25" y2="22.5" />
+            <line x1="20" y1="37.5" x2="25" y2="37.5" />
+          </svg>
+        </div>
+        <p class="pipe-card__label">DATA</p>
+        <p class="pipe-card__desc">PubChem AID 884<br />AID 1851</p>
+      </div>
+    </div>
+
+    <!-- FEATURES -->
+    <div class="pipe-card pipe-card--right pipe-card--features">
+      <div class="pipe-card__inner">
+        <div class="pipe-card__icon-wrap">
+          <svg
+            viewBox="0 0 64 64"
+            class="pipe-card__svg"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="3.2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <!-- Molecular Atom Orbitals & Chemical Nucleus -->
+            <circle cx="32" cy="32" r="5" fill="currentColor" stroke="none" />
+            <ellipse
+              cx="32"
+              cy="32"
+              rx="22"
+              ry="8.5"
+              transform="rotate(-30 32 32)"
+            />
+            <ellipse
+              cx="32"
+              cy="32"
+              rx="22"
+              ry="8.5"
+              transform="rotate(30 32 32)"
+            />
+            <ellipse
+              cx="32"
+              cy="32"
+              rx="22"
+              ry="8.5"
+              transform="rotate(90 32 32)"
+            />
+          </svg>
+        </div>
+        <p class="pipe-card__label">FEATURES</p>
+        <p class="pipe-card__desc">
+          RDKit descriptors<br />Morgan fingerprints
+        </p>
+      </div>
+    </div>
+
+    <!-- PBPK -->
+    <div class="pipe-card pipe-card--left pipe-card--pbpk">
+      <div class="pipe-card__inner">
+        <div class="pipe-card__icon-wrap">
+          <svg
+            viewBox="0 0 64 64"
+            class="pipe-card__svg"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="3.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <polyline points="4,40 16,40 22,20 30,50 38,28 44,44 52,44 60,32" />
+          </svg>
+        </div>
+        <p class="pipe-card__label">PBPK</p>
+        <p class="pipe-card__desc">
+          Css liver conc. IC<sub>50</sub><br />threshold
+        </p>
+      </div>
+    </div>
+
+    <!-- MODELS -->
+    <div class="pipe-card pipe-card--right pipe-card--models">
+      <div class="pipe-card__inner">
+        <div class="pipe-card__icon-wrap">
+          <svg
+            viewBox="0 0 64 64"
+            class="pipe-card__svg"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="3.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <rect x="20" y="20" width="24" height="24" rx="2" />
+            <line x1="28" y1="8" x2="28" y2="20" />
+            <line x1="36" y1="8" x2="36" y2="20" />
+            <line x1="28" y1="44" x2="28" y2="56" />
+            <line x1="36" y1="44" x2="36" y2="56" />
+            <line x1="8" y1="28" x2="20" y2="28" />
+            <line x1="8" y1="36" x2="20" y2="36" />
+            <line x1="44" y1="28" x2="56" y2="28" />
+            <line x1="44" y1="36" x2="56" y2="36" />
+            <circle cx="32" cy="32" r="4" />
+          </svg>
+        </div>
+        <p class="pipe-card__label">MODELS</p>
+        <p class="pipe-card__desc">Random Forest<br />Graph Conv. Net</p>
+      </div>
+    </div>
+
+    <!-- XAI -->
+    <div class="pipe-card pipe-card--left pipe-card--xai">
+      <div class="pipe-card__inner">
+        <div class="pipe-card__icon-wrap">
+          <svg
+            viewBox="0 0 64 64"
+            class="pipe-card__svg"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="3.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <rect x="16" y="16" width="32" height="32" rx="4" />
+            <text
+              x="22"
+              y="38"
+              font-size="18"
+              font-weight="bold"
+              fill="currentColor"
+              stroke="none"
+              font-family="sans-serif"
+            >
+              AI
+            </text>
+            <line x1="28" y1="6" x2="28" y2="16" />
+            <line x1="36" y1="6" x2="36" y2="16" />
+            <line x1="28" y1="48" x2="28" y2="58" />
+            <line x1="36" y1="48" x2="36" y2="58" />
+            <line x1="6" y1="28" x2="16" y2="28" />
+            <line x1="6" y1="36" x2="16" y2="36" />
+            <line x1="48" y1="28" x2="58" y2="28" />
+            <line x1="48" y1="36" x2="58" y2="36" />
+          </svg>
+        </div>
+        <p class="pipe-card__label">XAI</p>
+        <p class="pipe-card__desc">SHAP · LIME<br />GraphGrad-CAM</p>
+      </div>
+    </div>
+
+    <!-- PREDICTION -->
+    <div class="pipe-card pipe-card--right pipe-card--prediction">
+      <div class="pipe-card__inner">
+        <div class="pipe-card__icon-wrap">
+          <svg
+            viewBox="0 0 64 64"
+            class="pipe-card__svg"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="3.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path
+              d="M32 6 L54 16 L54 36 C54 48 44 56 32 60 C20 56 10 48 10 36 L10 16 Z"
+            />
+            <polyline points="22,32 29,39 42,26" />
+          </svg>
+        </div>
+        <p class="pipe-card__label">PREDICTION</p>
+        <p class="pipe-card__desc">Toxic / Safe +<br />confidence %</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     DATASETS — full-width black, prose style
+════════════════════════════════════════════════════════════════════════════ -->
+<section
+  class="about-section about-section--dark"
+  aria-labelledby="datasets-heading"
+>
+  <div class="about-prose-section">
+    <h2 id="datasets-heading" class="about-section__title">Datasets</h2>
+    <div class="about-prose">
+      <p>
+        <strong>PubChem AID 884</strong> — Primary CYP3A4 inhibition bioassay.
+        Fluorescence-based biochemical screen.
+      </p>
+      <p>
+        <strong>PubChem AID 1851</strong> — Confirmatory CYP3A4 inhibition
+        assay. Dose-response follow-up.
+      </p>
+      <p>
+        <strong>Reference compound: Ketoconazole (PubChem CID 47576)</strong> —
+        a potent, well-characterised
+        <span class="tooltip-wrapper">
+          <span class="tooltip-anchor about-tooltip-anchor">CYP3A4</span>
+          <span class="tooltip-box"
+            >Cytochrome P450 3A4 — a liver enzyme that metabolises roughly 50%
+            of marketed drugs. Its inhibition can cause dangerous drug
+            accumulation.</span
+          >
+        </span>
+        Cytochrome P450 3A4 — a liver enzyme that metabolises roughly 50% of
+        marketed drugs. Its inhibition can cause dangerous drug accumulation.
+        inhibitor used as the positive control and structural anchor for the
+        Tanimoto similarity calculation.
+      </p>
+      <p>
+        Molecular features computed with RDKit: 200-bit Morgan fingerprints
+        (radius 2) + 12 physicochemical descriptors (MolWt, MolLogP, TPSA,
+        NumHAcceptors, NumHDonors, NumRotatableBonds, RingCount,
+        NumAromaticRings, …).
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     VALIDATION FRAMEWORK — full-width black, 3 white cards
+════════════════════════════════════════════════════════════════════════════ -->
+<section
+  class="about-section about-section--dark"
+  aria-labelledby="validation-heading"
+>
+  <div class="about-prose-section">
+    <h2 id="validation-heading" class="about-section__title">
+      Validation Framework
+    </h2>
+    <p class="about-section__sub">
+      Three held-out test sets designed to probe different generalisation
+      challenges, inspired by the Ketoconazole reference structure.
+    </p>
+    <div class="val-grid">
+      <div class="val-card val-card--sibling">
+        <div class="val-card__header">
+          <div class="val-card__badge">High Overlap</div>
+          <h3 class="val-card__title">Sibling Set</h3>
+        </div>
+        <p class="val-card__desc">
+          Structurally similar compounds to Ketoconazole (Tanimoto ≥ 0.4). Tests
+          whether the model correctly flags structurally related — but
+          potentially novel — CYP3A4 inhibitors. The hardest set to get right.
+        </p>
+        <p class="val-card__tag">Tanimoto ≥ 0.4 to Ketoconazole</p>
+      </div>
+      <div class="val-card val-card--stranger">
+        <div class="val-card__header">
+          <div class="val-card__badge">Diverse Scaffolds</div>
+          <h3 class="val-card__title">Stranger Set</h3>
+        </div>
+        <p class="val-card__desc">
+          Structurally dissimilar inhibitors (Tanimoto &lt; 0.4). Tests whether
+          the model generalises beyond the Ketoconazole scaffold to other
+          chemotypes that still inhibit CYP3A4.
+        </p>
+        <p class="val-card__tag">Tanimoto &lt; 0.4 to Ketoconazole</p>
+      </div>
+      <div class="val-card val-card--safe">
+        <div class="val-card__header">
+          <div class="val-card__badge">Specificity Control</div>
+          <h3 class="val-card__title">Safe Set</h3>
+        </div>
+        <p class="val-card__desc">
+          Confirmed non-inhibitors from the PubChem assays. Tests specificity —
+          the model should not flag these as toxic. High false-positive rates
+          here indicate over-sensitivity.
+        </p>
+        <p class="val-card__tag">Confirmed non-inhibitors · Active = False</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     EXPLAINABILITY METHODS — full-width black, 3-column bordered grid
+════════════════════════════════════════════════════════════════════════════ -->
+<section
+  class="about-section about-section--dark"
+  aria-labelledby="xai-heading"
+>
+  <div class="about-prose-section">
+    <h2 id="xai-heading" class="about-section__title">
+      Explainability Methods
+    </h2>
+    <p class="about-section__sub">
+      Three complementary XAI methods provide both global and local
+      interpretations of model behaviour.
+    </p>
+    <div class="xai-grid">
+      <div class="xai-card xai-card--shap">
+        <div class="xai-card__badge">Global &amp; Local Attribution</div>
+        <h3 class="xai-card__title">SHAP</h3>
+        <p class="xai-card__desc">
+          SHapley Additive exPlanations assigns each feature a contribution
+          score based on game theory. Used on the Random Forest model to explain
+          global feature importance and individual predictions.
+        </p>
+        <p class="xai-card__tag">
+          TreeExplainer · Additive feature importances
+        </p>
+      </div>
+      <div class="xai-card xai-card--lime">
+        <div class="xai-card__badge">Rule-Based Local Surrogate</div>
+        <h3 class="xai-card__title">LIME</h3>
+        <p class="xai-card__desc">
+          Local Interpretable Model-Agnostic Explanations builds a simpler
+          interpretable model around each input to explain which molecular rules
+          pushed the prediction toward toxic or safe.
+        </p>
+        <p class="xai-card__tag">
+          Linear Local Surrogate · Perturbation testing
+        </p>
+      </div>
+      <div class="xai-card xai-card--gradcam">
+        <div class="xai-card__badge">Graph Neural Attention</div>
+        <h3 class="xai-card__title">GraphGrad-CAM</h3>
+        <p class="xai-card__desc">
+          Graph Gradient-weighted Class Activation Mapping highlights specific
+          atoms and bonds within the 2D molecular structure that the GCN focused
+          on, providing a visual structural explanation.
+        </p>
+        <p class="xai-card__tag">
+          GCN Class Activation · Atom-level gradient map
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     PROJECT TEAM — full-width black, centred names
+════════════════════════════════════════════════════════════════════════════ -->
+<section
+  class="about-section about-section--dark about-section--last"
+  aria-labelledby="team-heading"
+>
+  <div class="about-prose-section">
+    <h2 id="team-heading" class="about-section__title">Project Team</h2>
+    <div class="team-grid">
+      <div class="team-block">
+        <p class="team-label">AUTHORS</p>
+        <p class="team-name">CYRILL JOHN EYA</p>
+        <p class="team-name">RISIE MEGAN B. REY</p>
+        <p class="team-name">CHACEL GWEN P. FUNDANO</p>
+      </div>
+      <div class="team-block">
+        <p class="team-label">RESEARCH ADVISER</p>
+        <p class="team-name">MARIGOLD P. DE JESUS</p>
+      </div>
+      <div class="team-block">
+        <p class="team-label">INSTITUTION</p>
+        <p class="team-name">MASBATE NATIONAL COMPREHENSIVE HIGH SCHOOL</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %} {% block scripts %}
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const pipelineSection = document.getElementById("pipeline-section");
+    const stickyHeader = document.getElementById("pipeline-sticky-header");
+
+    if (!pipelineSection || !stickyHeader) return;
+
+    let ticking = false;
+
+    function update() {
+      const rect = pipelineSection.getBoundingClientRect();
+      const vh = window.innerHeight;
+
+      if (rect.top > 0) {
+        // Entering from Hero: header is centered at 50vh of the section
+        stickyHeader.style.position = "absolute";
+        stickyHeader.style.top = "50vh";
+        stickyHeader.style.bottom = "auto";
+        stickyHeader.style.transform = "translateY(-50%)";
+      } else if (rect.bottom > vh) {
+        // Inside section: header is pinned dead-center in the viewport
+        stickyHeader.style.position = "fixed";
+        stickyHeader.style.top = "50%";
+        stickyHeader.style.bottom = "auto";
+        stickyHeader.style.transform = "translateY(-50%)";
+      } else {
+        // Cards have scrolled past: header scrolls UP and exits with section (50vh above Datasets)
+        stickyHeader.style.position = "absolute";
+        stickyHeader.style.top = "auto";
+        stickyHeader.style.bottom = "50vh";
+        stickyHeader.style.transform = "translateY(50%)";
+      }
+
+      ticking = false;
+    }
+
+    function onScroll() {
+      if (!ticking) {
+        requestAnimationFrame(update);
+        ticking = true;
+      }
+    }
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+    update();
+  });
+</script>
 {% endblock %}

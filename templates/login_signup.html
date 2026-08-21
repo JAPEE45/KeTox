@@ -1,0 +1,749 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Sign in or create an account for KeTox — CYP3A4 hepatotoxicity predictor."
+    />
+    <title>Sign in to KeTox | KeTox</title>
+
+    <!-- Google Fonts: Plus Jakarta Sans, Outfit, Inter + JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Compiled Tailwind CSS v4 (CLI build) -->
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/output.css') }}"
+    />
+
+    <!-- Hand-authored styles: tokens, components, animations, etc. -->
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/custom.css') }}"
+    />
+
+    <style>
+      a {
+        text-decoration: none !important;
+      }
+    </style>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  </head>
+
+  <body
+    class="bg-neutral-50 text-neutral-900 antialiased min-h-screen flex flex-col relative"
+  >
+    <!-- ═══════════════════════════ NAVIGATION ════════════════════════════════ -->
+    <nav
+      class="sticky top-0 z-40"
+      style="
+        background-color: rgba(250, 250, 250, 0.85);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-bottom: 1px solid rgba(0,0,0,0.06);
+      "
+    >
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <!-- Wordmark -->
+          <a href="/" class="flex items-center gap-3 group" style="text-decoration:none;">
+            <div class="w-9 h-9 bg-black rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm group-hover:bg-neutral-800 transition-colors duration-200">
+              <svg viewBox="0 0 24 24" class="w-5 h-5 fill-white" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <circle cx="12" cy="12" r="2.2" />
+                <circle cx="4.5" cy="7.5" r="1.6" />
+                <circle cx="19.5" cy="7.5" r="1.6" />
+                <circle cx="4.5" cy="16.5" r="1.6" />
+                <circle cx="19.5" cy="16.5" r="1.6" />
+                <circle cx="12" cy="3" r="1.3" />
+                <circle cx="12" cy="21" r="1.3" />
+                <line x1="12" y1="9.8" x2="5.8" y2="8.9" stroke="white" stroke-width="1.3" stroke-linecap="round" />
+                <line x1="12" y1="9.8" x2="18.2" y2="8.9" stroke="white" stroke-width="1.3" stroke-linecap="round" />
+                <line x1="12" y1="14.2" x2="5.8" y2="15.1" stroke="white" stroke-width="1.3" stroke-linecap="round" />
+                <line x1="12" y1="14.2" x2="18.2" y2="15.1" stroke="white" stroke-width="1.3" stroke-linecap="round" />
+                <line x1="12" y1="9.8" x2="12" y2="4.3" stroke="white" stroke-width="1.3" stroke-linecap="round" />
+                <line x1="12" y1="14.2" x2="12" y2="19.7" stroke="white" stroke-width="1.3" stroke-linecap="round" />
+              </svg>
+            </div>
+            <div class="leading-tight">
+              <div class="text-xl font-bold text-black tracking-tight">KeTox</div>
+              <div class="text-xs text-neutral-500 font-medium hidden sm:block">CYP3A4 Hepatotoxicity Predictor</div>
+            </div>
+          </a>
+
+          <!-- Desktop Nav -->
+          <div class="hidden md:flex items-center gap-1">
+            <a href="/" style="text-decoration:none;" class="px-4 py-2.5 rounded-lg text-base font-medium text-neutral-600 hover:text-black hover:bg-neutral-100 transition-all duration-200">Home</a>
+            <a href="/home" style="text-decoration:none;" class="px-4 py-2.5 rounded-lg text-base font-medium text-neutral-600 hover:text-black hover:bg-neutral-100 transition-all duration-200">Predict</a>
+            <a href="/performance" style="text-decoration:none;" class="px-4 py-2.5 rounded-lg text-base font-medium text-neutral-600 hover:text-black hover:bg-neutral-100 transition-all duration-200">Model Performance</a>
+            <a href="/login" style="text-decoration:none;" class="ml-2 px-4 py-2 rounded-lg text-sm font-semibold text-white bg-black hover:bg-neutral-800 transition-all duration-200">Login / Sign up</a>
+          </div>
+
+          <!-- Mobile hamburger -->
+          <div class="flex items-center md:hidden">
+            <button id="auth-mobile-nav-toggle" type="button"
+              class="p-2 rounded-xl text-neutral-700 hover:text-black hover:bg-neutral-200/60 focus:outline-none transition-colors duration-200"
+              aria-controls="auth-mobile-nav-menu" aria-expanded="false" aria-label="Toggle navigation menu">
+              <svg id="auth-nav-icon-open" class="w-6 h-6 stroke-current" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="4" y1="6" x2="20" y2="6" />
+                <line x1="4" y1="12" x2="20" y2="12" />
+                <line x1="4" y1="18" x2="20" y2="18" />
+              </svg>
+              <svg id="auth-nav-icon-close" class="w-6 h-6 stroke-current hidden" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile Drawer -->
+      <div id="auth-mobile-nav-menu"
+        class="md:hidden overflow-hidden transition-all duration-300 ease-in-out max-h-0 opacity-0"
+        style="background-color:rgba(250,250,250,0.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(0,0,0,0.08);">
+        <div class="px-5 pt-3 pb-6 flex flex-col gap-2">
+          <a href="/" style="text-decoration:none;" class="px-4 py-3 rounded-xl text-base font-semibold text-neutral-800 hover:text-black hover:bg-neutral-200/50 transition-colors flex items-center justify-between">
+            <span>Home</span>
+            <svg class="w-4 h-4 opacity-40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </a>
+          <a href="/home" style="text-decoration:none;" class="px-4 py-3 rounded-xl text-base font-semibold text-neutral-800 hover:text-black hover:bg-neutral-200/50 transition-colors flex items-center justify-between">
+            <span>Predict</span>
+            <svg class="w-4 h-4 opacity-40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </a>
+          <a href="/performance" style="text-decoration:none;" class="px-4 py-3 rounded-xl text-base font-semibold text-neutral-800 hover:text-black hover:bg-neutral-200/50 transition-colors flex items-center justify-between">
+            <span>Model Performance</span>
+            <svg class="w-4 h-4 opacity-40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </a>
+          <a href="/login" style="text-decoration:none;" class="px-4 py-3 rounded-xl text-base font-semibold text-white bg-black hover:bg-neutral-800 transition-colors flex items-center justify-between mt-1">
+            <span>Login / Sign up</span>
+            <svg class="w-4 h-4 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Page content wrapper (centered vertically in remaining space) -->
+    <div class="flex-1 flex flex-col justify-center items-center px-4 py-12">
+    <!-- ═════════════════════════ FLOATING ERROR POPUP (TOAST) ════════════════ -->
+    <div
+      id="error-banner"
+      class="fixed top-6 right-6 z-50 transition-all duration-300 shadow-xl rounded-2xl bg-white border border-neutral-200/90 p-4 max-w-sm flex items-start gap-3.5"
+      style="
+        display: none;
+        box-shadow:
+          0 10px 30px -5px rgba(0, 0, 0, 0.12),
+          0 4px 12px -2px rgba(0, 0, 0, 0.05);
+      "
+      role="alert"
+      aria-live="assertive"
+    >
+      <div
+        class="w-8 h-8 rounded-full bg-red-50 border border-red-100 text-red-600 flex items-center justify-center flex-shrink-0 mt-0.5"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-4 h-4"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+      </div>
+      <div class="flex-1 min-w-0 pr-1">
+        <h4 id="error-title" class="text-sm font-semibold text-neutral-900 leading-tight">
+          Invalid Credentials
+        </h4>
+        <p
+          id="error-message"
+          class="text-xs text-neutral-600 mt-1 leading-relaxed"
+        >
+          The email or password you entered is incorrect.
+        </p>
+      </div>
+      <button
+        type="button"
+        onclick="hideError()"
+        class="text-neutral-400 hover:text-neutral-800 p-1.5 rounded-lg hover:bg-neutral-100 transition-colors flex-shrink-0 -mr-1 -mt-1"
+        style="background: transparent; border: none; cursor: pointer"
+        aria-label="Close error"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-4 h-4"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <!-- ═════════════════════════ LOADING MODAL ══════════════════════════════ -->
+    <div
+      id="loading-modal"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm transition-opacity duration-200 hidden"
+      aria-modal="true"
+      role="dialog"
+    >
+      <div
+        class="bg-white rounded-2xl border border-neutral-200/90 shadow-2xl p-6 sm:p-8 max-w-xs w-full mx-4 flex flex-col items-center text-center animate-in fade-in zoom-in-95 duration-150"
+      >
+        <div
+          class="w-10 h-10 rounded-full border-3 border-neutral-200 border-t-neutral-900 animate-spin mb-4"
+        ></div>
+        <h3 id="loading-title" class="text-sm font-bold text-neutral-900">
+          Authenticating...
+        </h3>
+        <p id="loading-desc" class="text-xs text-neutral-500 mt-1">
+          Please wait while we verify your account.
+        </p>
+      </div>
+    </div>
+
+    <div class="w-full max-w-[420px]">
+      <!-- Card Container -->
+      <div class="p-6 sm:p-8">
+        <!-- ===================== SIGN IN PANEL ===================== -->
+        <section id="panel-signin" class="auth-panel">
+          <div
+            class="w-12 h-12 bg-black rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm group-hover:bg-neutral-800 transition-colors duration-200 mx-auto mb-3"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              class="w-6 h-6 fill-white"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="12" r="2.2" />
+              <circle cx="4.5" cy="7.5" r="1.6" />
+              <circle cx="19.5" cy="7.5" r="1.6" />
+              <circle cx="4.5" cy="16.5" r="1.6" />
+              <circle cx="19.5" cy="16.5" r="1.6" />
+              <circle cx="12" cy="3" r="1.3" />
+              <circle cx="12" cy="21" r="1.3" />
+              <line
+                x1="12"
+                y1="9.8"
+                x2="5.8"
+                y2="8.9"
+                stroke="white"
+                stroke-width="1.3"
+                stroke-linecap="round"
+              />
+              <line
+                x1="12"
+                y1="9.8"
+                x2="18.2"
+                y2="8.9"
+                stroke="white"
+                stroke-width="1.3"
+                stroke-linecap="round"
+              />
+              <line
+                x1="12"
+                y1="14.2"
+                x2="5.8"
+                y2="15.1"
+                stroke="white"
+                stroke-width="1.3"
+                stroke-linecap="round"
+              />
+              <line
+                x1="12"
+                y1="14.2"
+                x2="18.2"
+                y2="15.1"
+                stroke="white"
+                stroke-width="1.3"
+                stroke-linecap="round"
+              />
+              <line
+                x1="12"
+                y1="9.8"
+                x2="12"
+                y2="4.3"
+                stroke="white"
+                stroke-width="1.3"
+                stroke-linecap="round"
+              />
+              <line
+                x1="12"
+                y1="14.2"
+                x2="12"
+                y2="19.7"
+                stroke="white"
+                stroke-width="1.3"
+                stroke-linecap="round"
+              />
+            </svg>
+          </div>
+          <h1 class="text-center text-2xl font-bold text-neutral-900 mb-6">
+            Sign in to KeTox
+          </h1>
+
+          <form id="signin-form" class="space-y-4" onsubmit="handleSignIn(event)">
+            <div class="space-y-1.5">
+              <label for="signin-email" class="block text-xs font-semibold text-neutral-700"
+                >Email Address</label
+              >
+              <input
+                type="email"
+                id="signin-email"
+                placeholder="Enter your email"
+                value=""
+                class="w-full rounded-xl border border-neutral-300 bg-white px-3.5 py-2.5 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-black focus:border-black transition-all"
+                required
+              />
+            </div>
+
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between">
+                <label for="signin-password" class="block text-xs font-semibold text-neutral-700"
+                  >Password</label
+                >
+                <button
+                  type="button"
+                  onclick="showPanel('reset')"
+                  class="text-xs text-neutral-700 font-medium hover:text-black transition-colors cursor-pointer bg-transparent border-0 p-0"
+                >
+                  Forgot password?
+                </button>
+              </div>
+              <input
+                type="password"
+                id="signin-password"
+                placeholder="Enter your password"
+                value=""
+                class="w-full rounded-xl border border-neutral-300 bg-white px-3.5 py-2.5 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-black focus:border-black transition-all"
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              class="w-full rounded-xl bg-black text-white font-semibold py-3 text-sm hover:bg-neutral-800 active:bg-black transition-all duration-200 shadow-sm cursor-pointer mt-2"
+            >
+              Sign in
+            </button>
+
+            <div class="flex items-center gap-3 py-1">
+              <div class="h-px bg-neutral-200 flex-1"></div>
+              <span class="text-xs text-neutral-400 font-medium">or</span>
+              <div class="h-px bg-neutral-200 flex-1"></div>
+            </div>
+
+            <button
+              type="button"
+              onclick="showLoadingModal('Connecting to Google...', 'Redirecting to OAuth provider...')"
+              class="w-full flex items-center justify-center gap-2.5 rounded-xl border border-neutral-200 bg-white py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50 hover:border-neutral-300 transition-all cursor-pointer"
+            >
+              <svg class="w-4 h-4" viewBox="0 0 24 24">
+                <path
+                  fill="#4285F4"
+                  d="M23.49 12.27c0-.79-.07-1.54-.2-2.27H12v4.51h6.47c-.28 1.48-1.13 2.73-2.4 3.58v2.98h3.88c2.27-2.09 3.54-5.17 3.54-8.8z"
+                />
+                <path
+                  fill="#34A853"
+                  d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-2.98c-1.08.72-2.45 1.15-4.05 1.15-3.11 0-5.75-2.1-6.69-4.93H1.3v3.09C3.26 21.3 7.31 24 12 24z"
+                />
+                <path
+                  fill="#FBBC05"
+                  d="M5.31 14.33A7.19 7.19 0 0 1 4.94 12c0-.81.14-1.6.37-2.33V6.58H1.3A11.96 11.96 0 0 0 0 12c0 1.93.46 3.76 1.3 5.42l4.01-3.09z"
+                />
+                <path
+                  fill="#EA4335"
+                  d="M12 4.75c1.76 0 3.34.6 4.59 1.79l3.44-3.44C17.94 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.3 6.58l4.01 3.09C6.25 6.85 8.89 4.75 12 4.75z"
+                />
+              </svg>
+              Continue with Google
+            </button>
+          </form>
+
+          <p class="text-center text-xs text-neutral-500 mt-6">
+            New to KeTox?
+            <button
+              type="button"
+              onclick="showPanel('signup')"
+              class="text-neutral-900 font-semibold hover:text-black transition-colors cursor-pointer bg-transparent border-0 p-0 ml-1"
+            >
+              Create an account
+            </button>
+          </p>
+        </section>
+
+        <!-- ===================== RESET PASSWORD PANEL ===================== -->
+        <section id="panel-reset" class="auth-panel hidden">
+          <h1 class="text-center text-2xl font-bold text-neutral-900 mb-2">
+            Reset your password
+          </h1>
+          <p class="text-center text-xs text-neutral-500 mb-6 leading-relaxed">
+            Enter your account's email address and we will send you a password
+            reset link.
+          </p>
+
+          <form class="space-y-4" onsubmit="handleResetPassword(event)">
+            <div class="space-y-1.5">
+              <label for="reset-email" class="block text-xs font-semibold text-neutral-700"
+                >Email Address</label
+              >
+              <input
+                type="email"
+                id="reset-email"
+                placeholder="Enter your email"
+                class="w-full rounded-xl border border-neutral-300 bg-white px-3.5 py-2.5 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-black focus:border-black transition-all"
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              class="w-full rounded-xl bg-black text-white font-semibold py-3 text-sm hover:bg-neutral-800 active:bg-black transition-all duration-200 shadow-sm cursor-pointer mt-2"
+            >
+              Send password reset email
+            </button>
+          </form>
+
+          <p class="text-center text-xs text-neutral-500 mt-6">
+            Remembered your password?
+            <button
+              type="button"
+              onclick="showPanel('signin')"
+              class="text-neutral-900 font-semibold hover:text-black transition-colors cursor-pointer bg-transparent border-0 p-0 ml-1"
+            >
+              Back to sign in
+            </button>
+          </p>
+        </section>
+
+        <!-- ===================== CREATE ACCOUNT PANEL ===================== -->
+        <section id="panel-signup" class="auth-panel hidden">
+          <h1 class="text-left text-2xl font-bold text-neutral-900 mb-1">
+            Create your account
+          </h1>
+          <p class="text-left text-xs text-neutral-500 mb-6">
+            Start predicting CYP3A4 hepatotoxicity
+          </p>
+
+          <form class="space-y-4" onsubmit="handleSignUp(event)">
+            <button
+              type="button"
+              onclick="showLoadingModal('Connecting to Google...', 'Redirecting to OAuth provider...')"
+              class="w-full flex items-center justify-center gap-2.5 rounded-xl border border-neutral-200 bg-white py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50 hover:border-neutral-300 transition-all cursor-pointer"
+            >
+              <svg class="w-4 h-4" viewBox="0 0 24 24">
+                <path
+                  fill="#4285F4"
+                  d="M23.49 12.27c0-.79-.07-1.54-.2-2.27H12v4.51h6.47c-.28 1.48-1.13 2.73-2.4 3.58v2.98h3.88c2.27-2.09 3.54-5.17 3.54-8.8z"
+                />
+                <path
+                  fill="#34A853"
+                  d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-2.98c-1.08.72-2.45 1.15-4.05 1.15-3.11 0-5.75-2.1-6.69-4.93H1.3v3.09C3.26 21.3 7.31 24 12 24z"
+                />
+                <path
+                  fill="#FBBC05"
+                  d="M5.31 14.33A7.19 7.19 0 0 1 4.94 12c0-.81.14-1.6.37-2.33V6.58H1.3A11.96 11.96 0 0 0 0 12c0 1.93.46 3.76 1.3 5.42l4.01-3.09z"
+                />
+                <path
+                  fill="#EA4335"
+                  d="M12 4.75c1.76 0 3.34.6 4.59 1.79l3.44-3.44C17.94 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.3 6.58l4.01 3.09C6.25 6.85 8.89 4.75 12 4.75z"
+                />
+              </svg>
+              Continue with Google
+            </button>
+
+            <div class="flex items-center gap-3 py-1">
+              <div class="h-px bg-neutral-200 flex-1"></div>
+              <span class="text-xs text-neutral-400 font-medium">or</span>
+              <div class="h-px bg-neutral-200 flex-1"></div>
+            </div>
+
+            <div class="flex gap-3">
+              <div class="space-y-1.5 flex-1">
+                <label for="signup-firstname" class="block text-xs font-semibold text-neutral-700"
+                  >First Name</label
+                >
+                <input
+                  type="text"
+                  id="signup-firstname"
+                  placeholder="First name"
+                  class="w-full rounded-xl border border-neutral-300 bg-white px-3.5 py-2.5 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-black focus:border-black transition-all"
+                  required
+                />
+              </div>
+              <div class="space-y-1.5 flex-1">
+                <label for="signup-lastname" class="block text-xs font-semibold text-neutral-700"
+                  >Last Name</label
+                >
+                <input
+                  type="text"
+                  id="signup-lastname"
+                  placeholder="Last name"
+                  class="w-full rounded-xl border border-neutral-300 bg-white px-3.5 py-2.5 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-black focus:border-black transition-all"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="space-y-1.5">
+              <label for="signup-email" class="block text-xs font-semibold text-neutral-700"
+                >Email Address</label
+              >
+              <input
+                type="email"
+                id="signup-email"
+                placeholder="Enter your email"
+                class="w-full rounded-xl border border-neutral-300 bg-white px-3.5 py-2.5 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-black focus:border-black transition-all"
+                required
+              />
+            </div>
+
+            <div class="space-y-1.5">
+              <label for="signup-password" class="block text-xs font-semibold text-neutral-700"
+                >Password</label
+              >
+              <input
+                type="password"
+                id="signup-password"
+                placeholder="Create a password"
+                class="w-full rounded-xl border border-neutral-300 bg-white px-3.5 py-2.5 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-black focus:border-black transition-all"
+                required
+              />
+            </div>
+
+            <div class="flex gap-3">
+              <div class="space-y-1.5 flex-1">
+                <label for="signup-role" class="block text-xs font-semibold text-neutral-700"
+                  >Role</label
+                >
+                <select
+                  id="signup-role"
+                  class="w-full rounded-xl border border-neutral-300 bg-white px-3.5 py-2.5 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-black focus:border-black transition-all cursor-pointer"
+                  required
+                  onchange="handleRoleChange(this.value)"
+                >
+                  <option value="" disabled selected>Select role</option>
+                  <option value="Student">Student</option>
+                  <option value="Teacher">Teacher</option>
+                  <option value="Researcher">Researcher</option>
+                  <option value="Others">Others</option>
+                </select>
+              </div>
+              <div id="signup-other-role-wrapper" class="space-y-1.5 flex-1">
+                <label for="signup-other-role" class="block text-xs font-semibold text-neutral-700"
+                  >If others, specify</label
+                >
+                <input
+                  type="text"
+                  id="signup-other-role"
+                  placeholder="Specify role"
+                  disabled
+                  class="w-full rounded-xl border border-neutral-300 bg-neutral-100 text-neutral-400 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-black transition-all disabled:cursor-not-allowed"
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              class="w-full rounded-xl bg-black text-white font-semibold py-3 text-sm hover:bg-neutral-800 active:bg-black transition-all duration-200 shadow-sm cursor-pointer mt-2"
+            >
+              Create account
+            </button>
+          </form>
+
+          <p class="text-center text-xs text-neutral-500 mt-6">
+            Already have an account?
+            <button
+              type="button"
+              onclick="showPanel('signin')"
+              class="text-neutral-900 font-semibold hover:text-black transition-colors cursor-pointer bg-transparent border-0 p-0 ml-1"
+            >
+              Sign in
+            </button>
+          </p>
+        </section>
+      </div>      
+    </div>
+    <!-- end page content wrapper -->
+
+    <script>
+      // ── Credentials Setup (Ready for backend replacement) ───────────────
+      const STATIC_CREDENTIALS = {
+        email: "admin@g.c",
+        password: "admin"
+      };
+
+      let errorTimeout = null;
+
+      function showPanel(name) {
+        hideError();
+        document.querySelectorAll('.auth-panel').forEach(function (el) {
+          el.classList.add('hidden');
+        });
+        var target = document.getElementById('panel-' + name);
+        if (target) {
+          target.classList.remove('hidden');
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      function handleRoleChange(role) {
+        var otherInput = document.getElementById('signup-other-role');
+        if (role === 'Others') {
+          otherInput.removeAttribute('disabled');
+          otherInput.classList.remove('bg-neutral-100', 'text-neutral-400', 'disabled:cursor-not-allowed');
+          otherInput.classList.add('bg-white', 'text-neutral-900');
+          otherInput.setAttribute('required', 'required');
+          otherInput.focus();
+        } else {
+          otherInput.setAttribute('disabled', 'disabled');
+          otherInput.classList.remove('bg-white', 'text-neutral-900');
+          otherInput.classList.add('bg-neutral-100', 'text-neutral-400', 'disabled:cursor-not-allowed');
+          otherInput.removeAttribute('required');
+          otherInput.value = '';
+        }
+      }
+
+      // ── UI Modal & Popup Handlers ─────────────────────────────────────────
+      function showLoadingModal(title, desc) {
+        const modal = document.getElementById('loading-modal');
+        document.getElementById('loading-title').textContent = title || 'Authenticating...';
+        document.getElementById('loading-desc').textContent = desc || 'Please wait while we verify your account.';
+        modal.classList.remove('hidden');
+      }
+
+      function hideLoadingModal() {
+        const modal = document.getElementById('loading-modal');
+        modal.classList.add('hidden');
+      }
+
+      function showError(title, message) {
+        const banner = document.getElementById('error-banner');
+        document.getElementById('error-title').textContent = title || 'Error';
+        document.getElementById('error-message').textContent = message || 'An error occurred.';
+        
+        banner.style.display = 'flex';
+        banner.classList.remove('opacity-0', 'translate-y-2');
+        banner.classList.add('opacity-100', 'translate-y-0');
+
+        if (errorTimeout) clearTimeout(errorTimeout);
+        errorTimeout = setTimeout(() => {
+          hideError();
+        }, 5000);
+      }
+
+      function hideError() {
+        const banner = document.getElementById('error-banner');
+        if (banner) {
+          banner.style.display = 'none';
+        }
+        if (errorTimeout) clearTimeout(errorTimeout);
+      }
+
+      // ── Auth Submission Flows ─────────────────────────────────────────────
+      function handleSignIn(e) {
+        e.preventDefault();
+        hideError();
+
+        const email = document.getElementById('signin-email').value.trim();
+        const password = document.getElementById('signin-password').value;
+
+        showLoadingModal('Signing in...', 'Verifying credentials with KeTox...');
+
+        // Simulate backend network latency (700ms)
+        setTimeout(() => {
+          hideLoadingModal();
+
+          if (email === STATIC_CREDENTIALS.email && password === STATIC_CREDENTIALS.password) {
+            // Valid credentials -> Redirect to home predictor
+            window.location.href = '/home';
+          } else {
+            // Invalid credentials -> Trigger error popup
+            showError('Invalid Credentials', 'The email or password you entered is incorrect.');
+          }
+        }, 700);
+      }
+
+      function handleSignUp(e) {
+        e.preventDefault();
+        hideError();
+
+        showLoadingModal('Creating account...', 'Registering user with KeTox...');
+
+        setTimeout(() => {
+          hideLoadingModal();
+          // Mock successful account creation redirect
+          window.location.href = '/home';
+        }, 900);
+      }
+
+      function handleResetPassword(e) {
+        e.preventDefault();
+        hideError();
+
+        showLoadingModal('Sending link...', 'Generating password reset email...');
+
+        setTimeout(() => {
+          hideLoadingModal();
+          showPanel('signin');
+          showError('Email Sent', 'If an account exists with that email, a password reset link has been dispatched.');
+          document.getElementById('error-title').classList.replace('text-neutral-900', 'text-neutral-900');
+        }, 800);
+      }
+
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+
+      // ── Mobile nav toggle ─────────────────────────────────────────────────
+      document.addEventListener('DOMContentLoaded', function () {
+        const toggleBtn = document.getElementById('auth-mobile-nav-toggle');
+        const menu = document.getElementById('auth-mobile-nav-menu');
+        const iconOpen = document.getElementById('auth-nav-icon-open');
+        const iconClose = document.getElementById('auth-nav-icon-close');
+        if (!toggleBtn || !menu) return;
+        let isOpen = false;
+        function toggleMenu() {
+          isOpen = !isOpen;
+          toggleBtn.setAttribute('aria-expanded', isOpen);
+          if (isOpen) {
+            menu.style.maxHeight = menu.scrollHeight + 'px';
+            menu.classList.remove('max-h-0', 'opacity-0');
+            menu.classList.add('opacity-100');
+            iconOpen.classList.add('hidden');
+            iconClose.classList.remove('hidden');
+          } else {
+            menu.style.maxHeight = '0px';
+            menu.classList.add('max-h-0', 'opacity-0');
+            menu.classList.remove('opacity-100');
+            iconOpen.classList.remove('hidden');
+            iconClose.classList.add('hidden');
+          }
+        }
+        toggleBtn.addEventListener('click', toggleMenu);
+        window.addEventListener('resize', () => {
+          if (window.innerWidth >= 768 && isOpen) toggleMenu();
+        });
+      });
+    </script>
+  </body>
+</html>

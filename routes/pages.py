@@ -1,7 +1,7 @@
 """
 routes/pages.py — KeTox page (HTML) routes
 
-Registers: GET /   GET /about   GET /performance
+Registers: GET /   GET /home   GET /about (alias)   GET /performance   GET /login
 """
 
 from flask import Blueprint, render_template
@@ -16,7 +16,17 @@ def index():
 
 @pages_bp.route("/about")
 def about():
-    return render_template("about.html")
+    return render_template("index.html")
+
+
+@pages_bp.route("/home")
+def home():
+    return render_template("home.html")
+
+
+@pages_bp.route("/login")
+def login():
+    return render_template("login_signup.html")
 
 
 @pages_bp.route("/performance")

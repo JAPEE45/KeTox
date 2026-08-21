@@ -36,13 +36,34 @@
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 
     {% block head %}{% endblock %}
+
+    <!-- Nav active state: run synchronously before first paint to prevent FOUC -->
+    <script>
+      (function () {
+        var path = window.location.pathname;
+        function setActive() {
+          document.querySelectorAll('[data-nav-path]').forEach(function (link) {
+            var lp = link.getAttribute('data-nav-path');
+            var isActive =
+              (lp === '/about' && (path === '/' || path === '/about')) ||
+              (lp !== '/about' && lp !== '/' && path.startsWith(lp));
+            if (isActive) link.classList.add('nav-link-active');
+          });
+        }
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', setActive);
+        } else {
+          setActive();
+        }
+      })();
+    </script>
   </head>
 
   <body
     class="bg-neutral-50 text-neutral-900 antialiased min-h-screen flex flex-col"
   >
-    {% if request.path == '/' %}
-    <!-- ═══════════════════════════ PARTICLE CANVAS (Home only) ══════════ -->
+    {% if request.path == '/home' %}
+    <!-- ═══════════════════════════ PARTICLE CANVAS (Predict page only) ══════════ -->
     <canvas
       id="particle-canvas"
       style="
@@ -72,7 +93,7 @@
           <!-- Wordmark -->
 
           <a
-            href="/"
+            href="/home"
             class="flex items-center gap-3 group no-underline"
             aria-label="KeTox Home"
           >
@@ -175,22 +196,28 @@
           <!-- Desktop Nav links (hidden on mobile) -->
           <div class="hidden md:flex items-center gap-1">
             <a
-              href="/"
-              data-nav-path="/"
+              href="/about"
+              data-nav-path="/about"
               class="px-4 py-2.5 rounded-lg text-base font-medium text-neutral-600 hover:text-black hover:bg-neutral-100 no-underline transition-all duration-200"
               >Home</a
             >
             <a
-              href="/about"
-              data-nav-path="/about"
+              href="/home"
+              data-nav-path="/home"
               class="px-4 py-2.5 rounded-lg text-base font-medium text-neutral-600 hover:text-black hover:bg-neutral-100 no-underline transition-all duration-200"
-              >About</a
+              >Predict</a
             >
             <a
               href="/performance"
               data-nav-path="/performance"
               class="px-4 py-2.5 rounded-lg text-base font-medium text-neutral-600 hover:text-black hover:bg-neutral-100 no-underline transition-all duration-200"
               >Model Performance</a
+            >
+            <a
+              href="/login"
+              data-nav-path="/login"
+              class="ml-2 px-4 py-2 rounded-lg text-sm font-semibold text-white bg-black hover:bg-neutral-800 no-underline transition-all duration-200"
+              >Login / Sign up</a
             >
           </div>
 
@@ -249,19 +276,19 @@
       >
         <div class="px-5 pt-3 pb-6 flex flex-col gap-2">
           <a
-            href="/"
-            data-nav-path="/"
+            href="/about"
+            data-nav-path="/about"
             class="px-4 py-3 rounded-xl text-base font-semibold text-neutral-800 hover:text-black hover:bg-neutral-200/50 no-underline transition-colors flex items-center justify-between"
           >
             <span>Home</span>
             <svg class="w-4 h-4 opacity-40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
           </a>
           <a
-            href="/about"
-            data-nav-path="/about"
+            href="/home"
+            data-nav-path="/home"
             class="px-4 py-3 rounded-xl text-base font-semibold text-neutral-800 hover:text-black hover:bg-neutral-200/50 no-underline transition-colors flex items-center justify-between"
           >
-            <span>About</span>
+            <span>Predict</span>
             <svg class="w-4 h-4 opacity-40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
           </a>
           <a
@@ -271,6 +298,14 @@
           >
             <span>Model Performance</span>
             <svg class="w-4 h-4 opacity-40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </a>
+          <a
+            href="/login"
+            data-nav-path="/login"
+            class="px-4 py-3 rounded-xl text-base font-semibold text-white bg-black hover:bg-neutral-800 no-underline transition-colors flex items-center justify-between mt-1"
+          >
+            <span>Login / Sign up</span>
+            <svg class="w-4 h-4 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
           </a>
         </div>
       </div>
@@ -336,7 +371,7 @@
       document.addEventListener("DOMContentLoaded", () => lucide.createIcons());
     </script>
 
-    {% block scripts %}{% endblock %} {% if request.path == '/' %}
+    {% block scripts %}{% endblock %} {% if request.path == '/home' %}
     <!-- =============== PARTICLE ANIMATION (Home only) =============== -->
     <script>
       (() => {

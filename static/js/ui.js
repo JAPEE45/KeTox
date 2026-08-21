@@ -24,17 +24,6 @@
     });
   });
 
-  // ─── Nav active state ──────────────────────────────────────────────────────
-  document.addEventListener('DOMContentLoaded', () => {
-    const path = window.location.pathname;
-    document.querySelectorAll('[data-nav-path]').forEach(link => {
-      const linkPath = link.getAttribute('data-nav-path');
-      const isActive =
-        (linkPath === '/' && path === '/') ||
-        (linkPath !== '/' && path.startsWith(linkPath));
-      if (isActive) link.classList.add('nav-link-active');
-    });
-  });
 
   // ─── Gauge bar ─────────────────────────────────────────────────────────────
   /**
