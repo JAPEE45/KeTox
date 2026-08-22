@@ -227,11 +227,30 @@
     renderPBPKCard(data.pbpk);
     renderExplainability(data.shap, data.lime);
 
-    // Update the Structure Preview sidebar image
+    // Update the Structure Preview sidebar image & details
     const previewImg = document.getElementById("structure-preview-img");
     if (previewImg && data.structure_image_url) {
       previewImg.src = data.structure_image_url;
       previewImg.alt = `2D molecular structure of ${data.compound_name || "compound"}`;
+    }
+
+    setText("preview-compound-name", data.compound_name || "Molecule Structure");
+    setText("preview-compound-formula", data.formula ? `Formula: ${data.formula}` : "");
+    const previewSmiles = document.getElementById("preview-compound-smiles");
+    if (previewSmiles) {
+      previewSmiles.textContent = data.smiles || "";
+      previewSmiles.title = data.smiles || "";
+    }
+
+    // Update the Heatmap image
+    const heatmapImg = document.getElementById("heatmap-img");
+    if (heatmapImg && data.heatmap) {
+      heatmapImg.src = data.heatmap;
+    }
+
+    // Re-initialize Lucide icons
+    if (window.lucide) {
+      window.lucide.createIcons();
     }
   }
 
@@ -253,10 +272,14 @@
         (isToxic ? "text-red-700" : "text-green-700");
     }
 
-    // Compound Name Tag — shown below confidence/badge headline
-    const compoundNameEl = document.getElementById("verdict-compound-name");
-    if (compoundNameEl) {
-      compoundNameEl.textContent = data.compound_name || "";
+    // Compound Name, Formula & SMILES Badges
+    setText("verdict-compound-name", data.compound_name || "Molecule");
+    setText("verdict-compound-formula", data.formula || "--");
+    const smilesEl = document.getElementById("verdict-compound-smiles");
+    if (smilesEl) {
+      smilesEl.textContent = data.smiles || "--";
+      const smilesWrapper = document.getElementById("verdict-compound-smiles-wrapper");
+      if (smilesWrapper) smilesWrapper.title = data.smiles || "";
     }
 
     // Confidence number — match prototype large sizing
@@ -270,7 +293,8 @@
     }
 
     // Summary text
-    setText("verdict-summary", data.summary);
+    const summaryEl = document.getElementById("verdict-summary");
+    if (summaryEl) summaryEl.innerHTML = data.summary;
 
     // Ensemble label — matches pill in new layout
     setText(
@@ -443,6 +467,22 @@
     // Error close button — replaces inline onclick="hideError()" in HTML
     const errorCloseBtn = document.getElementById("error-close-btn");
     if (errorCloseBtn) errorCloseBtn.addEventListener("click", hideError);
+
+    // Auto-fill and submit if query parameter is provided (e.g. from history table)
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const queryParam = urlParams.get("compound") || urlParams.get("q") || urlParams.get("smiles");
+      if (queryParam && compoundInput) {
+        compoundInput.value = queryParam;
+        if (form) {
+          setTimeout(() => {
+            form.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
+          }, 200);
+        }
+      }
+    } catch (e) {
+      console.warn("Could not read URL query params:", e);
+    }
   });
 
   // ─── Public API ────────────────────────────────────────────────────────────

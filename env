@@ -1,0 +1,9 @@
+# KeTox Environment Variables Template
+# Copy this file to .env.
+
+FLASK_ENV=development
+FLASK_DEBUG=1
+SECRET_KEY=dev-secret-key-replace-in-production
+
+# SQLite Database Path (Optional - defaults to ketox.db in the project root)
+# SQLITE_DB_PATH=ketox.db

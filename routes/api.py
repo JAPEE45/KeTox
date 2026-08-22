@@ -114,13 +114,14 @@ _GENERIC_SAFE_NAMES = frozenset(
 
 @api_bp.route("/predict", methods=["POST"])
 def predict():
-    """Mock compound prediction — returns structured JSON matching /predict schema."""
+    """Predict CYP3A4 hepatotoxicity — handles both SMILES strings and chemical compound names."""
+    from flask import session
     body = request.get_json(silent=True)
 
     if not body:
         return jsonify({"status": "error", "message": "No JSON body received."}), 400
 
-    compound_name = (
+    query = (
         body.get("compound_name") or
         body.get("name") or
         body.get("query") or
@@ -128,43 +129,110 @@ def predict():
         ""
     ).strip()
 
-    if not compound_name:
+    if not query:
         return jsonify({
             "status": "error",
-            "message": "Please enter a valid molecule or compound name.",
+            "message": "Please enter a valid molecule SMILES string or compound name.",
         }), 400
 
-    if len(compound_name) < 2:
+    if len(query) < 2:
         return jsonify({
             "status": "error",
-            "message": "Invalid compound name (too short). Example valid names: Ketoconazole, Aspirin, Fluconazole.",
+            "message": "Invalid input (too short). Example valid inputs: Ketoconazole, Aspirin, or a SMILES string.",
         }), 422
 
-    # Normalise
-    norm_key = compound_name.lower().replace("-", " ").replace("_", " ").strip()
+    from services.compound_lookup import resolve_compound_input
+    resolved = resolve_compound_input(query)
 
-    # Step 1 — exact KNOWN_COMPOUNDS key
-    matched = KNOWN_COMPOUNDS.get(norm_key)
-    # Step 2 — alias table  (exact match only, no substring guessing)
-    if matched is None:
-        canonical = COMPOUND_ALIASES.get(norm_key)
-        if canonical:
-            matched = KNOWN_COMPOUNDS.get(canonical)
+    if not resolved["is_valid"]:
+        return jsonify({
+            "status": "error",
+            "message": f"Could not parse '{query}' as a valid SMILES string or recognize it in the chemical dataset.",
+        }), 422
 
-    if matched:
-        response = dict(matched)
-        response["status"] = "ok"
-        response["compound_name"] = matched["name"]
-        return jsonify(response)
+    from services.predictor import predict_compound
+    result = predict_compound(smiles=resolved["smiles"], compound_name=resolved["compound_name"])
+    
+    # Enrich response with metadata if matched in local dataset
+    if resolved.get("metadata"):
+        result["dataset_metadata"] = resolved["metadata"]
 
-    # Generic fallback for unrecognised names
-    custom_name = compound_name.title()
-    is_safe = any(word in norm_key for word in _GENERIC_SAFE_NAMES)
-    fallback = _safe_fallback(custom_name) if is_safe else _toxic_fallback(custom_name)
-    return jsonify(fallback)
+    # Automatically save prediction to SQLite history
+    if result.get("status") == "ok":
+        try:
+            from services.db import save_prediction_history
+            user_id = session.get("user_id")
+            user_email = session.get("email")
+            save_prediction_history(result, user_id=user_id, user_email=user_email)
+        except Exception as e:
+            # Non-blocking error for history logging
+            print(f"Warning: Failed to log prediction history: {e}")
+
+    return jsonify(result)
 
 
 @api_bp.route("/api/performance")
 def api_performance():
     """Return model evaluation metrics as JSON."""
     return jsonify({"status": "ok", "data": PERFORMANCE_METRICS})
+
+
+@api_bp.route("/api/prediction-history", methods=["GET"])
+def api_prediction_history():
+    """Query prediction history log with filters and pagination."""
+    from services.db import get_prediction_history
+    
+    limit = min(int(request.args.get("limit", 50)), 200)
+    offset = max(int(request.args.get("offset", 0)), 0)
+    search = request.args.get("search", "").strip() or None
+    verdict = request.args.get("verdict", "").strip() or None
+    agreement = request.args.get("agreement", "").strip() or None
+    model_view = request.args.get("model_view", "").strip() or None
+    sort_by = request.args.get("sort_by", "date_desc").strip()
+
+    data = get_prediction_history(
+        limit=limit,
+        offset=offset,
+        search=search,
+        verdict=verdict,
+        agreement=agreement,
+        model_view=model_view,
+        sort_by=sort_by
+    )
+    return jsonify(data)
+
+
+@api_bp.route("/api/prediction-history/stats", methods=["GET"])
+def api_prediction_history_stats():
+    """Return aggregated historical prediction analytics and comparative model breakdown."""
+    from services.db import get_prediction_history_stats
+    stats = get_prediction_history_stats()
+    return jsonify(stats)
+
+
+@api_bp.route("/api/prediction-history/seed", methods=["POST"])
+def api_prediction_history_seed():
+    """Re-seed default curated historical predictions into SQLite."""
+    from services.db import seed_prediction_history
+    try:
+        seed_prediction_history(force=True)
+        return jsonify({"status": "ok", "message": "Prediction history successfully re-seeded."})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@api_bp.route("/api/prediction-history/<int:item_id>", methods=["DELETE"])
+def api_delete_prediction_history_item(item_id):
+    """Delete a single history entry by ID."""
+    from services.db import delete_prediction_history_item
+    result = delete_prediction_history_item(item_id)
+    return jsonify(result)
+
+
+@api_bp.route("/api/prediction-history/clear", methods=["DELETE"])
+def api_clear_prediction_history():
+    """Clear all historical predictions."""
+    from services.db import clear_prediction_history
+    result = clear_prediction_history()
+    return jsonify(result)
+

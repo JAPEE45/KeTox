@@ -26,9 +26,8 @@ class _Base:
     SECRET_KEY: str = os.environ.get("SECRET_KEY", "dev-insecure-change-in-production")
     JSON_SORT_KEYS: bool = False
 
-    # MongoDB configuration
-    MONGO_URI: str = os.environ.get("MONGO_URI", "mongodb://127.0.0.1:27017/ketox")
-    MONGO_DB_NAME: str = os.environ.get("MONGO_DB_NAME", "ketox")
+    # SQLite configuration
+    SQLITE_DB_PATH: str = os.environ.get("SQLITE_DB_PATH", os.path.join(os.path.dirname(os.path.abspath(__file__)), "ketox.db"))
 
 
 class Development(_Base):

@@ -55,7 +55,7 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
           <!-- Wordmark -->
-          <a href="/" class="flex items-center gap-3 group" style="text-decoration:none;">
+          <a href="{% if session.get('user_id') %}/home{% else %}/{% endif %}" class="flex items-center gap-3 group" style="text-decoration:none;">
             <div class="w-9 h-9 bg-black rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm group-hover:bg-neutral-800 transition-colors duration-200">
               <svg viewBox="0 0 24 24" class="w-5 h-5 fill-white" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                 <circle cx="12" cy="12" r="2.2" />
@@ -82,9 +82,15 @@
           <!-- Desktop Nav -->
           <div class="hidden md:flex items-center gap-1">
             <a href="/" style="text-decoration:none;" class="px-4 py-2.5 rounded-lg text-base font-medium text-neutral-600 hover:text-black hover:bg-neutral-100 transition-all duration-200">Home</a>
+            {% if session.get('user_id') %}
             <a href="/home" style="text-decoration:none;" class="px-4 py-2.5 rounded-lg text-base font-medium text-neutral-600 hover:text-black hover:bg-neutral-100 transition-all duration-200">Predict</a>
+            {% endif %}
             <a href="/performance" style="text-decoration:none;" class="px-4 py-2.5 rounded-lg text-base font-medium text-neutral-600 hover:text-black hover:bg-neutral-100 transition-all duration-200">Model Performance</a>
+            {% if session.get('user_id') %}
+            <a href="/api/auth/logout" style="text-decoration:none;" class="ml-2 px-4 py-2 rounded-lg text-sm font-semibold text-white bg-black hover:bg-neutral-800 transition-all duration-200" onclick="event.preventDefault(); fetch('/api/auth/logout', {method: 'POST'}).then(() => window.location.reload());">Log out</a>
+            {% else %}
             <a href="/login" style="text-decoration:none;" class="ml-2 px-4 py-2 rounded-lg text-sm font-semibold text-white bg-black hover:bg-neutral-800 transition-all duration-200">Login / Sign up</a>
+            {% endif %}
           </div>
 
           <!-- Mobile hamburger -->
@@ -115,18 +121,27 @@
             <span>Home</span>
             <svg class="w-4 h-4 opacity-40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
           </a>
+          {% if session.get('user_id') %}
           <a href="/home" style="text-decoration:none;" class="px-4 py-3 rounded-xl text-base font-semibold text-neutral-800 hover:text-black hover:bg-neutral-200/50 transition-colors flex items-center justify-between">
             <span>Predict</span>
             <svg class="w-4 h-4 opacity-40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
           </a>
+          {% endif %}
           <a href="/performance" style="text-decoration:none;" class="px-4 py-3 rounded-xl text-base font-semibold text-neutral-800 hover:text-black hover:bg-neutral-200/50 transition-colors flex items-center justify-between">
             <span>Model Performance</span>
             <svg class="w-4 h-4 opacity-40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
           </a>
+          {% if session.get('user_id') %}
+          <a href="/api/auth/logout" style="text-decoration:none;" class="px-4 py-3 rounded-xl text-base font-semibold text-white bg-black hover:bg-neutral-800 transition-colors flex items-center justify-between mt-1" onclick="event.preventDefault(); fetch('/api/auth/logout', {method: 'POST'}).then(() => window.location.reload());">
+            <span>Log out</span>
+            <svg class="w-4 h-4 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </a>
+          {% else %}
           <a href="/login" style="text-decoration:none;" class="px-4 py-3 rounded-xl text-base font-semibold text-white bg-black hover:bg-neutral-800 transition-colors flex items-center justify-between mt-1">
             <span>Login / Sign up</span>
             <svg class="w-4 h-4 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
           </a>
+          {% endif %}
         </div>
       </div>
     </nav>
