@@ -15,7 +15,6 @@
       {% block title %}KeTox{% endblock %} | CYP3A4 Hepatotoxicity Predictor
     </title>
 
-    <!-- Google Fonts: Plus Jakarta Sans, Outfit, Inter + JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -23,35 +22,36 @@
       rel="stylesheet"
     />
 
-    <!-- Compiled Tailwind CSS v4 (CLI build with preflight disabled) -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/output.css') }}" />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/output.css') }}?v=2.8"
+    />
 
-    <!-- Hand-authored styles: tokens, components, animations, gauges, etc. -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}" />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/custom.css') }}?v=2.8"
+    />
 
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 
     {% block head %}{% endblock %}
 
-    <!-- Nav active state: run synchronously before first paint to prevent FOUC -->
     <script>
       (function () {
         var path = window.location.pathname;
         function setActive() {
-          document.querySelectorAll('[data-nav-path]').forEach(function (link) {
-            var lp = link.getAttribute('data-nav-path');
+          document.querySelectorAll("[data-nav-path]").forEach(function (link) {
+            var lp = link.getAttribute("data-nav-path");
             var isActive =
-              (lp === '/about' && (path === '/' || path === '/about')) ||
-              (lp !== '/about' && lp !== '/' && path.startsWith(lp));
-            if (isActive) link.classList.add('nav-link-active');
+              (lp === "/about" && (path === "/" || path === "/about")) ||
+              (lp !== "/about" && lp !== "/" && path.startsWith(lp));
+            if (isActive) link.classList.add("nav-link-active");
           });
         }
-        if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', setActive);
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", setActive);
         } else {
           setActive();
         }
@@ -63,7 +63,6 @@
     class="bg-neutral-50 text-neutral-900 antialiased min-h-screen flex flex-col"
   >
     {% if request.path == '/home' %}
-    <!-- ═══════════════════════════ PARTICLE CANVAS (Predict page only) ══════════ -->
     <canvas
       id="particle-canvas"
       style="
@@ -78,8 +77,6 @@
     ></canvas>
     {% endif %}
 
-    <!-- ═══════════════════════════ NAVIGATION ═══════════════════════════ -->
-
     <nav
       class="sticky top-0 z-40 bg-neutral-50/85 backdrop-blur-md"
       style="
@@ -90,8 +87,6 @@
     >
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
-          <!-- Wordmark -->
-
           <a
             href="{% if session.get('user_id') %}/home{% else %}/{% endif %}"
             class="flex items-center gap-3 group no-underline"
@@ -192,8 +187,6 @@
               </div>
             </div>
           </a>
-
-          <!-- Desktop Nav links (hidden on mobile) -->
           <div class="hidden md:flex items-center gap-1">
             <a
               href="/about"
@@ -219,7 +212,12 @@
             <a
               href="/api/auth/logout"
               class="ml-2 px-4 py-2 rounded-lg text-sm font-semibold text-white bg-black hover:bg-neutral-800 no-underline transition-all duration-200"
-              onclick="event.preventDefault(); fetch('/api/auth/logout', {method: 'POST'}).then(() => window.location.reload());"
+              onclick="
+                event.preventDefault();
+                fetch('/api/auth/logout', { method: 'POST' }).then(() =>
+                  window.location.reload(),
+                );
+              "
               >Log out</a
             >
             {% else %}
@@ -232,7 +230,6 @@
             {% endif %}
           </div>
 
-          <!-- Mobile Accordion Toggle Button (visible on mobile only) -->
           <div class="flex items-center md:hidden">
             <button
               id="mobile-nav-toggle"
@@ -242,7 +239,6 @@
               aria-expanded="false"
               aria-label="Toggle navigation menu"
             >
-              <!-- Hamburger / Accordion Icon -->
               <svg
                 id="mobile-nav-icon-open"
                 class="w-6 h-6 stroke-current transition-transform duration-200"
@@ -256,7 +252,6 @@
                 <line x1="4" y1="12" x2="20" y2="12" />
                 <line x1="4" y1="18" x2="20" y2="18" />
               </svg>
-              <!-- Close Icon (hidden initially) -->
               <svg
                 id="mobile-nav-icon-close"
                 class="w-6 h-6 stroke-current hidden transition-transform duration-200"
@@ -274,7 +269,6 @@
         </div>
       </div>
 
-      <!-- ═════════════════════════ MOBILE ACCORDION DRAWER ════════════════ -->
       <div
         id="mobile-nav-menu"
         class="md:hidden overflow-hidden transition-all duration-300 ease-in-out max-h-0 opacity-0"
@@ -292,7 +286,15 @@
             class="px-4 py-3 rounded-xl text-base font-semibold text-neutral-800 hover:text-black hover:bg-neutral-200/50 no-underline transition-colors flex items-center justify-between"
           >
             <span>Home</span>
-            <svg class="w-4 h-4 opacity-40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            <svg
+              class="w-4 h-4 opacity-40"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
           </a>
           {% if session.get('user_id') %}
           <a
@@ -301,7 +303,15 @@
             class="px-4 py-3 rounded-xl text-base font-semibold text-neutral-800 hover:text-black hover:bg-neutral-200/50 no-underline transition-colors flex items-center justify-between"
           >
             <span>Predict</span>
-            <svg class="w-4 h-4 opacity-40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            <svg
+              class="w-4 h-4 opacity-40"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
           </a>
           {% endif %}
           <a
@@ -310,16 +320,37 @@
             class="px-4 py-3 rounded-xl text-base font-semibold text-neutral-800 hover:text-black hover:bg-neutral-200/50 no-underline transition-colors flex items-center justify-between"
           >
             <span>Model Performance</span>
-            <svg class="w-4 h-4 opacity-40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            <svg
+              class="w-4 h-4 opacity-40"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
           </a>
           {% if session.get('user_id') %}
           <a
             href="/api/auth/logout"
             class="px-4 py-3 rounded-xl text-base font-semibold text-white bg-black hover:bg-neutral-800 no-underline transition-colors flex items-center justify-between mt-1"
-            onclick="event.preventDefault(); fetch('/api/auth/logout', {method: 'POST'}).then(() => window.location.reload());"
+            onclick="
+              event.preventDefault();
+              fetch('/api/auth/logout', { method: 'POST' }).then(() =>
+                window.location.reload(),
+              );
+            "
           >
             <span>Log out</span>
-            <svg class="w-4 h-4 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            <svg
+              class="w-4 h-4 opacity-60"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
           </a>
           {% else %}
           <a
@@ -328,14 +359,21 @@
             class="px-4 py-3 rounded-xl text-base font-semibold text-white bg-black hover:bg-neutral-800 no-underline transition-colors flex items-center justify-between mt-1"
           >
             <span>Login / Sign up</span>
-            <svg class="w-4 h-4 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            <svg
+              class="w-4 h-4 opacity-60"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
           </a>
           {% endif %}
         </div>
       </div>
     </nav>
 
-    <!-- ═════════════════════════ MOBILE NAV SCRIPT ════════════════════════ -->
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         const toggleBtn = document.getElementById("mobile-nav-toggle");
@@ -368,7 +406,6 @@
 
         toggleBtn.addEventListener("click", toggleMenu);
 
-        // Close on window resize to desktop
         window.addEventListener("resize", () => {
           if (window.innerWidth >= 768 && isOpen) {
             toggleMenu();
@@ -377,43 +414,34 @@
       });
     </script>
 
-    <!-- ═══════════════════════════ MAIN CONTENT ═════════════════════════ -->
+    <main class="flex-1 flex flex-col w-full min-w-0">
+      {% block content %}{% endblock %}
+    </main>
 
-    <main class="flex-1 flex flex-col">{% block content %}{% endblock %}</main>
+    <script src="{{ url_for('static', filename='js/ui.js') }}?v=2.8"></script>
 
-    <!-- Scripts: ui.js → charts.js → predict.js (order matters) -->
+    <script src="{{ url_for('static', filename='js/charts.js') }}?v=2.8"></script>
 
-    <script src="{{ url_for('static', filename='js/ui.js') }}"></script>
-
-    <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
-
-    <script src="{{ url_for('static', filename='js/predict.js') }}"></script>
-
-    <!-- Lucide icon init (after DOM ready) -->
+    <script src="{{ url_for('static', filename='js/predict.js') }}?v=2.8"></script>
 
     <script>
       document.addEventListener("DOMContentLoaded", () => lucide.createIcons());
     </script>
 
     {% block scripts %}{% endblock %} {% if request.path == '/home' %}
-    <!-- =============== PARTICLE ANIMATION (Home only) =============== -->
     <script>
       (() => {
         const canvas = document.getElementById("particle-canvas");
         if (!canvas) return;
 
-        // Accessibility: respect the OS "reduce motion" preference.
-        // If set, hide the canvas and skip the animation entirely.
         if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
           canvas.style.display = "none";
-          // Still expose a no-op destroyParticles so predict.js can call it safely.
           window.destroyParticles = () => {};
           return;
         }
 
         const ctx = canvas.getContext("2d");
 
-        // HSL palette – vivid hues that shift smoothly
         const PALETTE = [
           [217, 89, 61], // blue
           [4, 80, 58], // red
@@ -425,45 +453,24 @@
           [280, 55, 55], // violet
           [195, 85, 52], // cyan
         ];
-
         const COUNT = 280;
-
         const CLUSTER_R = 340;
-
         const SPRING = 0.055;
-
         const DAMP = 0.82;
-
         const REPEL_R = 150;
-
         const REPEL_F = 7;
+        const FOLLOW = 0.015;
+        const G_FREQ1 = 0.0006;
+        const G_FREQ2 = 0.00097;
 
-        const FOLLOW = 0.015; // lazy cursor-chase delay
-
-        // Global breathing frequencies (millisecond-based, t = ms from rAF)
-
-        const G_FREQ1 = 0.0006; // ~10s cycle
-
-        const G_FREQ2 = 0.00097; // ~6.5s cycle
-
-        // Size pulse: particles shrink to SIZE_MIN and return to 1.0 each breath
-
-        // Synced to G_FREQ1 so the size pulse matches the cloud expand/compress
-
-        const SIZE_MIN = 0.55; // shrink to 55% of base length (clearly visible)
-
-        const SIZE_MAX = 1.0; // return to full length
+        const SIZE_MIN = 0.55;
+        const SIZE_MAX = 1.0;
 
         let W, H;
-
         let lastTime = 0;
-
-        let clock = 0; // seconds, for wobble oscillators
-
+        let clock = 0;
         let mouse = { x: -1, y: -1 };
-
         let clusterX, clusterY;
-
         let particles = [];
 
         function rand(lo, hi) {
@@ -491,192 +498,108 @@
 
           init() {
             const r = Math.sqrt(Math.random()) * CLUSTER_R;
-
             const theta = rand(0, Math.PI * 2);
 
             this.offX = r * Math.cos(theta);
-
             this.offY = r * Math.sin(theta);
-
             this.x = (clusterX || W / 2) + this.offX;
-
             this.y = (clusterY || H / 2) + this.offY;
-
             this.vx = 0;
-
             this.vy = 0;
-
-            // Organic position wobble
-
             this.phX = rand(0, Math.PI * 2);
-
             this.phY = rand(0, Math.PI * 2);
-
             this.fqX = rand(0.5, 1.2);
-
             this.fqY = rand(0.4, 1.0);
-
             this.aX = rand(10, 24);
-
             this.aY = rand(8, 18);
-
-            // Per-particle cloud-edge breathing (keeps shape organic, not a circle)
-
             this.bPhase = rand(0, Math.PI * 2);
-
             this.bFreq = rand(0.0008, 0.0018);
-
             this.bAmp = rand(0.07, 0.15);
-
-            // Size pulse: each particle has a small personal phase offset
-
-            // so they don't all shrink at exactly the same instant
-
-            this.sizePhase = rand(-0.4, 0.4); // small random offset in seconds
-
-            // Geometry
-
+            this.sizePhase = rand(-0.4, 0.4);
             this.baseLen = rand(5, 15);
-
             this.len = this.baseLen;
-
             this.thick = rand(1.2, 2.6);
-
             this.angle = rand(0, Math.PI);
-
             this.spin = rand(-0.008, 0.008);
-
             this.alpha = rand(0.5, 0.9);
-
-            // Color cycling
-
             this.colA = randInt(PALETTE.length);
-
             this.colB =
               (this.colA + 1 + randInt(PALETTE.length - 1)) % PALETTE.length;
-
             this.colFreq = rand(0.00015, 0.0004);
           }
-
-          // HSL color interpolated between two palette entries
 
           currentColor(t) {
             const progress =
               (Math.sin(t * this.colFreq * Math.PI * 2 + this.bPhase) + 1) / 2;
-
             const [hA, sA, lA] = PALETTE[this.colA];
-
             const [hB, sB, lB] = PALETTE[this.colB];
-
             const h = lerpHue(hA, hB, progress);
-
             const s = sA + (sB - sA) * progress;
-
             const l = lA + (lB - lA) * progress;
-
             return `hsl(${h.toFixed(1)},${s.toFixed(1)}%,${l.toFixed(1)}%)`;
           }
 
           update(t) {
-            // ── Cloud position breathing (expand / compress) ──────────────────
-
             const globalScale =
               1 +
               0.22 * Math.sin(t * G_FREQ1) +
               0.1 * Math.sin(t * G_FREQ2 + 1.2);
-
             const localScale =
               1 + this.bAmp * Math.sin(t * this.bFreq + this.bPhase);
-
             const scale = globalScale * localScale;
-
-            // Spring target (breathing + wobble)
-
             const tx =
               clusterX +
               this.offX * scale +
               Math.sin(clock * this.fqX + this.phX) * this.aX;
-
             const ty =
               clusterY +
               this.offY * scale +
               Math.cos(clock * this.fqY + this.phY) * this.aY;
 
             this.vx += (tx - this.x) * SPRING;
-
             this.vy += (ty - this.y) * SPRING;
-
-            // Cursor repulsion
 
             if (mouse.x > 0) {
               const dx = this.x - mouse.x;
-
               const dy = this.y - mouse.y;
-
               const dist = Math.hypot(dx, dy) || 1;
 
               if (dist < REPEL_R) {
                 const ratio = 1 - dist / REPEL_R;
 
                 this.vx += (dx / dist) * ratio * ratio * REPEL_F;
-
                 this.vy += (dy / dist) * ratio * ratio * REPEL_F;
               }
             }
 
             this.vx *= DAMP;
-
             this.vy *= DAMP;
-
             this.x += this.vx;
-
             this.y += this.vy;
-
             this.angle += this.spin;
-
-            // ── Size pulse synced to global breath ────────────────────────────
-
-            // sin goes -1 → +1; remap to SIZE_MIN → SIZE_MAX
-
-            // Use clock (seconds) so it's frame-rate independent
 
             const breathCycle = Math.sin(
               (clock + this.sizePhase) * G_FREQ1 * 1000,
             );
-
             const lenScale =
               SIZE_MIN + (SIZE_MAX - SIZE_MIN) * ((breathCycle + 1) / 2);
 
             this.len = this.baseLen * lenScale;
-
-            // Cache color
-
             this._color = this.currentColor(t);
           }
 
           draw() {
             ctx.save();
-
             ctx.globalAlpha = this.alpha;
-
             ctx.strokeStyle = this._color;
-
             ctx.lineWidth = this.thick;
-
             ctx.lineCap = "round";
-
             ctx.translate(this.x, this.y);
-
             ctx.rotate(this.angle);
-
             ctx.beginPath();
-
             ctx.moveTo(-this.len / 2, 0);
-
             ctx.lineTo(this.len / 2, 0);
-
             ctx.stroke();
-
             ctx.restore();
           }
         }
@@ -768,7 +691,6 @@
           mouse.y = -1;
         });
 
-        // ── Public API: call to gracefully kill the animation ────────────
         window.destroyParticles = function () {
           if (window._particleDestroyed) return;
           window._particleDestroyed = true;
@@ -784,12 +706,10 @@
             ctx.clearRect(0, 0, canvas.width || 0, canvas.height || 0);
           }
 
-          // Hide canvas immediately
           canvas.style.display = "none";
           canvas.remove();
         };
 
-        // Immediately destroy if user clicks About or Model Performance from Home
         document
           .querySelectorAll('a[href="/about"], a[href="/performance"]')
           .forEach((link) => {

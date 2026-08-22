@@ -2,13 +2,8 @@
 block meta_description %}KeTox methodology: data sources (PubChem AID 884 / AID
 1851), Random Forest and GCN models, PBPK modelling, SHAP/LIME/GraphGrad-CAM
 explainability, and the Sibling-Stranger-Safe validation framework.{% endblock
-%}
-
-{% block head %}
+%} {% block head %}
 <style>
-  /* ── About page scoped styles ───────────────────────────────────────────── */
-
-  /* Hero */
   .about-hero {
     position: relative;
     background: #000;
@@ -19,7 +14,6 @@ explainability, and the Sibling-Stranger-Safe validation framework.{% endblock
     overflow: hidden;
   }
 
-  /* Background overlays layer with smooth bottom fade/blur into dark background */
   .about-hero__bg-layer {
     position: absolute;
     inset: 0;
@@ -44,7 +38,6 @@ explainability, and the Sibling-Stranger-Safe validation framework.{% endblock
     );
   }
 
-  /* CYP3A4 Protein ribbon: back, low opacity, large scale */
   .about-hero__bg-protein {
     position: absolute;
     right: -4%;
@@ -58,7 +51,6 @@ explainability, and the Sibling-Stranger-Safe validation framework.{% endblock
     user-select: none;
   }
 
-  /* Ketoconazole Molecule: front, 100% opacity, rotated ~54deg, crisp shadow */
   .about-hero__bg-molecule {
     position: absolute;
     right: 4%;
@@ -72,7 +64,6 @@ explainability, and the Sibling-Stranger-Safe validation framework.{% endblock
     user-select: none;
   }
 
-  /* Foreground content */
   .about-hero__inner {
     position: relative;
     z-index: 10;
@@ -155,7 +146,6 @@ explainability, and the Sibling-Stranger-Safe validation framework.{% endblock
     font-weight: 700;
   }
 
-  /* Sections */
   .about-section {
     position: relative;
     z-index: 20;
@@ -193,7 +183,6 @@ explainability, and the Sibling-Stranger-Safe validation framework.{% endblock
     line-height: 1.6;
   }
 
-  /* ── Prediction Pipeline ── */
   .pipeline-section {
     position: relative;
     background: #000;
@@ -259,19 +248,55 @@ explainability, and the Sibling-Stranger-Safe validation framework.{% endblock
     width: 100%;
     margin-bottom: 24vh;
   }
-  .pipe-card:last-child { margin-bottom: 0; }
-  .pipe-card--left  { justify-content: flex-start;  padding-left: 1rem; }
-  .pipe-card--right { justify-content: flex-end;    padding-right: 1rem; }
+  .pipe-card:last-child {
+    margin-bottom: 0;
+  }
+  .pipe-card--left {
+    justify-content: flex-start;
+    padding-left: 1rem;
+  }
+  .pipe-card--right {
+    justify-content: flex-end;
+    padding-right: 1rem;
+  }
   @media (max-width: 768px) {
     .pipe-card--left,
-    .pipe-card--right { justify-content: center; padding-left: 0; padding-right: 0; }
+    .pipe-card--right {
+      justify-content: center;
+      padding-left: 0;
+      padding-right: 0;
+    }
   }
-  .pipe-card--data       { --accent-color: #2563eb; --accent-bg: rgba(37,99,235,0.08);  --accent-border: rgba(37,99,235,0.2); }
-  .pipe-card--features   { --accent-color: #ea580c; --accent-bg: rgba(234,88,12,0.08);  --accent-border: rgba(234,88,12,0.2); }
-  .pipe-card--pbpk       { --accent-color: #e11d48; --accent-bg: rgba(225,29,72,0.08);  --accent-border: rgba(225,29,72,0.2); }
-  .pipe-card--models     { --accent-color: #7c3aed; --accent-bg: rgba(124,58,237,0.08); --accent-border: rgba(124,58,237,0.2); }
-  .pipe-card--xai        { --accent-color: #0284c7; --accent-bg: rgba(2,132,199,0.08);  --accent-border: rgba(2,132,199,0.2); }
-  .pipe-card--prediction { --accent-color: #16a34a; --accent-bg: rgba(22,163,74,0.08);  --accent-border: rgba(22,163,74,0.2); }
+  .pipe-card--data {
+    --accent-color: #2563eb;
+    --accent-bg: rgba(37, 99, 235, 0.08);
+    --accent-border: rgba(37, 99, 235, 0.2);
+  }
+  .pipe-card--features {
+    --accent-color: #ea580c;
+    --accent-bg: rgba(234, 88, 12, 0.08);
+    --accent-border: rgba(234, 88, 12, 0.2);
+  }
+  .pipe-card--pbpk {
+    --accent-color: #e11d48;
+    --accent-bg: rgba(225, 29, 72, 0.08);
+    --accent-border: rgba(225, 29, 72, 0.2);
+  }
+  .pipe-card--models {
+    --accent-color: #7c3aed;
+    --accent-bg: rgba(124, 58, 237, 0.08);
+    --accent-border: rgba(124, 58, 237, 0.2);
+  }
+  .pipe-card--xai {
+    --accent-color: #0284c7;
+    --accent-bg: rgba(2, 132, 199, 0.08);
+    --accent-border: rgba(2, 132, 199, 0.2);
+  }
+  .pipe-card--prediction {
+    --accent-color: #16a34a;
+    --accent-bg: rgba(22, 163, 74, 0.08);
+    --accent-border: rgba(22, 163, 74, 0.2);
+  }
   .pipe-card__inner {
     background: #fff;
     color: #000;
@@ -287,116 +312,300 @@ explainability, and the Sibling-Stranger-Safe validation framework.{% endblock
     text-align: center;
     gap: 0.5rem;
     flex-shrink: 0;
-    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.9), 0 0 35px rgba(0,0,0,0.5);
-    transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s ease;
+    box-shadow:
+      0 25px 50px -12px rgba(0, 0, 0, 0.9),
+      0 0 35px rgba(0, 0, 0, 0.5);
+    transition:
+      transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 0.3s ease;
   }
   .pipe-card:hover .pipe-card__inner {
     transform: translateY(-4px);
-    box-shadow: 0 30px 60px -12px rgba(0,0,0,0.95), 0 0 45px rgba(0,0,0,0.6);
+    box-shadow:
+      0 30px 60px -12px rgba(0, 0, 0, 0.95),
+      0 0 45px rgba(0, 0, 0, 0.6);
   }
-  .pipe-card:hover .pipe-card__icon-wrap { transform: scale(1.05); }
-  .pipe-card__svg   { width: 48px; height: 48px; color: var(--accent-color,#000); stroke: var(--accent-color,#000); }
-  .pipe-card__label { font-size: 1.15rem; font-weight: 900; letter-spacing: 0.08em; color: var(--accent-color,#000); margin: 0; }
-  .pipe-card__desc  { font-size: 0.85rem; color: #4b5563; margin: 0; line-height: 1.5; }
+  .pipe-card:hover .pipe-card__icon-wrap {
+    transform: scale(1.05);
+  }
+  .pipe-card__svg {
+    width: 48px;
+    height: 48px;
+    color: var(--accent-color, #000);
+    stroke: var(--accent-color, #000);
+  }
+  .pipe-card__label {
+    font-size: 1.15rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    color: var(--accent-color, #000);
+    margin: 0;
+  }
+  .pipe-card__desc {
+    font-size: 0.85rem;
+    color: #4b5563;
+    margin: 0;
+    line-height: 1.5;
+  }
   @media (max-width: 640px) {
-    .pipe-card__inner { width: 190px; min-height: 190px; padding: 1.5rem 1.25rem; }
-    .pipe-card__icon-wrap { width: 64px; height: 64px; }
-    .pipe-card__svg { width: 38px; height: 38px; }
+    .pipe-card__inner {
+      width: 190px;
+      min-height: 190px;
+      padding: 1.5rem 1.25rem;
+    }
+    .pipe-card__icon-wrap {
+      width: 64px;
+      height: 64px;
+    }
+    .pipe-card__svg {
+      width: 38px;
+      height: 38px;
+    }
   }
 
-  /* Datasets prose */
-  .about-prose { display: flex; flex-direction: column; gap: 1.4rem; max-width: 900px; }
-  .about-prose p { font-size: clamp(1rem, 1.4vw, 1.2rem); color: #9ca3af; line-height: 1.75; }
-  .about-prose p strong { color: #fff; font-weight: 700; }
-  .about-tooltip-anchor { text-decoration: underline; text-underline-offset: 2px; cursor: help; }
-
-  /* Validation cards */
-  .val-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.75rem; margin-top: 1.5rem; }
-  @media (max-width: 768px) { .val-grid { grid-template-columns: 1fr; } }
-  .val-card {
-    background: #fff; color: #000; border-radius: 16px; padding: 2.25rem 2rem;
-    display: flex; flex-direction: column; gap: 1rem; position: relative;
-    box-shadow: 0 20px 40px -15px rgba(0,0,0,0.7), 0 0 25px rgba(0,0,0,0.4);
-    transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s ease;
+  .about-prose {
+    display: flex;
+    flex-direction: column;
+    gap: 1.4rem;
+    max-width: 900px;
   }
-  .val-card:hover { transform: translateY(-5px); box-shadow: 0 28px 55px -12px rgba(0,0,0,0.85), 0 0 35px rgba(0,0,0,0.5); }
-  .val-card--sibling  { --val-accent: #ea580c; --val-badge-bg: #fff7ed; --val-badge-text: #c2410c; }
-  .val-card--stranger { --val-accent: #2563eb; --val-badge-bg: #eff6ff; --val-badge-text: #1d4ed8; }
-  .val-card--safe     { --val-accent: #16a34a; --val-badge-bg: #f0fdf4; --val-badge-text: #15803d; }
-  .val-card__badge { align-self: flex-start; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--val-badge-text,#374151); }
-  .val-card__title { font-size: 1.7rem; font-weight: 900; color: #000; letter-spacing: -0.01em; margin: 0; }
-  .val-card__desc  { font-size: 0.92rem; color: #4b5563; line-height: 1.7; flex: 1; margin: 0; }
-  .val-card__tag {
-    font-size: 0.82rem; font-weight: 700; color: var(--val-accent,#111);
-    border-top: 1px solid #f3f4f6; padding-top: 1rem; margin: 0;
-    display: flex; align-items: center; gap: 0.4rem;
+  .about-prose p {
+    font-size: clamp(1rem, 1.4vw, 1.2rem);
+    color: #9ca3af;
+    line-height: 1.75;
   }
-  .val-card__tag::before { content: "•"; font-size: 1.2rem; line-height: 1; color: var(--val-accent,#111); }
+  .about-prose p strong {
+    color: #fff;
+    font-weight: 700;
+  }
+  .about-tooltip-anchor {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    cursor: help;
+  }
 
-  /* XAI grid */
-  .xai-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 0; overflow: hidden; margin-top: 1.5rem; box-shadow: 0 20px 40px -15px rgba(0,0,0,0.8); }
+  .val-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.75rem;
+    margin-top: 1.5rem;
+  }
   @media (max-width: 768px) {
-    .xai-grid { grid-template-columns: 1fr; }
-    .xai-card { padding: 2rem 0 !important; border-right: none !important; }
-    .xai-card:not(:first-child) { padding-left: 0 !important; }
-    .xai-card:not(:last-child)  { border-right: none !important; border-bottom: none !important; }
+    .val-grid {
+      grid-template-columns: 1fr;
+    }
   }
-  .xai-card { color: white; padding: 2.75rem 0; display: flex; flex-direction: column; gap: 1rem; position: relative; transition: background-color 0.25s ease, transform 0.25s ease; }
-  .xai-card:not(:first-child) { padding-left: 2rem; }
-  .xai-card:not(:last-child)  { border-right: 1px solid #333333; }
-  .xai-card--shap    { --xai-accent: #7c3aed; --xai-badge-bg: #f5f3ff; --xai-badge-text: #6d28d9; --xai-badge-border: #ede9fe; }
-  .xai-card--lime    { --xai-accent: #0284c7; --xai-badge-bg: #f0f9ff; --xai-badge-text: #0369a1; --xai-badge-border: #e0f2fe; }
-  .xai-card--gradcam { --xai-accent: #059669; --xai-badge-bg: #ecfdf5; --xai-badge-text: #047857; --xai-badge-border: #d1fae5; }
-  .xai-card__badge { align-self: flex-start; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--xai-badge-text,#374151); }
-  .xai-card__title { font-size: 1.8rem; font-weight: 900; color: white; letter-spacing: -0.01em; margin: 0; }
-  .xai-card__desc  { font-size: 0.92rem; color: white; line-height: 1.7; flex: 1; margin: 0; }
+  .val-card {
+    background: #fff;
+    color: #000;
+    border-radius: 16px;
+    padding: 2.25rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    position: relative;
+    box-shadow:
+      0 20px 40px -15px rgba(0, 0, 0, 0.7),
+      0 0 25px rgba(0, 0, 0, 0.4);
+    transition:
+      transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 0.3s ease;
+  }
+  .val-card:hover {
+    transform: translateY(-5px);
+    box-shadow:
+      0 28px 55px -12px rgba(0, 0, 0, 0.85),
+      0 0 35px rgba(0, 0, 0, 0.5);
+  }
+  .val-card--sibling {
+    --val-accent: #ea580c;
+    --val-badge-bg: #fff7ed;
+    --val-badge-text: #c2410c;
+  }
+  .val-card--stranger {
+    --val-accent: #2563eb;
+    --val-badge-bg: #eff6ff;
+    --val-badge-text: #1d4ed8;
+  }
+  .val-card--safe {
+    --val-accent: #16a34a;
+    --val-badge-bg: #f0fdf4;
+    --val-badge-text: #15803d;
+  }
+  .val-card__badge {
+    align-self: flex-start;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--val-badge-text, #374151);
+  }
+  .val-card__title {
+    font-size: 1.7rem;
+    font-weight: 900;
+    color: #000;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+  .val-card__desc {
+    font-size: 0.92rem;
+    color: #4b5563;
+    line-height: 1.7;
+    flex: 1;
+    margin: 0;
+  }
+  .val-card__tag {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--val-accent, #111);
+    border-top: 1px solid #f3f4f6;
+    padding-top: 1rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .val-card__tag::before {
+    content: "•";
+    font-size: 1.2rem;
+    line-height: 1;
+    color: var(--val-accent, #111);
+  }
+
+  .xai-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    overflow: hidden;
+    margin-top: 1.5rem;
+    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.8);
+  }
+  @media (max-width: 768px) {
+    .xai-grid {
+      grid-template-columns: 1fr;
+    }
+    .xai-card {
+      padding: 2rem 0 !important;
+      border-right: none !important;
+    }
+    .xai-card:not(:first-child) {
+      padding-left: 0 !important;
+    }
+    .xai-card:not(:last-child) {
+      border-right: none !important;
+      border-bottom: none !important;
+    }
+  }
+  .xai-card {
+    color: white;
+    padding: 2.75rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    position: relative;
+    transition:
+      background-color 0.25s ease,
+      transform 0.25s ease;
+  }
+  .xai-card:not(:first-child) {
+    padding-left: 2rem;
+  }
+  .xai-card:not(:last-child) {
+    border-right: 1px solid #333333;
+  }
+  .xai-card--shap {
+    --xai-accent: #7c3aed;
+    --xai-badge-bg: #f5f3ff;
+    --xai-badge-text: #6d28d9;
+    --xai-badge-border: #ede9fe;
+  }
+  .xai-card--lime {
+    --xai-accent: #0284c7;
+    --xai-badge-bg: #f0f9ff;
+    --xai-badge-text: #0369a1;
+    --xai-badge-border: #e0f2fe;
+  }
+  .xai-card--gradcam {
+    --xai-accent: #059669;
+    --xai-badge-bg: #ecfdf5;
+    --xai-badge-text: #047857;
+    --xai-badge-border: #d1fae5;
+  }
+  .xai-card__badge {
+    align-self: flex-start;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--xai-badge-text, #374151);
+  }
+  .xai-card__title {
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: white;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+  .xai-card__desc {
+    font-size: 0.92rem;
+    color: white;
+    line-height: 1.7;
+    flex: 1;
+    margin: 0;
+  }
   .xai-card__tag {
-    font-size: 0.82rem; font-weight: 700; color: var(--xai-accent,#111);
-    padding-top: 1rem; margin: 0; display: flex; align-items: center; gap: 0.4rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--xai-accent, #111);
+    padding-top: 1rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
   }
-  .xai-card__tag::before { content: "\u2726"; font-size: 0.85rem; color: var(--xai-accent,#111); }
+  .xai-card__tag::before {
+    content: "\u2726";
+    font-size: 0.85rem;
+    color: var(--xai-accent, #111);
+  }
 
-  /* Team section */
-  .team-grid { display: flex; flex-direction: column; align-items: center; gap: 2.5rem; margin-top: 1.5rem; }
-  .team-block { text-align: center; display: flex; flex-direction: column; gap: 0.3rem; }
-  .team-label { font-size: 0.8rem; font-weight: 700; color: #6b7280; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.4rem; }
-  .team-name  { font-size: clamp(1rem,1.8vw,1.25rem); font-weight: 500; color: #fff; letter-spacing: 0.04em; }
-  .team-disclaimer { text-align: center; font-size: 0.75rem; color: #4b5563; margin-top: 3rem; max-width: 600px; margin-left: auto; margin-right: auto; line-height: 1.6; }
-
-  /* Bibliography */
-  .about-bib-section { background: #f9fafb; border-top: 1px solid #e5e7eb; padding: 2rem 0; }
-  .about-bib-inner { max-width: 1280px; margin: 0 auto; padding: 0 3rem; }
-  @media (max-width: 768px) { .about-bib-inner { padding: 0 1.5rem; } }
-  .bib-details { background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; overflow: hidden; }
-  .bib-summary { display: flex; align-items: center; gap: 0.75rem; padding: 1.25rem 1.5rem; cursor: pointer; list-style: none; user-select: none; }
-  .bib-summary::-webkit-details-marker { display: none; }
-  .bib-summary__label { font-size: 1rem; font-weight: 700; color: #111; flex: 1; }
-  .bib-summary__hint  { font-size: 0.7rem; color: #9ca3af; background: #f3f4f6; border-radius: 999px; padding: 0.2rem 0.6rem; font-weight: 500; }
-  .bib-chevron { width: 16px; height: 16px; color: #9ca3af; transition: transform 0.2s; flex-shrink: 0; }
-  details[open] .bib-chevron { transform: rotate(180deg); }
-  .bib-body { padding: 1.25rem 1.5rem 1.5rem; border-top: 1px solid #f3f4f6; }
-  .bib-list { list-style: decimal inside; display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.8rem; color: #6b7280; line-height: 1.6; }
-  .bib-list strong { color: #111; }
-  .bib-url  { color: #9ca3af; }
-  .bib-note { font-size: 0.7rem; color: #9ca3af; margin-top: 1rem; font-style: italic; }
+  .team-grid {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2.5rem;
+    margin-top: 1.5rem;
+  }
+  .team-block {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+  .team-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #6b7280;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+  }
+  .team-name {
+    font-size: clamp(1rem, 1.8vw, 1.25rem);
+    font-weight: 500;
+    color: #fff;
+    letter-spacing: 0.04em;
+  }
 </style>
-{% endblock %}
+{% endblock %} {% block content %}
 
-{% block content %}
-
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     HERO — full-width black with overlayed background molecule & protein
-════════════════════════════════════════════════════════════════════════════ -->
 <section class="about-hero" aria-labelledby="about-heading">
-  <!-- Background molecule & protein overlays -->
   <div class="about-hero__bg-layer" aria-hidden="true">
-    <!-- CYP3A4 protein ribbon (back, low opacity) -->
     <img
       src="{{ url_for('static', filename='img/CYP3A4.png') }}"
       alt=""
       class="about-hero__bg-protein"
     />
-    <!-- Ketoconazole molecule (front, full opacity, slightly rotated) -->
     <img
       src="{{ url_for('static', filename='img/KETOCONAZOLE.png') }}"
       alt=""
@@ -404,7 +613,6 @@ explainability, and the Sibling-Stranger-Safe validation framework.{% endblock
     />
   </div>
 
-  <!-- Foreground Content -->
   <div class="about-hero__inner">
     <div class="about-hero__text">
       <h1 id="about-heading" class="about-hero__title">
@@ -423,15 +631,11 @@ explainability, and the Sibling-Stranger-Safe validation framework.{% endblock
   </div>
 </section>
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     PREDICTION PIPELINE — full-width black, sticky centered title, scrolling cards in front
-════════════════════════════════════════════════════════════════════════════ -->
 <section
   id="pipeline-section"
   class="pipeline-section"
   aria-labelledby="pipeline-heading"
 >
-  <!-- STICKY CENTERED HEADER —— pins dead-center in the viewport -->
   <div id="pipeline-sticky-header" class="pipeline-sticky-header">
     <div class="pipeline-sticky-inner">
       <h2 id="pipeline-heading" class="pipeline-title">Prediction Pipeline</h2>
@@ -442,9 +646,7 @@ explainability, and the Sibling-Stranger-Safe validation framework.{% endblock
     </div>
   </div>
 
-  <!-- FOREGROUND SCROLLING CARDS —— scroll on top and past the centered header -->
   <div class="pipeline-scroll-track">
-    <!-- DATA -->
     <div class="pipe-card pipe-card--left pipe-card--data">
       <div class="pipe-card__inner">
         <div class="pipe-card__icon-wrap">
@@ -459,7 +661,6 @@ explainability, and the Sibling-Stranger-Safe validation framework.{% endblock
             stroke-linejoin="round"
             aria-hidden="true"
           >
-            <!-- Database cylinder stack -->
             <ellipse cx="32" cy="15" rx="19" ry="6.5" />
             <path d="M13 15v15c0 3.6 8.5 6.5 19 6.5s19-2.9 19-6.5V15" />
             <path d="M13 30v15c0 3.6 8.5 6.5 19 6.5s19-2.9 19-6.5V30" />
@@ -472,7 +673,6 @@ explainability, and the Sibling-Stranger-Safe validation framework.{% endblock
       </div>
     </div>
 
-    <!-- FEATURES -->
     <div class="pipe-card pipe-card--right pipe-card--features">
       <div class="pipe-card__inner">
         <div class="pipe-card__icon-wrap">
@@ -487,7 +687,6 @@ explainability, and the Sibling-Stranger-Safe validation framework.{% endblock
             stroke-linejoin="round"
             aria-hidden="true"
           >
-            <!-- Molecular Atom Orbitals & Chemical Nucleus -->
             <circle cx="32" cy="32" r="5" fill="currentColor" stroke="none" />
             <ellipse
               cx="32"
@@ -519,7 +718,6 @@ explainability, and the Sibling-Stranger-Safe validation framework.{% endblock
       </div>
     </div>
 
-    <!-- PBPK -->
     <div class="pipe-card pipe-card--left pipe-card--pbpk">
       <div class="pipe-card__inner">
         <div class="pipe-card__icon-wrap">
@@ -544,7 +742,6 @@ explainability, and the Sibling-Stranger-Safe validation framework.{% endblock
       </div>
     </div>
 
-    <!-- MODELS -->
     <div class="pipe-card pipe-card--right pipe-card--models">
       <div class="pipe-card__inner">
         <div class="pipe-card__icon-wrap">
@@ -576,7 +773,6 @@ explainability, and the Sibling-Stranger-Safe validation framework.{% endblock
       </div>
     </div>
 
-    <!-- XAI -->
     <div class="pipe-card pipe-card--left pipe-card--xai">
       <div class="pipe-card__inner">
         <div class="pipe-card__icon-wrap">
@@ -618,7 +814,6 @@ explainability, and the Sibling-Stranger-Safe validation framework.{% endblock
       </div>
     </div>
 
-    <!-- PREDICTION -->
     <div class="pipe-card pipe-card--right pipe-card--prediction">
       <div class="pipe-card__inner">
         <div class="pipe-card__icon-wrap">
@@ -646,9 +841,6 @@ explainability, and the Sibling-Stranger-Safe validation framework.{% endblock
   </div>
 </section>
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     DATASETS — full-width black, prose style
-════════════════════════════════════════════════════════════════════════════ -->
 <section
   class="about-section about-section--dark"
   aria-labelledby="datasets-heading"
@@ -690,9 +882,6 @@ explainability, and the Sibling-Stranger-Safe validation framework.{% endblock
   </div>
 </section>
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     VALIDATION FRAMEWORK — full-width black, 3 white cards
-════════════════════════════════════════════════════════════════════════════ -->
 <section
   class="about-section about-section--dark"
   aria-labelledby="validation-heading"
@@ -746,9 +935,6 @@ explainability, and the Sibling-Stranger-Safe validation framework.{% endblock
   </div>
 </section>
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     EXPLAINABILITY METHODS — full-width black, 3-column bordered grid
-════════════════════════════════════════════════════════════════════════════ -->
 <section
   class="about-section about-section--dark"
   aria-labelledby="xai-heading"
@@ -802,9 +988,6 @@ explainability, and the Sibling-Stranger-Safe validation framework.{% endblock
   </div>
 </section>
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
-     PROJECT TEAM — full-width black, centred names
-════════════════════════════════════════════════════════════════════════════ -->
 <section
   class="about-section about-section--dark about-section--last"
   aria-labelledby="team-heading"

@@ -9,7 +9,6 @@
     />
     <title>Sign in to KeTox | KeTox</title>
 
-    <!-- Google Fonts: Plus Jakarta Sans, Outfit, Inter + JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -17,13 +16,11 @@
       rel="stylesheet"
     />
 
-    <!-- Compiled Tailwind CSS v4 (CLI build) -->
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='css/output.css') }}"
     />
 
-    <!-- Hand-authored styles: tokens, components, animations, etc. -->
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='css/custom.css') }}"
@@ -35,14 +32,12 @@
       }
     </style>
 
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   </head>
 
   <body
     class="bg-neutral-50 text-neutral-900 antialiased min-h-screen flex flex-col relative"
   >
-    <!-- ═══════════════════════════ NAVIGATION ════════════════════════════════ -->
     <nav
       class="sticky top-0 z-40"
       style="
@@ -54,7 +49,6 @@
     >
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
-          <!-- Wordmark -->
           <a href="{% if session.get('user_id') %}/home{% else %}/{% endif %}" class="flex items-center gap-3 group" style="text-decoration:none;">
             <div class="w-9 h-9 bg-black rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm group-hover:bg-neutral-800 transition-colors duration-200">
               <svg viewBox="0 0 24 24" class="w-5 h-5 fill-white" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -79,7 +73,6 @@
             </div>
           </a>
 
-          <!-- Desktop Nav -->
           <div class="hidden md:flex items-center gap-1">
             <a href="/" style="text-decoration:none;" class="px-4 py-2.5 rounded-lg text-base font-medium text-neutral-600 hover:text-black hover:bg-neutral-100 transition-all duration-200">Home</a>
             {% if session.get('user_id') %}
@@ -93,7 +86,6 @@
             {% endif %}
           </div>
 
-          <!-- Mobile hamburger -->
           <div class="flex items-center md:hidden">
             <button id="auth-mobile-nav-toggle" type="button"
               class="p-2 rounded-xl text-neutral-700 hover:text-black hover:bg-neutral-200/60 focus:outline-none transition-colors duration-200"
@@ -112,7 +104,6 @@
         </div>
       </div>
 
-      <!-- Mobile Drawer -->
       <div id="auth-mobile-nav-menu"
         class="md:hidden overflow-hidden transition-all duration-300 ease-in-out max-h-0 opacity-0"
         style="background-color:rgba(250,250,250,0.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(0,0,0,0.08);">
@@ -146,12 +137,10 @@
       </div>
     </nav>
 
-    <!-- Page content wrapper (centered vertically in remaining space) -->
     <div class="flex-1 flex flex-col justify-center items-center px-4 py-12">
-    <!-- ═════════════════════════ FLOATING ERROR POPUP (TOAST) ════════════════ -->
     <div
       id="error-banner"
-      class="fixed top-6 right-6 z-50 transition-all duration-300 shadow-xl rounded-2xl bg-white border border-neutral-200/90 p-4 max-w-sm flex items-start gap-3.5"
+      class="fixed top-0 inset-x-0 sm:top-6 sm:right-6 sm:inset-x-auto sm:max-w-sm w-full z-50 transition-all duration-300 shadow-md sm:shadow-xl rounded-none sm:rounded-2xl bg-white border-b sm:border border-neutral-200/90 p-4 flex items-start gap-3.5"
       style="
         display: none;
         box-shadow:
@@ -213,7 +202,6 @@
       </button>
     </div>
 
-    <!-- ═════════════════════════ LOADING MODAL ══════════════════════════════ -->
     <div
       id="loading-modal"
       class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm transition-opacity duration-200 hidden"
@@ -236,9 +224,7 @@
     </div>
 
     <div class="w-full max-w-[420px]">
-      <!-- Card Container -->
       <div class="p-6 sm:p-8">
-        <!-- ===================== SIGN IN PANEL ===================== -->
         <section id="panel-signin" class="auth-panel">
           <div
             class="w-12 h-12 bg-black rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm group-hover:bg-neutral-800 transition-colors duration-200 mx-auto mb-3"
@@ -367,7 +353,7 @@
               <div class="h-px bg-neutral-200 flex-1"></div>
             </div>
 
-            <button
+            <!-- <button
               type="button"
               onclick="showLoadingModal('Connecting to Google...', 'Redirecting to OAuth provider...')"
               class="w-full flex items-center justify-center gap-2.5 rounded-xl border border-neutral-200 bg-white py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50 hover:border-neutral-300 transition-all cursor-pointer"
@@ -391,7 +377,7 @@
                 />
               </svg>
               Continue with Google
-            </button>
+            </button> -->
           </form>
 
           <p class="text-center text-xs text-neutral-500 mt-6">
@@ -406,7 +392,6 @@
           </p>
         </section>
 
-        <!-- ===================== RESET PASSWORD PANEL ===================== -->
         <section id="panel-reset" class="auth-panel hidden">
           <h1 class="text-center text-2xl font-bold text-neutral-900 mb-2">
             Reset your password
@@ -450,7 +435,6 @@
           </p>
         </section>
 
-        <!-- ===================== CREATE ACCOUNT PANEL ===================== -->
         <section id="panel-signup" class="auth-panel hidden">
           <h1 class="text-left text-2xl font-bold text-neutral-900 mb-1">
             Create your account
@@ -460,7 +444,7 @@
           </p>
 
           <form class="space-y-4" onsubmit="handleSignUp(event)">
-            <button
+            <!-- <button
               type="button"
               onclick="showLoadingModal('Connecting to Google...', 'Redirecting to OAuth provider...')"
               class="w-full flex items-center justify-center gap-2.5 rounded-xl border border-neutral-200 bg-white py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50 hover:border-neutral-300 transition-all cursor-pointer"
@@ -484,13 +468,13 @@
                 />
               </svg>
               Continue with Google
-            </button>
+            </button> -->
 
-            <div class="flex items-center gap-3 py-1">
+            <!-- <div class="flex items-center gap-3 py-1">
               <div class="h-px bg-neutral-200 flex-1"></div>
               <span class="text-xs text-neutral-400 font-medium">or</span>
               <div class="h-px bg-neutral-200 flex-1"></div>
-            </div>
+            </div> -->
 
             <div class="flex gap-3">
               <div class="space-y-1.5 flex-1">
@@ -598,7 +582,6 @@
         </section>
       </div>      
     </div>
-    <!-- end page content wrapper -->
 
     <script>
       let errorTimeout = null;
@@ -632,7 +615,6 @@
         }
       }
 
-      // ── UI Modal & Popup Handlers ─────────────────────────────────────────
       function showLoadingModal(title, desc) {
         const modal = document.getElementById('loading-modal');
         document.getElementById('loading-title').textContent = title || 'Authenticating...';
@@ -668,7 +650,6 @@
         if (errorTimeout) clearTimeout(errorTimeout);
       }
 
-      // ── Auth Submission Flows (Connected to MongoDB Backend) ─────────────
       async function handleSignIn(e) {
         e.preventDefault();
         hideError();
@@ -765,7 +746,6 @@
         lucide.createIcons();
       }
 
-      // ── Mobile nav toggle ─────────────────────────────────────────────────
       document.addEventListener('DOMContentLoaded', function () {
         const toggleBtn = document.getElementById('auth-mobile-nav-toggle');
         const menu = document.getElementById('auth-mobile-nav-menu');

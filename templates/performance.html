@@ -1,265 +1,593 @@
-{% extends "base.html" %}
-{% block title %}Model Performance & History{% endblock %}
-{% block meta_description %}KeTox dual AI performance analytics and historical prediction evaluation across Random Forest, Graph Convolutional Network (GCN), and Ensemble architectures.{% endblock %}
-
-{% block content %}
-<!-- ═══════════════════════════ PAGE HEADER ══════════════════════════════ -->
-<section class="bg-white border-b border-slate-200">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-      <div>
-        <h1 class="text-2xl sm:text-3xl font-black text-navy-900 tracking-tight">
-          AI Model Performance & Prediction History
+{% extends "base.html" %} {% block title %}Model Performance & History{%
+endblock %} {% block meta_description %}KeTox dual AI performance analytics and
+historical prediction evaluation across Random Forest, Graph Convolutional
+Network (GCN), and Ensemble architectures.{% endblock %} {% block content %}
+<section class="bg-white border-b border-slate-200 w-full overflow-hidden">
+  <div
+    class="max-w-7xl w-full mx-auto px-3.5 sm:px-6 lg:px-8 py-5 sm:py-8 min-w-0"
+  >
+    <div
+      class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 sm:gap-6 min-w-0"
+    >
+      <div class="min-w-0">
+        <h1
+          class="text-xl sm:text-2xl md:text-3xl font-black text-navy-900 tracking-tight leading-tight break-words"
+        >
+          AI Model Performance &amp; Prediction History
         </h1>
-        <p class="text-slate-500 text-sm mt-1 max-w-2xl leading-relaxed">
-          Comparative evaluation and chronological log of KeTox's dual AI architectures:
+        <p
+          class="text-slate-500 text-xs sm:text-sm mt-1.5 max-w-2xl leading-relaxed"
+        >
+          Comparative evaluation and chronological log of KeTox's dual AI
+          architectures:
           <span class="tooltip-wrapper">
-            <span class="tooltip-anchor font-semibold text-slate-700">Random Forest</span>
-            <span class="tooltip-box">Ensemble of decision trees trained on RDKit molecular descriptors &amp; Morgan fingerprints.</span>
+            <span class="tooltip-anchor font-semibold text-slate-700"
+              >Random Forest</span
+            >
+            <span class="tooltip-box"
+              >Ensemble of decision trees trained on RDKit molecular descriptors
+              &amp; Morgan fingerprints.</span
+            >
           </span>
           and
           <span class="tooltip-wrapper">
-            <span class="tooltip-anchor font-semibold text-slate-700">GCN/GAT</span>
-            <span class="tooltip-box">Graph Attention Network learning from molecular graph topology with GraphGrad-CAM interpretability.</span>
+            <span class="tooltip-anchor font-semibold text-slate-700"
+              >GCN/GAT</span
+            >
+            <span class="tooltip-box"
+              >Graph Attention Network learning from molecular graph topology
+              with GraphGrad-CAM interpretability.</span
+            >
           </span>
           alongside the weighted ensemble consensus.
         </p>
       </div>
 
-      <!-- Model Scope 3-Way Switcher -->
-      <div class="flex-shrink-0 flex flex-col sm:flex-row items-start sm:items-center gap-3">
-        <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Scope:</span>
-        <div class="model-toggle" role="group" aria-label="Select AI model view">
-          <button class="model-toggle-btn active" id="scope-both" data-scope="both">Both AIs</button>
-          <button class="model-toggle-btn" id="scope-rf" data-scope="rf">Random Forest</button>
-          <button class="model-toggle-btn" id="scope-gcn" data-scope="gcn">GCN</button>
+      <div
+        class="flex-shrink-0 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full sm:w-auto min-w-0"
+      >
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-400"
+          >Scope:</span
+        >
+        <div
+          class="model-toggle grid grid-cols-3 sm:inline-flex w-full sm:w-auto text-center min-w-0"
+          role="group"
+          aria-label="Select AI model view"
+        >
+          <button
+            class="model-toggle-btn active"
+            id="scope-both"
+            data-scope="both"
+          >
+            Both AIs
+          </button>
+          <button class="model-toggle-btn" id="scope-rf" data-scope="rf">
+            Random Forest
+          </button>
+          <button class="model-toggle-btn" id="scope-gcn" data-scope="gcn">
+            GCN
+          </button>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-10">
-
-  <!-- ═══════════════════════════ KPI SCORECARDS ═══════════════════════ -->
-  <section>
-    <div class="flex items-center justify-between mb-4">
-      <h2 class="text-sm font-bold text-navy-900 flex items-center gap-2">
-        Prediction History Overview
-        <span class="text-slate-400 font-normal text-xs">&mdash; from database</span>
+<div
+  class="max-w-7xl w-full mx-auto px-3.5 sm:px-6 lg:px-8 py-5 sm:py-8 flex flex-col gap-5 sm:gap-8 lg:gap-10 min-w-0 overflow-hidden"
+>
+  <section class="w-full min-w-0">
+    <div class="flex items-center justify-between mb-3 sm:mb-4 min-w-0">
+      <h2
+        class="text-xs sm:text-sm font-bold text-navy-900 flex items-center gap-1.5 sm:gap-2 truncate"
+      >
+        <span>Prediction History Overview</span>
+        <span
+          class="text-slate-400 font-normal text-[11px] sm:text-xs hidden xs:inline"
+          >&mdash; database</span
+        >
       </h2>
-      <button id="btn-refresh-stats" class="text-xs font-semibold text-slate-500 hover:text-navy-900 flex items-center gap-1 bg-white px-2.5 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors">
+      <button
+        id="btn-refresh-stats"
+        class="text-xs font-semibold text-slate-500 hover:text-navy-900 flex items-center gap-1 bg-white px-2.5 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors flex-shrink-0"
+      >
         <i data-lucide="rotate-cw" class="w-3 h-3"></i>
-        Refresh
+        <span>Refresh</span>
       </button>
     </div>
 
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      <div class="card p-5 text-center relative overflow-hidden">
+    <div
+      class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 w-full min-w-0"
+    >
+      <div
+        class="card p-3 sm:p-5 text-center relative overflow-hidden flex flex-col justify-between min-w-0"
+      >
         <div class="absolute top-0 left-0 w-full h-1 bg-navy-900"></div>
-        <div class="section-label mb-1">Total Predictions</div>
-        <div class="text-3xl sm:text-4xl font-black text-navy-900 mt-1" id="kpi-total">—</div>
-        <p class="text-xs text-slate-400 mt-1">Molecules evaluated</p>
+        <div class="section-label mb-1 text-[10px] sm:text-xs truncate">
+          Total Predictions
+        </div>
+        <div
+          class="text-2xl sm:text-3xl lg:text-4xl font-black text-navy-900 mt-1"
+          id="kpi-total"
+        >
+          —
+        </div>
+        <p class="text-[10px] sm:text-xs text-slate-400 mt-1 truncate">
+          Molecules evaluated
+        </p>
       </div>
-      <div class="card p-5 text-center relative overflow-hidden">
+      <div
+        class="card p-3 sm:p-5 text-center relative overflow-hidden flex flex-col justify-between min-w-0"
+      >
         <div class="absolute top-0 left-0 w-full h-1 bg-teal-500"></div>
-        <div class="section-label mb-1">
+        <div class="section-label mb-1 text-[10px] sm:text-xs truncate">
           <span class="tooltip-wrapper">
             <span class="tooltip-anchor">Consensus Rate</span>
-            <span class="tooltip-box">Percentage where both RF and GCN agreed on the verdict.</span>
+            <span class="tooltip-box"
+              >Percentage where both RF and GCN agreed on the verdict.</span
+            >
           </span>
         </div>
-        <div class="text-3xl sm:text-4xl font-black text-teal-600 mt-1" id="kpi-agreement">—</div>
-        <p class="text-xs text-slate-400 mt-1" id="kpi-agreement-sub">Unanimous classifications</p>
+        <div
+          class="text-2xl sm:text-3xl lg:text-4xl font-black text-teal-600 mt-1"
+          id="kpi-agreement"
+        >
+          —
+        </div>
+        <p
+          class="text-[10px] sm:text-xs text-slate-400 mt-1 truncate"
+          id="kpi-agreement-sub"
+        >
+          Unanimous classifications
+        </p>
       </div>
-      <div class="card p-5 text-center relative overflow-hidden" id="kpi-rf-card">
+      <div
+        class="card p-3 sm:p-5 text-center relative overflow-hidden flex flex-col justify-between min-w-0"
+        id="kpi-rf-card"
+      >
         <div class="absolute top-0 left-0 w-full h-1 bg-blue-600"></div>
-        <div class="section-label mb-1">RF Confidence</div>
-        <div class="text-3xl sm:text-4xl font-black text-blue-600 mt-1" id="kpi-rf-conf">—</div>
-        <p class="text-xs text-slate-400 mt-1" id="kpi-rf-sub">Avg Prob: &mdash;</p>
+        <div class="section-label mb-1 text-[10px] sm:text-xs truncate">
+          RF Confidence
+        </div>
+        <div
+          class="text-2xl sm:text-3xl lg:text-4xl font-black text-blue-600 mt-1"
+          id="kpi-rf-conf"
+        >
+          —
+        </div>
+        <p
+          class="text-[10px] sm:text-xs text-slate-400 mt-1 truncate"
+          id="kpi-rf-sub"
+        >
+          Avg Prob: &mdash;
+        </p>
       </div>
-      <div class="card p-5 text-center relative overflow-hidden" id="kpi-gcn-card">
+      <div
+        class="card p-3 sm:p-5 text-center relative overflow-hidden flex flex-col justify-between min-w-0"
+        id="kpi-gcn-card"
+      >
         <div class="absolute top-0 left-0 w-full h-1 bg-indigo-600"></div>
-        <div class="section-label mb-1">GCN Confidence</div>
-        <div class="text-3xl sm:text-4xl font-black text-indigo-600 mt-1" id="kpi-gcn-conf">—</div>
-        <p class="text-xs text-slate-400 mt-1" id="kpi-gcn-sub">Avg Prob: &mdash;</p>
+        <div class="section-label mb-1 text-[10px] sm:text-xs truncate">
+          GCN Confidence
+        </div>
+        <div
+          class="text-2xl sm:text-3xl lg:text-4xl font-black text-indigo-600 mt-1"
+          id="kpi-gcn-conf"
+        >
+          —
+        </div>
+        <p
+          class="text-[10px] sm:text-xs text-slate-400 mt-1 truncate"
+          id="kpi-gcn-sub"
+        >
+          Avg Prob: &mdash;
+        </p>
       </div>
     </div>
   </section>
 
-  <!-- ═══════════════════════════ TIMELINE CHART ═══════════════════════ -->
-  <section class="card p-6">
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-      <div>
-        <h2 class="text-base font-bold text-navy-900" id="trajectory-title">
+  <section class="card p-3.5 sm:p-6 w-full min-w-0 overflow-hidden">
+    <div
+      class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3 mb-3 sm:mb-4 min-w-0"
+    >
+      <div class="min-w-0">
+        <h2
+          class="text-sm sm:text-base font-bold text-navy-900 truncate"
+          id="trajectory-title"
+        >
           Dual-AI Prediction Trajectory
         </h2>
-        <p class="text-xs text-slate-500 mt-0.5">
-          Chronological probability tracking for each model across historical predictions.
+        <p class="text-xs text-slate-500 mt-0.5 leading-relaxed">
+          Chronological probability tracking for each model across historical
+          predictions.
         </p>
       </div>
-      <span class="text-[11px] font-mono text-slate-500 px-2.5 py-1 rounded bg-slate-100 border border-slate-200">
+      <span
+        class="self-start sm:self-auto text-[10px] sm:text-[11px] font-mono text-slate-500 px-2 sm:px-2.5 py-1 rounded bg-slate-100 border border-slate-200 whitespace-nowrap"
+      >
         Threshold: &ge; 45% = Toxic
       </span>
     </div>
-    <div class="chart-container" style="height: 320px">
+    <div class="chart-container h-[240px] sm:h-[320px] w-full min-w-0">
       <canvas id="history-timeline-chart"></canvas>
     </div>
   </section>
 
-  <!-- ═══════════════════════════ DONUT + DISTRIBUTION ═══════════════════ -->
-  <section class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-    <!-- Donut -->
-    <div class="lg:col-span-5 card p-6 flex flex-col">
-      <div class="flex items-center justify-between mb-1">
-        <h3 class="text-sm font-bold text-navy-900">Model Consensus</h3>
-        <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-teal-50 text-teal-700 border border-teal-200" id="donut-badge">—</span>
+  <section
+    class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-stretch w-full min-w-0"
+  >
+    <div
+      class="lg:col-span-5 card p-3.5 sm:p-6 flex flex-col w-full min-w-0 overflow-hidden"
+    >
+      <div class="flex items-center justify-between mb-1 min-w-0">
+        <h3 class="text-xs sm:text-sm font-bold text-navy-900">
+          Model Consensus
+        </h3>
+        <span
+          class="text-[10px] sm:text-[11px] font-semibold px-2 py-0.5 rounded-full bg-teal-50 text-teal-700 border border-teal-200"
+          id="donut-badge"
+          >—</span
+        >
       </div>
-      <p class="text-xs text-slate-500 mb-4">Where RF and GCN agree or diverge.</p>
-      <div class="flex-1 flex items-center justify-center" style="min-height: 200px">
+      <p class="text-xs text-slate-500 mb-2 sm:mb-4">
+        Where RF and GCN agree or diverge.
+      </p>
+      <div
+        class="flex-1 flex items-center justify-center relative my-1 min-h-[170px] sm:min-h-[210px] w-full min-w-0 overflow-hidden"
+      >
         <canvas id="agreement-donut-chart"></canvas>
       </div>
-      <div class="grid grid-cols-2 gap-2 text-xs pt-4 border-t border-slate-100 mt-4">
-        <div class="p-2 rounded-lg bg-red-50/60 border border-red-100">
-          <span class="text-[10px] uppercase font-bold text-red-600">Both Toxic</span>
-          <span class="block text-lg font-black text-red-700" id="stat-both-toxic">0</span>
+      <div
+        class="grid grid-cols-2 gap-1.5 sm:gap-2 text-xs pt-3 sm:pt-4 border-t border-slate-100 mt-auto w-full min-w-0"
+      >
+        <div
+          class="p-2 sm:p-2.5 rounded-lg bg-red-50/60 border border-red-100 min-w-0"
+        >
+          <span
+            class="text-[9px] sm:text-[10px] uppercase font-bold text-red-600 block truncate"
+            >Both Toxic</span
+          >
+          <span
+            class="block text-base sm:text-lg font-black text-red-700"
+            id="stat-both-toxic"
+            >0</span
+          >
         </div>
-        <div class="p-2 rounded-lg bg-green-50/60 border border-green-100">
-          <span class="text-[10px] uppercase font-bold text-green-600">Both Safe</span>
-          <span class="block text-lg font-black text-green-700" id="stat-both-safe">0</span>
+        <div
+          class="p-2 sm:p-2.5 rounded-lg bg-green-50/60 border border-green-100 min-w-0"
+        >
+          <span
+            class="text-[9px] sm:text-[10px] uppercase font-bold text-green-600 block truncate"
+            >Both Safe</span
+          >
+          <span
+            class="block text-base sm:text-lg font-black text-green-700"
+            id="stat-both-safe"
+            >0</span
+          >
         </div>
-        <div class="p-2 rounded-lg bg-amber-50/60 border border-amber-100">
-          <span class="text-[10px] uppercase font-bold text-amber-600">RF Toxic / GCN Safe</span>
-          <span class="block text-lg font-black text-amber-700" id="stat-rf-only">0</span>
+        <div
+          class="p-2 sm:p-2.5 rounded-lg bg-amber-50/60 border border-amber-100 min-w-0"
+        >
+          <span
+            class="text-[9px] sm:text-[10px] uppercase font-bold text-amber-600 block truncate"
+            >RF Toxic / GCN Safe</span
+          >
+          <span
+            class="block text-base sm:text-lg font-black text-amber-700"
+            id="stat-rf-only"
+            >0</span
+          >
         </div>
-        <div class="p-2 rounded-lg bg-blue-50/60 border border-blue-100">
-          <span class="text-[10px] uppercase font-bold text-blue-600">RF Safe / GCN Toxic</span>
-          <span class="block text-lg font-black text-blue-700" id="stat-gcn-only">0</span>
+        <div
+          class="p-2 sm:p-2.5 rounded-lg bg-blue-50/60 border border-blue-100 min-w-0"
+        >
+          <span
+            class="text-[9px] sm:text-[10px] uppercase font-bold text-blue-600 block truncate"
+            >RF Safe / GCN Toxic</span
+          >
+          <span
+            class="block text-base sm:text-lg font-black text-blue-700"
+            id="stat-gcn-only"
+            >0</span
+          >
         </div>
       </div>
     </div>
 
-    <!-- Distribution -->
-    <div class="lg:col-span-7 card p-6 flex flex-col">
-      <div class="flex items-center justify-between mb-1">
-        <h3 class="text-sm font-bold text-navy-900">Probability Distribution</h3>
-        <span class="text-[11px] text-slate-400 font-mono">Binned Histogram</span>
+    <div
+      class="lg:col-span-7 card p-3.5 sm:p-6 flex flex-col w-full min-w-0 overflow-hidden"
+    >
+      <div class="flex items-center justify-between mb-1 min-w-0">
+        <h3 class="text-xs sm:text-sm font-bold text-navy-900 truncate">
+          Probability Distribution
+        </h3>
+        <span
+          class="text-[10px] sm:text-[11px] text-slate-400 font-mono whitespace-nowrap"
+          >Binned Histogram</span
+        >
       </div>
-      <p class="text-xs text-slate-500 mb-4">
-        How decisively each AI separates safe (0&ndash;20%) from toxic (80&ndash;100%).
+      <p class="text-xs text-slate-500 mb-2 sm:mb-4 leading-relaxed">
+        How decisively each AI separates safe (0&ndash;20%) from toxic
+        (80&ndash;100%).
       </p>
-      <div class="flex-1" style="min-height: 220px">
+      <div class="chart-container flex-1 h-[210px] sm:h-[260px] w-full min-w-0">
         <canvas id="distribution-chart"></canvas>
       </div>
     </div>
   </section>
 
-  <!-- ═══════════════════════════ SIMILARITY + CONTESTED ═══════════════════ -->
-  <section class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-    <!-- Similarity -->
-    <div class="lg:col-span-6 card p-6">
-      <h3 class="text-sm font-bold text-navy-900 mb-1">Performance by Similarity Class</h3>
-      <p class="text-xs text-slate-500 mb-4">Average risk grouped by Ketoconazole Tanimoto similarity.</p>
-      <div class="chart-container" style="height: 220px">
-        <canvas id="similarity-history-chart"></canvas>
+  <section class="card p-3.5 sm:p-6 w-full min-w-0 overflow-hidden">
+    <div
+      class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-4 mb-2 sm:mb-4 min-w-0"
+    >
+      <div class="min-w-0">
+        <h3 class="text-sm sm:text-base font-bold text-navy-900 truncate">
+          Performance by Similarity Class
+        </h3>
+        <p class="text-xs text-slate-500 mt-0.5 leading-relaxed">
+          Average risk grouped by Ketoconazole Tanimoto similarity.
+        </p>
       </div>
-      <div class="grid grid-cols-3 gap-2 text-center text-xs mt-4 pt-3 border-t border-slate-100">
-        <div class="p-2 rounded bg-slate-50 border border-slate-100">
-          <div class="text-[10px] font-bold text-slate-500 uppercase">Sibling</div>
-          <div class="text-base font-black text-red-600 mt-0.5" id="sim-sibling">&mdash;</div>
-          <div class="text-[10px] text-slate-400">Tanimoto &gt; 0.6</div>
-        </div>
-        <div class="p-2 rounded bg-slate-50 border border-slate-100">
-          <div class="text-[10px] font-bold text-slate-500 uppercase">Stranger</div>
-          <div class="text-base font-black text-amber-600 mt-0.5" id="sim-stranger">&mdash;</div>
-          <div class="text-[10px] text-slate-400">0.2 &ndash; 0.6</div>
-        </div>
-        <div class="p-2 rounded bg-slate-50 border border-slate-100">
-          <div class="text-[10px] font-bold text-slate-500 uppercase">Safe</div>
-          <div class="text-base font-black text-green-600 mt-0.5" id="sim-safe">&mdash;</div>
-          <div class="text-[10px] text-slate-400">Tanimoto &lt; 0.2</div>
-        </div>
-      </div>
+      <span
+        class="self-start sm:self-auto text-[10px] sm:text-[11px] font-mono text-slate-500 px-2 sm:px-2.5 py-1 rounded bg-slate-100 border border-slate-200 whitespace-nowrap"
+      >
+        Tanimoto Reference: Ketoconazole (1.0)
+      </span>
     </div>
 
-    <!-- Contested Cases (from database) -->
-    <div class="lg:col-span-6 card p-6 flex flex-col">
-      <div class="flex items-center justify-between mb-1">
-        <h3 class="text-sm font-bold text-navy-900">Contested Cases</h3>
-        <span class="text-[10px] font-semibold bg-amber-50 text-amber-700 px-2 py-0.5 rounded border border-amber-200">
-          From Database
-        </span>
+    <div class="chart-container h-[220px] sm:h-[280px] w-full min-w-0">
+      <canvas id="similarity-history-chart"></canvas>
+    </div>
+
+    <div
+      class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4 text-center text-xs mt-4 pt-4 border-t border-slate-100 w-full min-w-0"
+    >
+      <div
+        class="p-2.5 sm:p-3.5 rounded-xl bg-slate-50 border border-slate-100 min-w-0"
+      >
+        <div
+          class="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider truncate"
+        >
+          Sibling
+        </div>
+        <div
+          class="text-base sm:text-xl font-black text-red-600 mt-0.5"
+          id="sim-sibling"
+        >
+          &mdash;
+        </div>
+        <div class="text-[10px] sm:text-xs text-slate-400 mt-0.5">
+          &gt; 0.6 Tanimoto
+        </div>
       </div>
-      <p class="text-xs text-slate-500 mb-3">Molecules where RF and GCN disagreed.</p>
-      <div class="space-y-3 flex-1" id="contested-list">
-        <div class="p-4 bg-slate-50 text-center text-slate-400 text-xs">
-          Loading contested cases...
+      <div
+        class="p-2.5 sm:p-3.5 rounded-xl bg-slate-50 border border-slate-100 min-w-0"
+      >
+        <div
+          class="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider truncate"
+        >
+          Stranger
+        </div>
+        <div
+          class="text-base sm:text-xl font-black text-amber-600 mt-0.5"
+          id="sim-stranger"
+        >
+          &mdash;
+        </div>
+        <div class="text-[10px] sm:text-xs text-slate-400 mt-0.5">
+          0.2 &ndash; 0.6 Tanimoto
+        </div>
+      </div>
+      <div
+        class="p-2.5 sm:p-3.5 rounded-xl bg-slate-50 border border-slate-100 min-w-0"
+      >
+        <div
+          class="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider truncate"
+        >
+          Safe
+        </div>
+        <div
+          class="text-base sm:text-xl font-black text-green-600 mt-0.5"
+          id="sim-safe"
+        >
+          &mdash;
+        </div>
+        <div class="text-[10px] sm:text-xs text-slate-400 mt-0.5">
+          &lt; 0.2 Tanimoto
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ═══════════════════════════ BENCHMARK TEST SET ═══════════════════════ -->
-  <section class="card p-6">
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+  <section class="card p-3.5 sm:p-6 w-full min-w-0 overflow-hidden">
+    <div class="flex items-center justify-between mb-1 min-w-0">
       <div>
-        <h2 class="text-base font-bold text-navy-900" id="bench-title">Random Forest &mdash; Benchmark Validation</h2>
-        <p class="text-xs text-slate-500 mt-0.5">Validation on held-out Sibling, Stranger, and Safe test splits.</p>
+        <h3 class="text-sm sm:text-base font-bold text-navy-900 truncate">
+          Contested Cases
+        </h3>
+        <p class="text-xs text-slate-500 mt-0.5 leading-relaxed">
+          Historical molecules where Random Forest and GCN produced divergent
+          verdicts.
+        </p>
       </div>
-      <div class="inline-flex rounded-lg border border-slate-200 bg-slate-50 p-0.5 text-xs">
-        <button class="px-2.5 py-1 font-semibold rounded bg-white text-navy-900 shadow-sm" id="bench-rf" data-bench="rf">Random Forest</button>
-        <button class="px-2.5 py-1 font-semibold rounded text-slate-500 hover:text-navy-900" id="bench-gcn" data-bench="gcn">GCN</button>
+      <span
+        class="text-[9px] sm:text-[10px] font-semibold bg-amber-50 text-amber-700 px-2.5 py-1 rounded border border-amber-200 whitespace-nowrap flex-shrink-0"
+      >
+        From Database
+      </span>
+    </div>
+    <div class="space-y-3 mt-4 w-full min-w-0" id="contested-list">
+      <div
+        class="p-4 bg-slate-50 text-center text-slate-400 text-xs rounded-xl"
+      >
+        Loading contested cases...
+      </div>
+    </div>
+  </section>
+
+  <section class="card p-3.5 sm:p-6 w-full min-w-0 overflow-hidden">
+    <div
+      class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 min-w-0"
+    >
+      <div class="min-w-0">
+        <h2
+          class="text-sm sm:text-base font-bold text-navy-900 truncate"
+          id="bench-title"
+        >
+          Random Forest &mdash; Benchmark Validation
+        </h2>
+        <p class="text-xs text-slate-500 mt-0.5 leading-relaxed">
+          Validation on held-out Sibling, Stranger, and Safe test splits.
+        </p>
+      </div>
+      <div
+        class="inline-flex w-full sm:w-auto rounded-lg border border-slate-200 bg-slate-50 p-0.5 text-xs min-w-0"
+      >
+        <button
+          class="flex-1 sm:flex-none text-center px-3 py-1.5 sm:py-1 font-semibold rounded bg-white text-navy-900 shadow-sm transition-all"
+          id="bench-rf"
+          data-bench="rf"
+        >
+          Random Forest
+        </button>
+        <button
+          class="flex-1 sm:flex-none text-center px-3 py-1.5 sm:py-1 font-semibold rounded text-slate-500 hover:text-navy-900 transition-all"
+          id="bench-gcn"
+          data-bench="gcn"
+        >
+          GCN
+        </button>
       </div>
     </div>
 
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-      <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/80 text-center">
-        <div class="section-label mb-1">Accuracy</div>
-        <div class="text-3xl font-black text-navy-900" id="stat-accuracy">&mdash;</div>
+    <div
+      class="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-4 w-full min-w-0"
+    >
+      <div
+        class="p-2.5 sm:p-4 rounded-xl bg-slate-50 border border-slate-200/80 text-center min-w-0"
+      >
+        <div class="section-label mb-1 text-[10px] sm:text-xs truncate">
+          Accuracy
+        </div>
+        <div
+          class="text-xl sm:text-3xl font-black text-navy-900"
+          id="stat-accuracy"
+        >
+          &mdash;
+        </div>
       </div>
-      <div class="p-4 rounded-xl bg-teal-50/50 border border-teal-100 text-center">
-        <div class="section-label text-teal-800 mb-1">Sensitivity</div>
-        <div class="text-3xl font-black text-teal-700" id="stat-sensitivity">&mdash;</div>
+      <div
+        class="p-2.5 sm:p-4 rounded-xl bg-teal-50/50 border border-teal-100 text-center min-w-0"
+      >
+        <div
+          class="section-label text-teal-800 mb-1 text-[10px] sm:text-xs truncate"
+        >
+          Sensitivity
+        </div>
+        <div
+          class="text-xl sm:text-3xl font-black text-teal-700"
+          id="stat-sensitivity"
+        >
+          &mdash;
+        </div>
       </div>
-      <div class="p-4 rounded-xl bg-blue-50/50 border border-blue-100 text-center">
-        <div class="section-label text-blue-800 mb-1">Specificity</div>
-        <div class="text-3xl font-black text-blue-700" id="stat-specificity">&mdash;</div>
+      <div
+        class="p-2.5 sm:p-4 rounded-xl bg-blue-50/50 border border-blue-100 text-center min-w-0"
+      >
+        <div
+          class="section-label text-blue-800 mb-1 text-[10px] sm:text-xs truncate"
+        >
+          Specificity
+        </div>
+        <div
+          class="text-xl sm:text-3xl font-black text-blue-700"
+          id="stat-specificity"
+        >
+          &mdash;
+        </div>
       </div>
-      <div class="p-4 rounded-xl bg-amber-50/50 border border-amber-100 text-center">
-        <div class="section-label text-amber-800 mb-1">MCC</div>
-        <div class="text-3xl font-black text-amber-700" id="stat-mcc">&mdash;</div>
+      <div
+        class="p-2.5 sm:p-4 rounded-xl bg-amber-50/50 border border-amber-100 text-center min-w-0"
+      >
+        <div
+          class="section-label text-amber-800 mb-1 text-[10px] sm:text-xs truncate"
+        >
+          MCC
+        </div>
+        <div
+          class="text-xl sm:text-3xl font-black text-amber-700"
+          id="stat-mcc"
+        >
+          &mdash;
+        </div>
       </div>
     </div>
 
-    <div class="chart-container" style="height: 280px">
+    <div class="chart-container h-[220px] sm:h-[280px] w-full min-w-0">
       <canvas id="performance-chart"></canvas>
     </div>
 
-    <!-- Confusion Matrices -->
-    <div class="mt-6 pt-5 border-t border-slate-100">
-      <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Confusion Matrices</h3>
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {% for set_name, set_key in [('Sibling','sibling'), ('Stranger','stranger'), ('Safe','safe')] %}
-        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/80">
-          <h4 class="text-xs font-bold text-navy-900 mb-2.5">{{ set_name }} Set</h4>
+    <div
+      class="mt-4 sm:mt-6 pt-3 sm:pt-5 border-t border-slate-100 w-full min-w-0"
+    >
+      <h3
+        class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 sm:mb-3"
+      >
+        Confusion Matrices
+      </h3>
+      <div
+        class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-4 w-full min-w-0"
+      >
+        {% for set_name, set_key in [('Sibling','sibling'),
+        ('Stranger','stranger'), ('Safe','safe')] %}
+        <div
+          class="p-3 sm:p-4 rounded-xl bg-slate-50 border border-slate-200/80 min-w-0"
+        >
+          <h4 class="text-xs font-bold text-navy-900 mb-2 truncate">
+            {{ set_name }} Set
+          </h4>
           <div class="grid grid-cols-2 gap-1.5 text-center text-xs">
-            <div class="col-span-2 grid grid-cols-2 gap-1 mb-0.5 text-[10px] text-slate-400 font-semibold">
-              <div>Pred: Toxic</div><div>Pred: Safe</div>
+            <div
+              class="col-span-2 grid grid-cols-2 gap-1 mb-0.5 text-[10px] text-slate-400 font-semibold"
+            >
+              <div>Pred: Toxic</div>
+              <div>Pred: Safe</div>
             </div>
-            <div class="cm-tp rounded-lg p-2.5">
-              <div class="text-base font-black" id="cm-{{ set_key }}-tp">—</div>
+            <div class="cm-tp rounded-lg p-2 sm:p-2.5 min-w-0">
+              <div
+                class="text-sm sm:text-base font-black"
+                id="cm-{{ set_key }}-tp"
+              >
+                —
+              </div>
               <div class="text-[9px] text-green-700 font-bold mt-0.5">TP</div>
             </div>
-            <div class="cm-fn rounded-lg p-2.5">
-              <div class="text-base font-black" id="cm-{{ set_key }}-fn">—</div>
+            <div class="cm-fn rounded-lg p-2 sm:p-2.5 min-w-0">
+              <div
+                class="text-sm sm:text-base font-black"
+                id="cm-{{ set_key }}-fn"
+              >
+                —
+              </div>
               <div class="text-[9px] text-red-700 font-bold mt-0.5">FN</div>
             </div>
-            <div class="cm-fp rounded-lg p-2.5">
-              <div class="text-base font-black" id="cm-{{ set_key }}-fp">—</div>
+            <div class="cm-fp rounded-lg p-2 sm:p-2.5 min-w-0">
+              <div
+                class="text-sm sm:text-base font-black"
+                id="cm-{{ set_key }}-fp"
+              >
+                —
+              </div>
               <div class="text-[9px] text-red-700 font-bold mt-0.5">FP</div>
             </div>
-            <div class="cm-tn rounded-lg p-2.5">
-              <div class="text-base font-black" id="cm-{{ set_key }}-tn">—</div>
+            <div class="cm-tn rounded-lg p-2 sm:p-2.5 min-w-0">
+              <div
+                class="text-sm sm:text-base font-black"
+                id="cm-{{ set_key }}-tn"
+              >
+                —
+              </div>
               <div class="text-[9px] text-green-700 font-bold mt-0.5">TN</div>
             </div>
           </div>
@@ -269,50 +597,107 @@
     </div>
   </section>
 
-  <!-- ═══════════════════════════ PREDICTION HISTORY TABLE ═══════════════ -->
-  <section class="card p-6">
-    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-5">
-      <div>
-        <h2 class="text-lg font-bold text-navy-900">
-          Prediction History Explorer
-          <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 ml-2" id="tbl-badge">0</span>
+  <section class="card p-3.5 sm:p-6 w-full min-w-0 overflow-hidden">
+    <div
+      class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 sm:gap-4 mb-3 sm:mb-5 min-w-0"
+    >
+      <div class="min-w-0">
+        <h2
+          class="text-base sm:text-lg font-bold text-navy-900 flex items-center gap-2 truncate"
+        >
+          <span>Prediction History Explorer</span>
+          <span
+            class="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600"
+            id="tbl-badge"
+            >0</span
+          >
         </h2>
-        <p class="text-xs text-slate-500 mt-1">Every prediction stored in the SQLite database with dual AI breakdown.</p>
+        <p class="text-xs text-slate-500 mt-0.5 leading-relaxed">
+          Every prediction stored in the SQLite database with dual AI breakdown.
+        </p>
       </div>
-      <div class="flex flex-wrap items-center gap-3">
-        <div class="relative">
-          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
-          <input type="text" id="hist-search" class="text-xs bg-slate-50 border border-slate-200 rounded-lg pl-9 pr-3 py-2 w-56 outline-none focus:border-navy-900 focus:bg-white transition-all placeholder:text-slate-400" placeholder="Search name, SMILES, formula..." />
+      <div
+        class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 w-full lg:w-auto min-w-0"
+      >
+        <div class="relative w-full sm:w-64 min-w-0">
+          <i
+            data-lucide="search"
+            class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"
+          ></i>
+          <input
+            type="text"
+            id="hist-search"
+            class="text-xs bg-slate-50 border border-slate-200 rounded-lg pl-9 pr-3 py-2 w-full outline-none focus:border-navy-900 focus:bg-white transition-all placeholder:text-slate-400"
+            placeholder="Search name, SMILES, formula..."
+          />
         </div>
-        <select id="hist-sort" class="text-xs bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 outline-none text-slate-700 cursor-pointer">
-          <option value="date_desc">Newest First</option>
-          <option value="confidence_desc">Highest Risk</option>
-          <option value="confidence_asc">Lowest Risk</option>
-          <option value="tanimoto_desc">Highest Similarity</option>
-          <option value="divergence_desc">Max Divergence</option>
-        </select>
-        <button id="btn-seed" class="text-xs font-semibold text-slate-600 hover:text-navy-900 bg-slate-100 hover:bg-slate-200 border border-slate-200 px-3 py-2 rounded-lg transition-colors">
-          Seed Data
-        </button>
+        <div class="flex items-center gap-2 w-full sm:w-auto min-w-0">
+          <select
+            id="hist-sort"
+            class="text-xs bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 outline-none text-slate-700 cursor-pointer flex-1 sm:flex-none min-w-0"
+          >
+            <option value="date_desc">Newest First</option>
+            <option value="confidence_desc">Highest Risk</option>
+            <option value="confidence_asc">Lowest Risk</option>
+            <option value="tanimoto_desc">Highest Similarity</option>
+            <option value="divergence_desc">Max Divergence</option>
+          </select>
+          <button
+            id="btn-seed"
+            class="text-xs font-semibold text-slate-600 hover:text-navy-900 bg-slate-100 hover:bg-slate-200 border border-slate-200 px-3 py-2 rounded-lg transition-colors whitespace-nowrap flex-shrink-0"
+          >
+            Seed Data
+          </button>
+        </div>
       </div>
     </div>
 
-    <!-- Filter Pills -->
-    <div class="flex flex-wrap items-center gap-2 mb-4 pb-3 border-b border-slate-100 text-xs">
-      <span class="text-slate-400 font-medium mr-1">Filter:</span>
-      <button class="perf-filter active" data-agreement="all" data-verdict="all">All</button>
-      <button class="perf-filter" data-agreement="agreed" data-verdict="all">✓ Unanimous</button>
-      <button class="perf-filter" data-agreement="disagreed" data-verdict="all">⚡ Divergent</button>
-      <button class="perf-filter" data-agreement="all" data-verdict="toxic">⚠️ Toxic</button>
-      <button class="perf-filter" data-agreement="all" data-verdict="safe">✅ Safe</button>
+    <div
+      class="flex items-center gap-1.5 sm:gap-2 mb-3 pb-2 border-b border-slate-100 text-xs overflow-x-auto py-1 w-full min-w-0"
+      style="-webkit-overflow-scrolling: touch"
+    >
+      <span class="text-slate-400 font-medium mr-1 flex-shrink-0">Filter:</span>
+      <button
+        class="perf-filter active"
+        data-agreement="all"
+        data-verdict="all"
+      >
+        All
+      </button>
+      <button class="perf-filter" data-agreement="agreed" data-verdict="all">
+        Unanimous
+      </button>
+      <button class="perf-filter" data-agreement="disagreed" data-verdict="all">
+        Divergent
+      </button>
+      <button class="perf-filter" data-agreement="all" data-verdict="toxic">
+        Toxic
+      </button>
+      <button class="perf-filter" data-agreement="all" data-verdict="safe">
+        Safe
+      </button>
     </div>
 
-    <!-- Table -->
-    <div class="overflow-x-auto rounded-xl border border-slate-200">
-      <table class="w-full text-left text-xs">
-        <thead class="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200 uppercase tracking-wider text-[10px]">
+    <div
+      class="flex items-center justify-between text-[11px] text-slate-400 mb-2 sm:hidden px-0.5"
+    >
+      <span class="flex items-center gap-1"
+        ><i data-lucide="chevrons-left-right" class="w-3.5 h-3.5"></i> Scroll
+        table horizontally</span
+      >
+      <span class="text-[10px]">Swipe &rarr;</span>
+    </div>
+
+    <div
+      class="overflow-x-auto rounded-xl border border-slate-200 w-full max-w-full shadow-sm"
+      style="-webkit-overflow-scrolling: touch"
+    >
+      <table class="min-w-[600px] w-full text-left text-xs">
+        <thead
+          class="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200 uppercase tracking-wider text-[10px]"
+        >
           <tr>
-            <th class="py-3 px-4">Compound</th>
+            <th class="py-3 px-3 sm:px-4">Compound</th>
             <th class="py-3 px-3">SMILES</th>
             <th class="py-3 px-3">Random Forest</th>
             <th class="py-3 px-3">GCN</th>
@@ -322,100 +707,210 @@
           </tr>
         </thead>
         <tbody id="hist-tbody" class="divide-y divide-slate-100 bg-white">
-          <tr><td colspan="7" class="py-8 text-center text-slate-400">Loading...</td></tr>
+          <tr>
+            <td colspan="7" class="py-8 text-center text-slate-400">
+              Loading...
+            </td>
+          </tr>
         </tbody>
       </table>
     </div>
 
-    <!-- Pagination -->
-    <div class="flex items-center justify-between mt-4 text-xs text-slate-500">
+    <div
+      class="flex flex-col sm:flex-row items-center justify-between gap-3 mt-4 text-xs text-slate-500 w-full min-w-0"
+    >
       <span id="tbl-info">Showing 0 of 0</span>
-      <div class="flex items-center gap-2">
-        <button id="btn-prev" class="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed font-medium" disabled>Previous</button>
-        <button id="btn-next" class="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed font-medium" disabled>Next</button>
+      <div
+        class="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end min-w-0"
+      >
+        <button
+          id="btn-prev"
+          class="flex-1 sm:flex-none text-center px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed font-medium transition-colors"
+          disabled
+        >
+          Previous
+        </button>
+        <button
+          id="btn-next"
+          class="flex-1 sm:flex-none text-center px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed font-medium transition-colors"
+          disabled
+        >
+          Next
+        </button>
       </div>
     </div>
   </section>
-
 </div>
 
-<!-- ═══════════════════════════ INSPECT MODAL ══════════════════════════════ -->
-<div id="inspect-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 hidden">
-  <div class="bg-white rounded-2xl max-w-2xl w-full border border-slate-200 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col" id="inspect-box">
-    <!-- Header -->
-    <div class="p-5 border-b border-slate-100 flex items-start justify-between bg-slate-50/80">
-      <div>
-        <h3 class="text-xl font-bold text-navy-900" id="m-name">—</h3>
-        <p class="text-xs font-mono text-slate-400 mt-1 max-w-md truncate" id="m-smiles"></p>
+<div
+  id="inspect-modal"
+  class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 p-2 sm:p-4 hidden"
+>
+  <div
+    class="bg-white rounded-t-2xl sm:rounded-2xl max-w-2xl w-full border border-slate-200 shadow-2xl overflow-hidden max-h-[92vh] sm:max-h-[90vh] flex flex-col"
+    id="inspect-box"
+  >
+    <div
+      class="p-4 sm:p-5 border-b border-slate-100 flex items-start justify-between gap-3 bg-slate-50/80"
+    >
+      <div class="min-w-0 flex-1">
+        <h3
+          class="text-lg sm:text-xl font-bold text-navy-900 break-words"
+          id="m-name"
+        >
+          —
+        </h3>
+        <p
+          class="text-[10px] sm:text-xs font-mono text-slate-400 mt-1 max-w-[240px] sm:max-w-md truncate"
+          id="m-smiles"
+        ></p>
       </div>
-      <button type="button" id="m-close-x" class="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors">
+      <button
+        type="button"
+        id="m-close-x"
+        class="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors flex-shrink-0"
+      >
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
     </div>
-    <!-- Body -->
-    <div class="p-6 overflow-y-auto space-y-5 flex-1 text-xs">
-      <!-- Verdict -->
-      <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between flex-wrap gap-4">
+    <div
+      class="p-4 sm:p-6 overflow-y-auto space-y-4 sm:space-y-5 flex-1 text-xs"
+    >
+      <div
+        class="p-3.5 sm:p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between flex-wrap gap-2 sm:gap-4"
+      >
         <div>
-          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Ensemble Verdict</span>
-          <div class="flex items-baseline gap-3 mt-0.5">
-            <span class="text-3xl font-black" id="m-verdict">—</span>
-            <span class="text-lg font-bold text-slate-700" id="m-conf">—</span>
+          <span
+            class="text-[10px] font-bold uppercase tracking-wider text-slate-400"
+            >Ensemble Verdict</span
+          >
+          <div class="flex items-baseline gap-2 sm:gap-3 mt-0.5 flex-wrap">
+            <span class="text-2xl sm:text-3xl font-black" id="m-verdict"
+              >—</span
+            >
+            <span
+              class="text-sm sm:text-lg font-bold text-slate-700"
+              id="m-conf"
+              >—</span
+            >
           </div>
         </div>
         <div class="text-right">
-          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Consensus</span>
-          <div class="text-sm font-bold text-slate-800 mt-0.5" id="m-agree">—</div>
+          <span
+            class="text-[10px] font-bold uppercase tracking-wider text-slate-400"
+            >Consensus</span
+          >
+          <div
+            class="text-xs sm:text-sm font-bold text-slate-800 mt-0.5"
+            id="m-agree"
+          >
+            —
+          </div>
         </div>
       </div>
-      <!-- Dual AI -->
-      <div class="grid grid-cols-2 gap-4">
-        <div class="p-4 rounded-xl border border-teal-100 bg-teal-50/40">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+        <div
+          class="p-3.5 sm:p-4 rounded-xl border border-teal-100 bg-teal-50/40"
+        >
           <div class="flex items-center justify-between mb-1">
             <span class="font-bold text-slate-900 text-xs">Random Forest</span>
             <span class="text-[10px] font-bold" id="m-rf-lbl">—</span>
           </div>
-          <div class="text-2xl font-black text-teal-700 my-1" id="m-rf-pct">—</div>
+          <div
+            class="text-xl sm:text-2xl font-black text-teal-700 my-1"
+            id="m-rf-pct"
+          >
+            —
+          </div>
           <div class="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
-            <div id="m-rf-bar" class="bg-teal-600 h-full rounded-full transition-all" style="width:0%"></div>
+            <div
+              id="m-rf-bar"
+              class="bg-teal-600 h-full rounded-full transition-all"
+              style="width: 0%"
+            ></div>
           </div>
         </div>
-        <div class="p-4 rounded-xl border border-indigo-100 bg-indigo-50/40">
+        <div
+          class="p-3.5 sm:p-4 rounded-xl border border-indigo-100 bg-indigo-50/40"
+        >
           <div class="flex items-center justify-between mb-1">
             <span class="font-bold text-slate-900 text-xs">GCN / GAT</span>
             <span class="text-[10px] font-bold" id="m-gcn-lbl">—</span>
           </div>
-          <div class="text-2xl font-black text-indigo-700 my-1" id="m-gcn-pct">—</div>
+          <div
+            class="text-xl sm:text-2xl font-black text-indigo-700 my-1"
+            id="m-gcn-pct"
+          >
+            —
+          </div>
           <div class="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
-            <div id="m-gcn-bar" class="bg-indigo-600 h-full rounded-full transition-all" style="width:0%"></div>
+            <div
+              id="m-gcn-bar"
+              class="bg-indigo-600 h-full rounded-full transition-all"
+              style="width: 0%"
+            ></div>
           </div>
         </div>
       </div>
-      <!-- Tanimoto & Css -->
-      <div class="grid grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
         <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
-          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Tanimoto Similarity</span>
-          <div class="text-lg font-black text-navy-900 mt-0.5" id="m-tan">—</div>
+          <span
+            class="text-[10px] font-bold uppercase tracking-wider text-slate-400"
+            >Tanimoto Similarity</span
+          >
+          <div
+            class="text-base sm:text-lg font-black text-navy-900 mt-0.5"
+            id="m-tan"
+          >
+            —
+          </div>
           <span class="text-[10px] text-slate-500" id="m-sim-cat">—</span>
         </div>
         <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
-          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">PBPK Css</span>
-          <div class="text-lg font-black text-navy-900 mt-0.5" id="m-css">—</div>
+          <span
+            class="text-[10px] font-bold uppercase tracking-wider text-slate-400"
+            >PBPK Css</span
+          >
+          <div
+            class="text-base sm:text-lg font-black text-navy-900 mt-0.5"
+            id="m-css"
+          >
+            —
+          </div>
           <span class="text-[10px] text-slate-500">Threshold: 1.0 mg/L</span>
         </div>
       </div>
-      <!-- Notes -->
       <div>
         <h4 class="font-bold text-slate-900 mb-1">Interpretation</h4>
-        <p class="text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-lg border border-slate-200" id="m-notes">—</p>
+        <p
+          class="text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs"
+          id="m-notes"
+        >
+          —
+        </p>
       </div>
     </div>
-    <!-- Footer -->
-    <div class="p-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between">
-      <span class="text-[11px] text-slate-400" id="m-date">—</span>
-      <div class="flex items-center gap-2">
-        <button type="button" id="m-close-btn" class="btn-secondary text-xs px-3 py-1.5">Close</button>
-        <a id="m-predict-link" href="/home" class="btn-primary text-xs px-4 py-1.5 rounded-lg no-underline">
+    <div
+      class="p-3.5 sm:p-4 border-t border-slate-100 bg-slate-50 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-2"
+    >
+      <span
+        class="text-[10px] sm:text-[11px] text-slate-400 text-center sm:text-left"
+        id="m-date"
+        >—</span
+      >
+      <div class="flex items-center gap-2 w-full sm:w-auto">
+        <button
+          type="button"
+          id="m-close-btn"
+          class="btn-secondary text-xs px-3 py-2 sm:py-1.5 flex-1 sm:flex-none text-center justify-center"
+        >
+          Close
+        </button>
+        <a
+          id="m-predict-link"
+          href="/home"
+          class="btn-primary text-xs px-4 py-2 sm:py-1.5 rounded-lg no-underline flex-1 sm:flex-none text-center justify-center"
+        >
           Test in Predictor
         </a>
       </div>
@@ -432,403 +927,639 @@
     background: #f8fafc;
     color: #64748b;
     cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
     transition: all 0.15s ease;
   }
-  .perf-filter:hover { background: #f1f5f9; color: #0f172a; border-color: #cbd5e1; }
-  .perf-filter.active { background: #0f172a !important; color: #fff !important; border-color: #0f172a !important; }
+  .perf-filter:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+    border-color: #cbd5e1;
+  }
+  .perf-filter.active {
+    background: #0f172a !important;
+    color: #fff !important;
+    border-color: #0f172a !important;
+  }
 </style>
-{% endblock %}
-
-{% block scripts %}
+{% endblock %} {% block scripts %}
 <script>
-(function() {
-  'use strict';
+  (function () {
+    "use strict";
 
-  // ─── State ─────────────────────────────────────────────────────────────
-  let scope = 'both';
-  let benchModel = 'rf';
-  let statsCache = null;
-  let tableCache = [];        // current page items for modal lookup
-  let page = 0;
-  const PAGE_SIZE = 15;
-  let filterAgreement = 'all';
-  let filterVerdict = 'all';
-  let searchQuery = '';
-  let sortBy = 'date_desc';
+    let scope = "both";
+    let benchModel = "rf";
+    let statsCache = null;
+    let tableCache = [];
+    let page = 0;
+    const PAGE_SIZE = 15;
+    let filterAgreement = "all";
+    let filterVerdict = "all";
+    let searchQuery = "";
+    let sortBy = "date_desc";
 
-  const BENCH_FALLBACK = {
-    rf: {
-      overall: { accuracy: 0.926, sensitivity: 0.907, specificity: 0.947, mcc: 0.852 },
-      sibling: { accuracy: 0.891, sensitivity: 0.872, specificity: 0.921, mcc: 0.795 },
-      stranger: { accuracy: 0.934, sensitivity: 0.908, specificity: 0.956, mcc: 0.863 },
-      safe: { accuracy: 0.952, sensitivity: 0.941, specificity: 0.963, mcc: 0.902 },
-      cm: {
-        sibling: { tp: 156, fn: 23, fp: 18, tn: 192 },
-        stranger: { tp: 201, fn: 19, fp: 14, tn: 228 },
-        safe: { tp: 12, fn: 8, fp: 5, tn: 350 }
+    const BENCH_FALLBACK = {
+      rf: {
+        overall: {
+          accuracy: 0.926,
+          sensitivity: 0.907,
+          specificity: 0.947,
+          mcc: 0.852,
+        },
+        sibling: {
+          accuracy: 0.891,
+          sensitivity: 0.872,
+          specificity: 0.921,
+          mcc: 0.795,
+        },
+        stranger: {
+          accuracy: 0.934,
+          sensitivity: 0.908,
+          specificity: 0.956,
+          mcc: 0.863,
+        },
+        safe: {
+          accuracy: 0.952,
+          sensitivity: 0.941,
+          specificity: 0.963,
+          mcc: 0.902,
+        },
+        cm: {
+          sibling: { tp: 156, fn: 23, fp: 18, tn: 192 },
+          stranger: { tp: 201, fn: 19, fp: 14, tn: 228 },
+          safe: { tp: 12, fn: 8, fp: 5, tn: 350 },
+        },
+      },
+      gcn: {
+        overall: {
+          accuracy: 0.911,
+          sensitivity: 0.892,
+          specificity: 0.93,
+          mcc: 0.824,
+        },
+        sibling: {
+          accuracy: 0.873,
+          sensitivity: 0.855,
+          specificity: 0.895,
+          mcc: 0.75,
+        },
+        stranger: {
+          accuracy: 0.918,
+          sensitivity: 0.894,
+          specificity: 0.938,
+          mcc: 0.831,
+        },
+        safe: {
+          accuracy: 0.941,
+          sensitivity: 0.928,
+          specificity: 0.957,
+          mcc: 0.885,
+        },
+        cm: {
+          sibling: { tp: 148, fn: 31, fp: 22, tn: 188 },
+          stranger: { tp: 196, fn: 23, fp: 17, tn: 225 },
+          safe: { tp: 11, fn: 9, fp: 6, tn: 349 },
+        },
+      },
+    };
+
+    function pct(v) {
+      return v == null ? "--" : (v * 100).toFixed(1) + "%";
+    }
+
+    function setScope(s) {
+      scope = s;
+      document
+        .querySelectorAll("[data-scope]")
+        .forEach((b) => b.classList.toggle("active", b.dataset.scope === s));
+      const rfCard = document.getElementById("kpi-rf-card");
+      const gcnCard = document.getElementById("kpi-gcn-card");
+      if (rfCard) rfCard.style.opacity = s === "gcn" ? "0.4" : "1";
+      if (gcnCard) gcnCard.style.opacity = s === "rf" ? "0.4" : "1";
+
+      const t = document.getElementById("trajectory-title");
+      if (t) {
+        if (s === "both") t.textContent = "Dual-AI Prediction Trajectory";
+        else if (s === "rf")
+          t.textContent = "Random Forest Prediction Trajectory";
+        else t.textContent = "GCN Prediction Trajectory";
       }
-    },
-    gcn: {
-      overall: { accuracy: 0.911, sensitivity: 0.892, specificity: 0.930, mcc: 0.824 },
-      sibling: { accuracy: 0.873, sensitivity: 0.855, specificity: 0.895, mcc: 0.750 },
-      stranger: { accuracy: 0.918, sensitivity: 0.894, specificity: 0.938, mcc: 0.831 },
-      safe: { accuracy: 0.941, sensitivity: 0.928, specificity: 0.957, mcc: 0.885 },
-      cm: {
-        sibling: { tp: 148, fn: 31, fp: 22, tn: 188 },
-        stranger: { tp: 196, fn: 23, fp: 17, tn: 225 },
-        safe: { tp: 11, fn: 9, fp: 6, tn: 349 }
+      if (statsCache) {
+        KeToxCharts.renderPredictionHistoryTimeline(statsCache.timeline, s);
+        KeToxCharts.renderConfidenceDistributionChart(
+          statsCache.distribution,
+          s,
+        );
+        KeToxCharts.renderSimilarityCategoryBarChart(
+          statsCache.similarity_breakdown,
+          s,
+        );
       }
     }
-  };
 
-  // ─── Helpers ───────────────────────────────────────────────────────────
-  function pct(v) { return v == null ? '--' : (v * 100).toFixed(1) + '%'; }
-
-  // ─── Scope Switcher ────────────────────────────────────────────────────
-  function setScope(s) {
-    scope = s;
-    document.querySelectorAll('[data-scope]').forEach(b =>
-      b.classList.toggle('active', b.dataset.scope === s)
-    );
-    // Dim irrelevant KPI cards
-    const rfCard = document.getElementById('kpi-rf-card');
-    const gcnCard = document.getElementById('kpi-gcn-card');
-    if (rfCard) rfCard.style.opacity = s === 'gcn' ? '0.4' : '1';
-    if (gcnCard) gcnCard.style.opacity = s === 'rf' ? '0.4' : '1';
-    // Update chart title
-    const t = document.getElementById('trajectory-title');
-    if (t) {
-      if (s === 'both') t.textContent = 'Dual-AI Prediction Trajectory';
-      else if (s === 'rf') t.textContent = 'Random Forest Prediction Trajectory';
-      else t.textContent = 'GCN Prediction Trajectory';
-    }
-    // Re-render scope-dependent charts
-    if (statsCache) {
-      KeToxCharts.renderPredictionHistoryTimeline(statsCache.timeline, s);
-      KeToxCharts.renderConfidenceDistributionChart(statsCache.distribution, s);
-      KeToxCharts.renderSimilarityCategoryBarChart(statsCache.similarity_breakdown, s);
-    }
-  }
-
-  // ─── Benchmark Switcher ────────────────────────────────────────────────
-  function setBench(m) {
-    benchModel = m;
-    const brf = document.getElementById('bench-rf');
-    const bgcn = document.getElementById('bench-gcn');
-    if (m === 'rf') {
-      brf.className = 'px-2.5 py-1 font-semibold rounded bg-white text-navy-900 shadow-sm';
-      bgcn.className = 'px-2.5 py-1 font-semibold rounded text-slate-500 hover:text-navy-900';
-    } else {
-      bgcn.className = 'px-2.5 py-1 font-semibold rounded bg-white text-navy-900 shadow-sm';
-      brf.className = 'px-2.5 py-1 font-semibold rounded text-slate-500 hover:text-navy-900';
-    }
-    renderBench(m);
-  }
-
-  function renderBench(m) {
-    const data = (window.PERF_DATA && window.PERF_DATA[m]) || BENCH_FALLBACK[m];
-    const name = m === 'rf' ? 'Random Forest' : 'GCN';
-    setText('bench-title', name + ' — Benchmark Validation');
-    setText('stat-accuracy', pct(data.overall.accuracy));
-    setText('stat-sensitivity', pct(data.overall.sensitivity));
-    setText('stat-specificity', pct(data.overall.specificity));
-    setText('stat-mcc', data.overall.mcc.toFixed(3));
-    KeToxCharts.renderPerformanceChart(m, data);
-    ['sibling','stranger','safe'].forEach(s => {
-      const cm = data.cm[s];
-      setText('cm-' + s + '-tp', cm.tp);
-      setText('cm-' + s + '-fn', cm.fn);
-      setText('cm-' + s + '-fp', cm.fp);
-      setText('cm-' + s + '-tn', cm.tn);
-    });
-  }
-
-  // ─── Stats (KPIs + Charts) ─────────────────────────────────────────────
-  async function loadStats() {
-    try {
-      const r = await fetch('/api/prediction-history/stats');
-      const j = await r.json();
-      if (j.status !== 'ok') return;
-      statsCache = j;
-      renderStats(j);
-    } catch(e) { console.warn('Stats load failed:', e); }
-  }
-
-  function renderStats(s) {
-    const a = s.agreement_stats || {};
-    setText('kpi-total', s.total_predictions || '0');
-    setText('kpi-agreement', (a.agreement_rate || 0).toFixed(1) + '%');
-    setText('kpi-agreement-sub', (a.agreed_count || 0) + '/' + (s.total_predictions || 0) + ' unanimous');
-
-    setText('kpi-rf-conf', (s.rf_stats?.high_confidence_rate || 0).toFixed(1) + '%');
-    setText('kpi-rf-sub', 'Avg: ' + ((s.rf_stats?.avg_probability || 0) * 100).toFixed(1) + '%');
-    setText('kpi-gcn-conf', (s.gcn_stats?.high_confidence_rate || 0).toFixed(1) + '%');
-    setText('kpi-gcn-sub', 'Avg: ' + ((s.gcn_stats?.avg_probability || 0) * 100).toFixed(1) + '%');
-
-    setText('donut-badge', (a.agreement_rate || 0).toFixed(1) + '% Consensus');
-    setText('stat-both-toxic', a.both_toxic || '0');
-    setText('stat-both-safe', a.both_safe || '0');
-    setText('stat-rf-only', a.rf_toxic_gcn_safe || '0');
-    setText('stat-gcn-only', a.rf_safe_gcn_toxic || '0');
-
-    const sb = s.similarity_breakdown || {};
-    setText('sim-sibling', sb['Sibling-like']?.ens_avg ? (sb['Sibling-like'].ens_avg * 100).toFixed(1) + '%' : '--');
-    setText('sim-stranger', sb['Stranger-like']?.ens_avg ? (sb['Stranger-like'].ens_avg * 100).toFixed(1) + '%' : '--');
-    setText('sim-safe', sb['Safe-like']?.ens_avg ? (sb['Safe-like'].ens_avg * 100).toFixed(1) + '%' : '--');
-
-    // Charts
-    KeToxCharts.renderPredictionHistoryTimeline(s.timeline, scope);
-    KeToxCharts.renderModelAgreementDonut(s);
-    KeToxCharts.renderConfidenceDistributionChart(s.distribution, scope);
-    KeToxCharts.renderSimilarityCategoryBarChart(s.similarity_breakdown, scope);
-
-    // Contested cases from database
-    renderContested(s.contested_cases);
-  }
-
-  function renderContested(cases) {
-    const el = document.getElementById('contested-list');
-    if (!el) return;
-    if (!cases || cases.length === 0) {
-      el.innerHTML = '<div class="p-4 rounded-xl bg-slate-50 text-center text-slate-400 text-xs">No divergent cases found — both models agree on all predictions.</div>';
-      return;
-    }
-    el.innerHTML = cases.slice(0, 3).map(item => {
-      const rfP = (item.rf_probability * 100).toFixed(1);
-      const gcnP = (item.gcn_probability * 100).toFixed(1);
-      const ensP = (item.confidence * 100).toFixed(1);
-      const diff = (Math.abs(item.rf_probability - item.gcn_probability) * 100).toFixed(1);
-      const tox = item.verdict === 'toxic';
-      return '<div class="p-3.5 rounded-xl bg-slate-50">' +
-        '<div class="flex items-center justify-between mb-1">' +
-          '<span class="font-bold text-xs text-navy-900">' + item.compound_name + (item.formula ? ' (' + item.formula + ')' : '') + '</span>' +
-          '<span class="text-[10px] font-bold ' + (tox ? 'text-red-700 bg-red-100' : 'text-green-700 bg-green-100') + ' px-2 py-0.5 rounded">' +
-            'Ensemble: ' + (tox ? 'TOXIC' : 'SAFE') + ' (' + ensP + '%)' +
-          '</span>' +
-        '</div>' +
-        '<p class="text-xs text-slate-600 leading-relaxed">' + (item.notes || 'Divergent predictions between RF and GCN.') + '</p>' +
-        '<div class="flex items-center gap-3 mt-2 text-[10px] text-slate-500">' +
-          '<span>RF: <strong class="' + (item.rf_label === 'toxic' ? 'text-red-600' : 'text-green-600') + '">' + rfP + '%</strong></span>' +
-          '<span>&middot;</span>' +
-          '<span>GCN: <strong class="' + (item.gcn_label === 'toxic' ? 'text-red-600' : 'text-green-600') + '">' + gcnP + '%</strong></span>' +
-          '<span>&middot;</span>' +
-          '<span class="text-amber-700 font-medium">Δ = ' + diff + '%</span>' +
-        '</div>' +
-      '</div>';
-    }).join('');
-  }
-
-  // ─── History Table ─────────────────────────────────────────────────────
-  async function loadTable() {
-    try {
-      const offset = page * PAGE_SIZE;
-      const p = new URLSearchParams({ limit: PAGE_SIZE, offset: offset, sort_by: sortBy });
-      if (searchQuery) p.set('search', searchQuery);
-      if (filterVerdict !== 'all') p.set('verdict', filterVerdict);
-      if (filterAgreement !== 'all') p.set('agreement', filterAgreement);
-
-      const r = await fetch('/api/prediction-history?' + p.toString());
-      const j = await r.json();
-      if (j.status === 'ok') {
-        tableCache = j.items;
-        renderRows(j.items, j.total_count, offset);
+    function setBench(m) {
+      benchModel = m;
+      const brf = document.getElementById("bench-rf");
+      const bgcn = document.getElementById("bench-gcn");
+      if (m === "rf") {
+        brf.className =
+          "px-2.5 py-1 font-semibold rounded bg-white text-navy-900 shadow-sm";
+        bgcn.className =
+          "px-2.5 py-1 font-semibold rounded text-slate-500 hover:text-navy-900";
+      } else {
+        bgcn.className =
+          "px-2.5 py-1 font-semibold rounded bg-white text-navy-900 shadow-sm";
+        brf.className =
+          "px-2.5 py-1 font-semibold rounded text-slate-500 hover:text-navy-900";
       }
-    } catch(e) { console.warn('Table load failed:', e); }
-  }
-
-  function renderRows(items, total, offset) {
-    setText('tbl-badge', total + ' entries');
-    const start = total === 0 ? 0 : offset + 1;
-    const end = Math.min(offset + items.length, total);
-    setText('tbl-info', 'Showing ' + start + '–' + end + ' of ' + total);
-
-    document.getElementById('btn-prev').disabled = page <= 0;
-    document.getElementById('btn-next').disabled = (offset + items.length) >= total;
-
-    const tbody = document.getElementById('hist-tbody');
-    if (!items.length) {
-      tbody.innerHTML = '<tr><td colspan="7" class="py-10 text-center text-slate-400"><p class="font-medium text-slate-600">No predictions match your filters.</p><button class="text-xs text-teal-600 hover:underline font-semibold mt-2" id="btn-reset-filters">Reset Filters</button></td></tr>';
-      const resetBtn = document.getElementById('btn-reset-filters');
-      if (resetBtn) resetBtn.addEventListener('click', resetFilters);
-      return;
+      renderBench(m);
     }
 
-    tbody.innerHTML = items.map((item, idx) => {
-      const tox = item.verdict === 'toxic';
-      const rfTox = item.rf_label === 'toxic';
-      const gcnTox = item.gcn_label === 'toxic';
+    function renderBench(m) {
+      const data =
+        (window.PERF_DATA && window.PERF_DATA[m]) || BENCH_FALLBACK[m];
+      const name = m === "rf" ? "Random Forest" : "GCN";
+      setText("bench-title", name + " — Benchmark Validation");
+      setText("stat-accuracy", pct(data.overall.accuracy));
+      setText("stat-sensitivity", pct(data.overall.sensitivity));
+      setText("stat-specificity", pct(data.overall.specificity));
+      setText("stat-mcc", data.overall.mcc.toFixed(3));
+      KeToxCharts.renderPerformanceChart(m, data);
+      ["sibling", "stranger", "safe"].forEach((s) => {
+        const cm = data.cm[s];
+        setText("cm-" + s + "-tp", cm.tp);
+        setText("cm-" + s + "-fn", cm.fn);
+        setText("cm-" + s + "-fp", cm.fp);
+        setText("cm-" + s + "-tn", cm.tn);
+      });
+    }
+
+    async function loadStats() {
+      try {
+        const r = await fetch("/api/prediction-history/stats");
+        const j = await r.json();
+        if (j.status !== "ok") return;
+        statsCache = j;
+        renderStats(j);
+      } catch (e) {
+        console.warn("Stats load failed:", e);
+      }
+    }
+
+    function renderStats(s) {
+      const a = s.agreement_stats || {};
+      setText("kpi-total", s.total_predictions || "0");
+      setText("kpi-agreement", (a.agreement_rate || 0).toFixed(1) + "%");
+      setText(
+        "kpi-agreement-sub",
+        (a.agreed_count || 0) + "/" + (s.total_predictions || 0) + " unanimous",
+      );
+
+      setText(
+        "kpi-rf-conf",
+        (s.rf_stats?.high_confidence_rate || 0).toFixed(1) + "%",
+      );
+      setText(
+        "kpi-rf-sub",
+        "Avg: " + ((s.rf_stats?.avg_probability || 0) * 100).toFixed(1) + "%",
+      );
+      setText(
+        "kpi-gcn-conf",
+        (s.gcn_stats?.high_confidence_rate || 0).toFixed(1) + "%",
+      );
+      setText(
+        "kpi-gcn-sub",
+        "Avg: " + ((s.gcn_stats?.avg_probability || 0) * 100).toFixed(1) + "%",
+      );
+
+      setText(
+        "donut-badge",
+        (a.agreement_rate || 0).toFixed(1) + "% Consensus",
+      );
+      setText("stat-both-toxic", a.both_toxic || "0");
+      setText("stat-both-safe", a.both_safe || "0");
+      setText("stat-rf-only", a.rf_toxic_gcn_safe || "0");
+      setText("stat-gcn-only", a.rf_safe_gcn_toxic || "0");
+
+      const sb = s.similarity_breakdown || {};
+      setText(
+        "sim-sibling",
+        sb["Sibling-like"]?.ens_avg
+          ? (sb["Sibling-like"].ens_avg * 100).toFixed(1) + "%"
+          : "--",
+      );
+      setText(
+        "sim-stranger",
+        sb["Stranger-like"]?.ens_avg
+          ? (sb["Stranger-like"].ens_avg * 100).toFixed(1) + "%"
+          : "--",
+      );
+      setText(
+        "sim-safe",
+        sb["Safe-like"]?.ens_avg
+          ? (sb["Safe-like"].ens_avg * 100).toFixed(1) + "%"
+          : "--",
+      );
+
+      KeToxCharts.renderPredictionHistoryTimeline(s.timeline, scope);
+      KeToxCharts.renderModelAgreementDonut(s);
+      KeToxCharts.renderConfidenceDistributionChart(s.distribution, scope);
+      KeToxCharts.renderSimilarityCategoryBarChart(
+        s.similarity_breakdown,
+        scope,
+      );
+
+      renderContested(s.contested_cases);
+    }
+
+    function renderContested(cases) {
+      const el = document.getElementById("contested-list");
+      if (!el) return;
+      if (!cases || cases.length === 0) {
+        el.innerHTML =
+          '<div class="p-4 rounded-xl bg-slate-50 text-center text-slate-400 text-xs">No divergent cases found — both models agree on all predictions.</div>';
+        return;
+      }
+      el.innerHTML = cases
+        .slice(0, 3)
+        .map((item) => {
+          const rfP = (item.rf_probability * 100).toFixed(1);
+          const gcnP = (item.gcn_probability * 100).toFixed(1);
+          const ensP = (item.confidence * 100).toFixed(1);
+          const diff = (
+            Math.abs(item.rf_probability - item.gcn_probability) * 100
+          ).toFixed(1);
+          const tox = item.verdict === "toxic";
+          return (
+            '<div class="p-3 sm:p-3.5 rounded-xl bg-slate-50 border border-slate-100">' +
+            '<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-1.5">' +
+            '<span class="font-bold text-xs text-navy-900 break-words">' +
+            item.compound_name +
+            (item.formula
+              ? ' <span class="font-mono text-[10px] text-slate-400 font-normal">(' +
+                item.formula +
+                ")</span>"
+              : "") +
+            "</span>" +
+            '<span class="self-start sm:self-auto text-[10px] font-bold ' +
+            (tox
+              ? "text-red-700 bg-red-100 border border-red-200"
+              : "text-green-700 bg-green-100 border border-green-200") +
+            ' px-2 py-0.5 rounded-full whitespace-nowrap">' +
+            "Ensemble: " +
+            (tox ? "TOXIC" : "SAFE") +
+            " (" +
+            ensP +
+            "%)" +
+            "</span>" +
+            "</div>" +
+            '<p class="text-xs text-slate-600 leading-relaxed">' +
+            (item.notes || "Divergent predictions between RF and GCN.") +
+            "</p>" +
+            '<div class="flex flex-wrap items-center gap-2 sm:gap-3 mt-2 text-[10px] text-slate-500 pt-2 border-t border-slate-200/60">' +
+            '<span>RF: <strong class="' +
+            (item.rf_label === "toxic" ? "text-red-600" : "text-green-600") +
+            '">' +
+            rfP +
+            "%</strong></span>" +
+            "<span>&middot;</span>" +
+            '<span>GCN: <strong class="' +
+            (item.gcn_label === "toxic" ? "text-red-600" : "text-green-600") +
+            '">' +
+            gcnP +
+            "%</strong></span>" +
+            "<span>&middot;</span>" +
+            '<span class="text-amber-700 font-bold bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200/80">Δ = ' +
+            diff +
+            "%</span>" +
+            "</div>" +
+            "</div>"
+          );
+        })
+        .join("");
+    }
+
+    async function loadTable() {
+      try {
+        const offset = page * PAGE_SIZE;
+        const p = new URLSearchParams({
+          limit: PAGE_SIZE,
+          offset: offset,
+          sort_by: sortBy,
+        });
+        if (searchQuery) p.set("search", searchQuery);
+        if (filterVerdict !== "all") p.set("verdict", filterVerdict);
+        if (filterAgreement !== "all") p.set("agreement", filterAgreement);
+
+        const r = await fetch("/api/prediction-history?" + p.toString());
+        const j = await r.json();
+        if (j.status === "ok") {
+          tableCache = j.items;
+          renderRows(j.items, j.total_count, offset);
+        }
+      } catch (e) {
+        console.warn("Table load failed:", e);
+      }
+    }
+
+    function renderRows(items, total, offset) {
+      setText("tbl-badge", total + " entries");
+      const start = total === 0 ? 0 : offset + 1;
+      const end = Math.min(offset + items.length, total);
+      setText("tbl-info", "Showing " + start + "–" + end + " of " + total);
+
+      document.getElementById("btn-prev").disabled = page <= 0;
+      document.getElementById("btn-next").disabled =
+        offset + items.length >= total;
+
+      const tbody = document.getElementById("hist-tbody");
+      if (!items.length) {
+        tbody.innerHTML =
+          '<tr><td colspan="7" class="py-10 text-center text-slate-400"><p class="font-medium text-slate-600">No predictions match your filters.</p><button class="text-xs text-teal-600 hover:underline font-semibold mt-2" id="btn-reset-filters">Reset Filters</button></td></tr>';
+        const resetBtn = document.getElementById("btn-reset-filters");
+        if (resetBtn) resetBtn.addEventListener("click", resetFilters);
+        return;
+      }
+
+      tbody.innerHTML = items
+        .map((item, idx) => {
+          const tox = item.verdict === "toxic";
+          const rfTox = item.rf_label === "toxic";
+          const gcnTox = item.gcn_label === "toxic";
+          const rfP = Math.round(item.rf_probability * 100);
+          const gcnP = Math.round(item.gcn_probability * 100);
+          const ensP = Math.round(item.confidence * 100);
+          const agreed = (item.model_agreement || "").startsWith("Agreed");
+
+          return (
+            '<tr class="hover:bg-slate-50/80 transition-colors">' +
+            '<td class="py-3 px-3 sm:px-4"><div class="font-bold text-slate-900">' +
+            item.compound_name +
+            '</div><div class="font-mono text-[10px] text-slate-400 mt-0.5">' +
+            (item.formula || "") +
+            "</div></td>" +
+            '<td class="py-3 px-3"><div class="font-mono text-[10px] text-slate-500 max-w-[120px] truncate" title="' +
+            (item.smiles || "") +
+            '">' +
+            (item.smiles || "") +
+            '</div><span class="text-[9px] font-semibold px-1.5 rounded bg-slate-100 text-slate-600">' +
+            (item.similarity_category || "—") +
+            "</span></td>" +
+            '<td class="py-3 px-3"><span class="font-bold text-[11px] ' +
+            (rfTox ? "text-red-700" : "text-green-700") +
+            '">' +
+            rfP +
+            '%</span> <span class="text-[9px] font-bold uppercase ' +
+            (rfTox ? "text-red-600" : "text-green-600") +
+            '">(' +
+            item.rf_label +
+            ')</span><div class="w-16 bg-slate-200 rounded-full h-1 mt-1 overflow-hidden"><div class="' +
+            (rfTox ? "bg-red-500" : "bg-green-500") +
+            ' h-full rounded-full" style="width:' +
+            rfP +
+            '%"></div></div></td>' +
+            '<td class="py-3 px-3"><span class="font-bold text-[11px] ' +
+            (gcnTox ? "text-red-700" : "text-green-700") +
+            '">' +
+            gcnP +
+            '%</span> <span class="text-[9px] font-bold uppercase ' +
+            (gcnTox ? "text-red-600" : "text-green-600") +
+            '">(' +
+            item.gcn_label +
+            ')</span><div class="w-16 bg-slate-200 rounded-full h-1 mt-1 overflow-hidden"><div class="' +
+            (gcnTox ? "bg-red-500" : "bg-green-500") +
+            ' h-full rounded-full" style="width:' +
+            gcnP +
+            '%"></div></div></td>' +
+            '<td class="py-3 px-3"><span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold ' +
+            (tox
+              ? "bg-red-100 text-red-800 border border-red-200"
+              : "bg-green-100 text-green-800 border border-green-200") +
+            '">' +
+            (tox ? "TOXIC" : "SAFE") +
+            " · " +
+            ensP +
+            "%</span></td>" +
+            '<td class="py-3 px-3"><span class="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full ' +
+            (agreed
+              ? "text-teal-700 bg-teal-50"
+              : "text-amber-700 bg-amber-50") +
+            '">' +
+            item.model_agreement +
+            "</span></td>" +
+            '<td class="py-3 px-3 text-right"><div class="flex items-center justify-end gap-1"><button class="p-1.5 rounded-lg text-slate-500 hover:text-navy-900 hover:bg-slate-100 transition-colors inspect-btn" data-idx="' +
+            idx +
+            '" title="Inspect"><i data-lucide="eye" class="w-3.5 h-3.5"></i></button><a href="/home?compound=' +
+            encodeURIComponent(item.compound_name || item.smiles) +
+            '" class="p-1.5 rounded-lg text-teal-600 hover:text-teal-900 hover:bg-teal-50 transition-colors" title="Test in Predictor"><i data-lucide="play" class="w-3.5 h-3.5"></i></a></div></td>' +
+            "</tr>"
+          );
+        })
+        .join("");
+
+      if (window.lucide) lucide.createIcons();
+
+      tbody.querySelectorAll(".inspect-btn").forEach((btn) => {
+        btn.addEventListener("click", function () {
+          const idx = parseInt(this.dataset.idx);
+          if (tableCache[idx]) openModal(tableCache[idx]);
+        });
+      });
+    }
+
+    function resetFilters() {
+      filterAgreement = "all";
+      filterVerdict = "all";
+      searchQuery = "";
+      document.getElementById("hist-search").value = "";
+      document
+        .querySelectorAll(".perf-filter")
+        .forEach((p) => p.classList.remove("active"));
+      document
+        .querySelector('.perf-filter[data-agreement="all"][data-verdict="all"]')
+        ?.classList.add("active");
+      page = 0;
+      loadTable();
+    }
+
+    function openModal(item) {
+      setText("m-name", item.compound_name || "Molecule");
+      setText("m-smiles", item.smiles || "");
+
+      const tox = item.verdict === "toxic";
+      const verdictEl = document.getElementById("m-verdict");
+      if (verdictEl) {
+        verdictEl.textContent = tox ? "TOXIC" : "SAFE";
+        verdictEl.className =
+          "text-3xl font-black " + (tox ? "text-red-700" : "text-green-700");
+      }
+      setText(
+        "m-conf",
+        Math.round(item.confidence * 100) + "% Inhibition Risk",
+      );
+      setText("m-agree", item.model_agreement);
+
       const rfP = Math.round(item.rf_probability * 100);
       const gcnP = Math.round(item.gcn_probability * 100);
-      const ensP = Math.round(item.confidence * 100);
-      const agreed = (item.model_agreement || '').startsWith('Agreed');
+      setText("m-rf-lbl", (item.rf_label || "safe").toUpperCase());
+      setText("m-rf-pct", rfP + "%");
+      const rfBar = document.getElementById("m-rf-bar");
+      if (rfBar) {
+        rfBar.style.width = rfP + "%";
+        rfBar.className =
+          (item.rf_label === "toxic" ? "bg-red-500" : "bg-teal-600") +
+          " h-full rounded-full transition-all";
+      }
 
-      return '<tr class="hover:bg-slate-50/80 transition-colors">' +
-        '<td class="py-3 px-4"><div class="font-bold text-slate-900">' + item.compound_name + '</div><div class="font-mono text-[10px] text-slate-400 mt-0.5">' + (item.formula || '') + '</div></td>' +
-        '<td class="py-3 px-3"><div class="font-mono text-[10px] text-slate-500 max-w-[120px] truncate" title="' + (item.smiles || '') + '">' + (item.smiles || '') + '</div><span class="text-[9px] font-semibold px-1.5 rounded bg-slate-100 text-slate-600">' + (item.similarity_category || '—') + '</span></td>' +
-        '<td class="py-3 px-3"><span class="font-bold text-[11px] ' + (rfTox ? 'text-red-700' : 'text-green-700') + '">' + rfP + '%</span> <span class="text-[9px] font-bold uppercase ' + (rfTox ? 'text-red-600' : 'text-green-600') + '">(' + item.rf_label + ')</span><div class="w-16 bg-slate-200 rounded-full h-1 mt-1 overflow-hidden"><div class="' + (rfTox ? 'bg-red-500' : 'bg-green-500') + ' h-full rounded-full" style="width:' + rfP + '%"></div></div></td>' +
-        '<td class="py-3 px-3"><span class="font-bold text-[11px] ' + (gcnTox ? 'text-red-700' : 'text-green-700') + '">' + gcnP + '%</span> <span class="text-[9px] font-bold uppercase ' + (gcnTox ? 'text-red-600' : 'text-green-600') + '">(' + item.gcn_label + ')</span><div class="w-16 bg-slate-200 rounded-full h-1 mt-1 overflow-hidden"><div class="' + (gcnTox ? 'bg-red-500' : 'bg-green-500') + ' h-full rounded-full" style="width:' + gcnP + '%"></div></div></td>' +
-        '<td class="py-3 px-3"><span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold ' + (tox ? 'bg-red-100 text-red-800 border border-red-200' : 'bg-green-100 text-green-800 border border-green-200') + '">' + (tox ? 'TOXIC' : 'SAFE') + ' · ' + ensP + '%</span></td>' +
-        '<td class="py-3 px-3"><span class="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full ' + (agreed ? 'text-teal-700 bg-teal-50' : 'text-amber-700 bg-amber-50') + '">' + item.model_agreement + '</span></td>' +
-        '<td class="py-3 px-3 text-right"><div class="flex items-center justify-end gap-1"><button class="p-1.5 rounded-lg text-slate-500 hover:text-navy-900 hover:bg-slate-100 transition-colors inspect-btn" data-idx="' + idx + '" title="Inspect"><i data-lucide="eye" class="w-3.5 h-3.5"></i></button><a href="/home?compound=' + encodeURIComponent(item.compound_name || item.smiles) + '" class="p-1.5 rounded-lg text-teal-600 hover:text-teal-900 hover:bg-teal-50 transition-colors" title="Test in Predictor"><i data-lucide="play" class="w-3.5 h-3.5"></i></a></div></td>' +
-      '</tr>';
-    }).join('');
+      setText("m-gcn-lbl", (item.gcn_label || "safe").toUpperCase());
+      setText("m-gcn-pct", gcnP + "%");
+      const gcnBar = document.getElementById("m-gcn-bar");
+      if (gcnBar) {
+        gcnBar.style.width = gcnP + "%";
+        gcnBar.className =
+          (item.gcn_label === "toxic" ? "bg-red-500" : "bg-indigo-600") +
+          " h-full rounded-full transition-all";
+      }
 
-    // Re-init lucide icons for dynamic content
-    if (window.lucide) lucide.createIcons();
+      setText("m-tan", (item.tanimoto_similarity || 0).toFixed(2) + " / 1.0");
+      setText("m-sim-cat", item.similarity_category || "—");
+      setText("m-css", (item.css_value || 0).toFixed(2) + " mg/L");
+      const mNotes = document.getElementById("m-notes");
+      if (mNotes) mNotes.innerHTML = item.notes || "No additional notes.";
+      setText(
+        "m-date",
+        item.created_at
+          ? "Recorded: " + new Date(item.created_at).toLocaleString()
+          : "",
+      );
 
-    // Attach inspect handlers
-    tbody.querySelectorAll('.inspect-btn').forEach(btn => {
-      btn.addEventListener('click', function() {
-        const idx = parseInt(this.dataset.idx);
-        if (tableCache[idx]) openModal(tableCache[idx]);
-      });
-    });
-  }
+      const link = document.getElementById("m-predict-link");
+      if (link)
+        link.href =
+          "/home?compound=" +
+          encodeURIComponent(item.compound_name || item.smiles);
 
-  function resetFilters() {
-    filterAgreement = 'all';
-    filterVerdict = 'all';
-    searchQuery = '';
-    document.getElementById('hist-search').value = '';
-    document.querySelectorAll('.perf-filter').forEach(p => p.classList.remove('active'));
-    document.querySelector('.perf-filter[data-agreement="all"][data-verdict="all"]')?.classList.add('active');
-    page = 0;
-    loadTable();
-  }
-
-  // ─── Modal ─────────────────────────────────────────────────────────────
-  function openModal(item) {
-    setText('m-name', item.compound_name || 'Molecule');
-    setText('m-smiles', item.smiles || '');
-
-    const tox = item.verdict === 'toxic';
-    const verdictEl = document.getElementById('m-verdict');
-    if (verdictEl) {
-      verdictEl.textContent = tox ? 'TOXIC' : 'SAFE';
-      verdictEl.className = 'text-3xl font-black ' + (tox ? 'text-red-700' : 'text-green-700');
+      document.getElementById("inspect-modal").classList.remove("hidden");
+      if (window.lucide) lucide.createIcons();
     }
-    setText('m-conf', Math.round(item.confidence * 100) + '% Inhibition Risk');
-    setText('m-agree', item.model_agreement);
 
-    const rfP = Math.round(item.rf_probability * 100);
-    const gcnP = Math.round(item.gcn_probability * 100);
-    setText('m-rf-lbl', (item.rf_label || 'safe').toUpperCase());
-    setText('m-rf-pct', rfP + '%');
-    const rfBar = document.getElementById('m-rf-bar');
-    if (rfBar) { rfBar.style.width = rfP + '%'; rfBar.className = (item.rf_label === 'toxic' ? 'bg-red-500' : 'bg-teal-600') + ' h-full rounded-full transition-all'; }
+    function closeModal() {
+      document.getElementById("inspect-modal").classList.add("hidden");
+    }
 
-    setText('m-gcn-lbl', (item.gcn_label || 'safe').toUpperCase());
-    setText('m-gcn-pct', gcnP + '%');
-    const gcnBar = document.getElementById('m-gcn-bar');
-    if (gcnBar) { gcnBar.style.width = gcnP + '%'; gcnBar.className = (item.gcn_label === 'toxic' ? 'bg-red-500' : 'bg-indigo-600') + ' h-full rounded-full transition-all'; }
+    document.addEventListener("DOMContentLoaded", function () {
+      document.querySelectorAll("[data-scope]").forEach((btn) => {
+        btn.addEventListener("click", function () {
+          setScope(this.dataset.scope);
+        });
+      });
 
-    setText('m-tan', (item.tanimoto_similarity || 0).toFixed(2) + ' / 1.0');
-    setText('m-sim-cat', item.similarity_category || '—');
-    setText('m-css', (item.css_value || 0).toFixed(2) + ' mg/L');
-    const mNotes = document.getElementById('m-notes');
-    if (mNotes) mNotes.innerHTML = item.notes || 'No additional notes.';
-    setText('m-date', item.created_at ? 'Recorded: ' + new Date(item.created_at).toLocaleString() : '');
+      document
+        .getElementById("bench-rf")
+        ?.addEventListener("click", () => setBench("rf"));
+      document
+        .getElementById("bench-gcn")
+        ?.addEventListener("click", () => setBench("gcn"));
 
-    const link = document.getElementById('m-predict-link');
-    if (link) link.href = '/home?compound=' + encodeURIComponent(item.compound_name || item.smiles);
+      document
+        .getElementById("btn-refresh-stats")
+        ?.addEventListener("click", function () {
+          loadStats();
+          loadTable();
+        });
 
-    document.getElementById('inspect-modal').classList.remove('hidden');
-    if (window.lucide) lucide.createIcons();
-  }
+      let searchTimer;
+      document
+        .getElementById("hist-search")
+        ?.addEventListener("input", function (e) {
+          clearTimeout(searchTimer);
+          searchTimer = setTimeout(function () {
+            searchQuery = e.target.value.trim();
+            page = 0;
+            loadTable();
+          }, 300);
+        });
 
-  function closeModal() {
-    document.getElementById('inspect-modal').classList.add('hidden');
-  }
+      document
+        .getElementById("hist-sort")
+        ?.addEventListener("change", function (e) {
+          sortBy = e.target.value;
+          page = 0;
+          loadTable();
+        });
 
-  // ─── Init ──────────────────────────────────────────────────────────────
-  document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll(".perf-filter").forEach((pill) => {
+        pill.addEventListener("click", function () {
+          document
+            .querySelectorAll(".perf-filter")
+            .forEach((p) => p.classList.remove("active"));
+          this.classList.add("active");
+          filterAgreement = this.dataset.agreement || "all";
+          filterVerdict = this.dataset.verdict || "all";
+          page = 0;
+          loadTable();
+        });
+      });
 
-    // Scope buttons (uses data-scope, NOT data-model, so no conflict)
-    document.querySelectorAll('[data-scope]').forEach(btn => {
-      btn.addEventListener('click', function() { setScope(this.dataset.scope); });
-    });
+      document
+        .getElementById("btn-prev")
+        ?.addEventListener("click", function () {
+          if (page > 0) {
+            page--;
+            loadTable();
+          }
+        });
+      document
+        .getElementById("btn-next")
+        ?.addEventListener("click", function () {
+          page++;
+          loadTable();
+        });
 
-    // Benchmark buttons
-    document.getElementById('bench-rf')?.addEventListener('click', () => setBench('rf'));
-    document.getElementById('bench-gcn')?.addEventListener('click', () => setBench('gcn'));
+      document
+        .getElementById("btn-seed")
+        ?.addEventListener("click", async function () {
+          if (!confirm("Re-seed the standard curated prediction dataset?"))
+            return;
+          try {
+            await fetch("/api/prediction-history/seed", { method: "POST" });
+            loadStats();
+            loadTable();
+          } catch (e) {
+            alert("Seed failed.");
+          }
+        });
 
-    // Refresh
-    document.getElementById('btn-refresh-stats')?.addEventListener('click', function() {
+      document
+        .getElementById("m-close-x")
+        ?.addEventListener("click", closeModal);
+      document
+        .getElementById("m-close-btn")
+        ?.addEventListener("click", closeModal);
+      document
+        .getElementById("inspect-modal")
+        ?.addEventListener("click", function (e) {
+          if (e.target === this) closeModal();
+        });
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") closeModal();
+      });
+
+      fetch("/api/performance")
+        .then((r) => r.json())
+        .then((j) => {
+          window.PERF_DATA = j.data;
+        })
+        .catch(() => {
+          window.PERF_DATA = BENCH_FALLBACK;
+        })
+        .finally(() => {
+          renderBench("rf");
+        });
+
       loadStats();
       loadTable();
     });
-
-    // Search with debounce
-    let searchTimer;
-    document.getElementById('hist-search')?.addEventListener('input', function(e) {
-      clearTimeout(searchTimer);
-      searchTimer = setTimeout(function() {
-        searchQuery = e.target.value.trim();
-        page = 0;
-        loadTable();
-      }, 300);
-    });
-
-    // Sort
-    document.getElementById('hist-sort')?.addEventListener('change', function(e) {
-      sortBy = e.target.value;
-      page = 0;
-      loadTable();
-    });
-
-    // Filter pills
-    document.querySelectorAll('.perf-filter').forEach(pill => {
-      pill.addEventListener('click', function() {
-        document.querySelectorAll('.perf-filter').forEach(p => p.classList.remove('active'));
-        this.classList.add('active');
-        filterAgreement = this.dataset.agreement || 'all';
-        filterVerdict = this.dataset.verdict || 'all';
-        page = 0;
-        loadTable();
-      });
-    });
-
-    // Pagination
-    document.getElementById('btn-prev')?.addEventListener('click', function() {
-      if (page > 0) { page--; loadTable(); }
-    });
-    document.getElementById('btn-next')?.addEventListener('click', function() {
-      page++;
-      loadTable();
-    });
-
-    // Seed
-    document.getElementById('btn-seed')?.addEventListener('click', async function() {
-      if (!confirm('Re-seed the standard curated prediction dataset?')) return;
-      try {
-        await fetch('/api/prediction-history/seed', { method: 'POST' });
-        loadStats();
-        loadTable();
-      } catch(e) { alert('Seed failed.'); }
-    });
-
-    // Modal close
-    document.getElementById('m-close-x')?.addEventListener('click', closeModal);
-    document.getElementById('m-close-btn')?.addEventListener('click', closeModal);
-    document.getElementById('inspect-modal')?.addEventListener('click', function(e) {
-      if (e.target === this) closeModal();
-    });
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') closeModal();
-    });
-
-    // Load benchmark data
-    fetch('/api/performance')
-      .then(r => r.json())
-      .then(j => { window.PERF_DATA = j.data; })
-      .catch(() => { window.PERF_DATA = BENCH_FALLBACK; })
-      .finally(() => { renderBench('rf'); });
-
-    // Load history data from database
-    loadStats();
-    loadTable();
-  });
-
-})();
+  })();
 </script>
 {% endblock %}

@@ -15,10 +15,12 @@ In production, set FLASK_ENV=production and provide a SECRET_KEY env var.
 """
 
 import os
-from dotenv import load_dotenv
-
-# Load environment variables from .env file if present
-load_dotenv()
+try:
+    from dotenv import load_dotenv
+    # Load environment variables from .env file if present
+    load_dotenv()
+except ImportError:
+    pass
 
 
 class _Base:

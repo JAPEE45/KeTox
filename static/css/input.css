@@ -1,30 +1,14 @@
-/*
- * KeTox — Tailwind CSS v4 Input File
- *
- * Build with the Tailwind CLI v4 standalone binary:
- *   ./tailwindcss.exe -i static/css/input.css -o static/css/output.css --watch
- *
- * Download binary from:
- *   https://github.com/tailwindlabs/tailwindcss/releases/latest
- *   File: tailwindcss-windows-x64.exe  →  rename to tailwindcss.exe
- */
-
 @import "tailwindcss";
 
 @source "../../templates";
 @source "../js";
 
-/* -------------------------------------------------------------------------
-   Custom theme tokens — available as Tailwind utilities when CLI-compiled.
-   e.g., bg-navy-800, text-teal-ketox, bg-toxic-light
-   ------------------------------------------------------------------------- */
 @theme {
   --font-family-sans:
     "Plus Jakarta Sans", "Outfit", "Google Sans", system-ui, -apple-system,
     sans-serif;
   --font-family-mono: "JetBrains Mono", "Fira Code", "Courier New", monospace;
 
-  /* Black & White monochrome palette */
   --color-navy-50: #f4f4f5;
   --color-navy-100: #e4e4e7;
   --color-navy-200: #d4d4d8;
@@ -35,11 +19,9 @@
   --color-navy-800: #09090b;
   --color-navy-900: #000000;
 
-  /* Accent */
   --color-teal-ketox: #18181b;
   --color-teal-light: #f4f4f5;
 
-  /* Verdict colours */
   --color-toxic: #dc2626;
   --color-toxic-mid: #ef4444;
   --color-toxic-light: #fef2f2;
@@ -52,11 +34,7 @@
   --color-elevated-light: #fffbeb;
 }
 
-/* -------------------------------------------------------------------------
-   Reusable component classes
-   ------------------------------------------------------------------------- */
 @layer components {
-  /* Card */
   .card {
     @apply bg-white rounded-xl border border-neutral-200 shadow-sm;
   }
@@ -64,7 +42,6 @@
     @apply bg-white rounded-xl border border-neutral-200 shadow-md;
   }
 
-  /* Buttons */
   .btn-primary {
     @apply bg-black text-white px-6 py-2 font-semibold text-sm
            hover:bg-neutral-800 active:bg-black
@@ -85,7 +62,6 @@
     @apply bg-black text-white shadow-sm;
   }
 
-  /* Badges */
   .badge-toxic {
     @apply bg-red-100 text-red-700 border border-red-200 px-3 py-1 rounded-full text-sm font-bold tracking-wide;
   }
@@ -105,14 +81,12 @@
     @apply bg-slate-100 text-slate-600 border border-slate-200 px-2.5 py-0.5 rounded-full text-xs font-semibold;
   }
 
-  /* SMILES input */
   .input-smiles {
     @apply w-full font-mono text-sm bg-slate-50 border border-slate-300 rounded-lg px-4 py-3
            focus:outline-none focus:ring-2 focus:ring-navy-500 focus:border-navy-500
            transition-all duration-200 placeholder:text-slate-400;
   }
 
-  /* Example chip */
   .chip {
     @apply inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium
            border border-slate-200 bg-white text-slate-600
@@ -126,7 +100,6 @@
     @apply border-green-200 bg-green-50 text-green-700 hover:border-green-300 hover:bg-green-100;
   }
 
-  /* Tooltip */
   .tooltip-wrapper {
     @apply relative inline-block;
   }
@@ -151,17 +124,14 @@
     @apply opacity-100;
   }
 
-  /* Section label */
   .section-label {
     @apply text-xs font-semibold uppercase tracking-widest text-slate-400;
   }
 
-  /* Stat card number */
   .stat-number {
     @apply text-4xl font-black tracking-tight;
   }
 
-  /* Skeleton shimmer */
   .skeleton {
     @apply bg-slate-200 rounded animate-pulse;
   }
